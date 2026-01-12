@@ -36,6 +36,7 @@ interface SessionState {
   countdownInterval?: ReturnType<typeof setInterval>
   isRecovering?: boolean
   countdownStartedAt?: number
+  lastInteractiveBashAt?: number
 }
 
 const CONTINUATION_PROMPT = `[SYSTEM REMINDER - TODO CONTINUATION]
@@ -49,6 +50,7 @@ Incomplete tasks remain in your todo list. Continue working on the next pending 
 const COUNTDOWN_SECONDS = 2
 const TOAST_DURATION_MS = 900
 const COUNTDOWN_GRACE_PERIOD_MS = 500
+const INTERACTIVE_BASH_DEBOUNCE_MS = 5000
 
 function getMessageDir(sessionID: string): string | null {
   if (!existsSync(MESSAGE_STORAGE)) return null
@@ -281,6 +283,15 @@ export function createTodoContinuationEnforcer(
         return
       }
 
+      // Skip if interactive_bash was recently used (5s debounce)
+      if (state.lastInteractiveBashAt) {
+        const timeSinceInteractiveBash = Date.now() - state.lastInteractiveBashAt
+        if (timeSinceInteractiveBash < INTERACTIVE_BASH_DEBOUNCE_MS) {
+          log(`[${HOOK_NAME}] Skipped: recent interactive_bash usage`, { sessionID, timeSinceInteractiveBash })
+          return
+        }
+      }
+
       const hasRunningBgTasks = backgroundManager
         ? backgroundManager.getTasksByParentSession(sessionID).some(t => t.status === "running")
         : false
@@ -389,8 +400,15 @@ export function createTodoContinuationEnforcer(
 
     if (event.type === "tool.execute.before" || event.type === "tool.execute.after") {
       const sessionID = props?.sessionID as string | undefined
+      const toolName = props?.tool as string | undefined
       if (sessionID) {
         cancelCountdown(sessionID)
+        // Track interactive_bash usage for debounce
+        if (toolName?.toLowerCase() === "interactive_bash" && event.type === "tool.execute.after") {
+          const state = getState(sessionID)
+          state.lastInteractiveBashAt = Date.now()
+          log(`[${HOOK_NAME}] Tracked interactive_bash execution`, { sessionID })
+        }
       }
       return
     }
