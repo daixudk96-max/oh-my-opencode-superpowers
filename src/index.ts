@@ -30,6 +30,7 @@ import {
   createStartWorkHook,
   createSisyphusOrchestratorHook,
   createPrometheusMdOnlyHook,
+  createCompactionErrorRecoveryHook,
 } from "./hooks";
 import {
   contextCollector,
@@ -207,6 +208,10 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 
   const prometheusMdOnly = isHookEnabled("prometheus-md-only")
     ? createPrometheusMdOnlyHook(ctx)
+    : null;
+
+  const compactionErrorRecovery = isHookEnabled("compaction-error-recovery")
+    ? createCompactionErrorRecoveryHook(ctx)
     : null;
 
   const taskResumeInfo = createTaskResumeInfoHook();
@@ -408,6 +413,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
       await interactiveBashSession?.event(input);
       await ralphLoop?.event(input);
       await sisyphusOrchestrator?.handler(input);
+      await compactionErrorRecovery?.event(input);
 
       const { event } = input;
       const props = event.properties as Record<string, unknown> | undefined;

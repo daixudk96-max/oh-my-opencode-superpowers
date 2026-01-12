@@ -80,6 +80,7 @@ export const HookNameSchema = z.enum([
   "ralph-loop",
   "preemptive-compaction",
   "compaction-context-injector",
+  "compaction-error-recovery",
   "claude-code-hooks",
   "auto-slash-command",
   "edit-error-recovery",
