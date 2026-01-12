@@ -144,7 +144,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
       })
     : null;
   const compactionContextInjector = isHookEnabled("compaction-context-injector")
-    ? createCompactionContextInjector()
+    ? createCompactionContextInjector({ ctx })
     : undefined;
   const preemptiveCompaction = isHookEnabled("preemptive-compaction")
     ? createPreemptiveCompactionHook(ctx, {
