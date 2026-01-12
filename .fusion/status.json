@@ -1,0 +1,9 @@
+{
+  "currentChange": "compaction-error-recovery",
+  "startedAt": "2026-01-12T10:50:00.000Z",
+  "tasks": {
+    "1.1": "complete",
+    "1.2": "complete",
+    "1.3": "complete"
+  }
+}
