@@ -37,6 +37,7 @@ interface SessionState {
   isRecovering?: boolean
   countdownStartedAt?: number
   lastInteractiveBashAt?: number
+  recoveryCompleteTimer?: ReturnType<typeof setTimeout>
 }
 
 const CONTINUATION_PROMPT = `[SYSTEM REMINDER - TODO CONTINUATION]
@@ -51,6 +52,7 @@ const COUNTDOWN_SECONDS = 2
 const TOAST_DURATION_MS = 900
 const COUNTDOWN_GRACE_PERIOD_MS = 500
 const INTERACTIVE_BASH_DEBOUNCE_MS = 5000
+const RECOVERY_COMPLETE_DELAY_MS = 5000
 
 function getMessageDir(sessionID: string): string | null {
   if (!existsSync(MESSAGE_STORAGE)) return null
@@ -136,8 +138,21 @@ export function createTodoContinuationEnforcer(
   const markRecoveryComplete = (sessionID: string): void => {
     const state = sessions.get(sessionID)
     if (state) {
-      state.isRecovering = false
-      log(`[${HOOK_NAME}] Session recovery complete`, { sessionID })
+      // Clear any existing recovery complete timer
+      if (state.recoveryCompleteTimer) {
+        clearTimeout(state.recoveryCompleteTimer)
+      }
+      // Delay clearing isRecovering to allow "continue" prompt to execute
+      // This prevents todo-continuation from firing immediately after compaction
+      state.recoveryCompleteTimer = setTimeout(() => {
+        const currentState = sessions.get(sessionID)
+        if (currentState) {
+          currentState.isRecovering = false
+          currentState.recoveryCompleteTimer = undefined
+          log(`[${HOOK_NAME}] Session recovery complete (delayed)`, { sessionID })
+        }
+      }, RECOVERY_COMPLETE_DELAY_MS)
+      log(`[${HOOK_NAME}] Session recovery complete scheduled`, { sessionID, delayMs: RECOVERY_COMPLETE_DELAY_MS })
     }
   }
 
