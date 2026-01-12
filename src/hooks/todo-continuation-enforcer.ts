@@ -38,6 +38,7 @@ interface SessionState {
   countdownStartedAt?: number
   lastInteractiveBashAt?: number
   recoveryCompleteTimer?: ReturnType<typeof setTimeout>
+  abortDetectedAt?: number
 }
 
 const CONTINUATION_PROMPT = `[SYSTEM REMINDER - TODO CONTINUATION]
@@ -51,8 +52,9 @@ Incomplete tasks remain in your todo list. Continue working on the next pending 
 const COUNTDOWN_SECONDS = 2
 const TOAST_DURATION_MS = 900
 const COUNTDOWN_GRACE_PERIOD_MS = 500
-const INTERACTIVE_BASH_DEBOUNCE_MS = 5000
-const RECOVERY_COMPLETE_DELAY_MS = 5000
+const INTERACTIVE_BASH_DEBOUNCE_MS = 10000
+const RECOVERY_COMPLETE_DELAY_MS = 10000
+const ABORT_WINDOW_MS = 3000
 
 function getMessageDir(sessionID: string): string | null {
   if (!existsSync(MESSAGE_STORAGE)) return null
@@ -271,6 +273,14 @@ export function createTodoContinuationEnforcer(
       const sessionID = props?.sessionID as string | undefined
       if (!sessionID) return
 
+      // Track abort events for hybrid detection
+      const error = props?.error as { name?: string } | undefined
+      if (error?.name === "MessageAbortedError" || error?.name === "AbortError") {
+        const state = getState(sessionID)
+        state.abortDetectedAt = Date.now()
+        log(`[${HOOK_NAME}] Abort detected via session.error`, { sessionID, errorName: error.name })
+      }
+
       cancelCountdown(sessionID)
       log(`[${HOOK_NAME}] session.error`, { sessionID })
       return
@@ -298,13 +308,24 @@ export function createTodoContinuationEnforcer(
         return
       }
 
-      // Skip if interactive_bash was recently used (5s debounce)
+      // Skip if interactive_bash was recently used (10s debounce)
       if (state.lastInteractiveBashAt) {
         const timeSinceInteractiveBash = Date.now() - state.lastInteractiveBashAt
         if (timeSinceInteractiveBash < INTERACTIVE_BASH_DEBOUNCE_MS) {
           log(`[${HOOK_NAME}] Skipped: recent interactive_bash usage`, { sessionID, timeSinceInteractiveBash })
           return
         }
+      }
+
+      // Check 1: Event-based abort detection (primary, most reliable)
+      if (state.abortDetectedAt) {
+        const timeSinceAbort = Date.now() - state.abortDetectedAt
+        if (timeSinceAbort < ABORT_WINDOW_MS) {
+          log(`[${HOOK_NAME}] Skipped: abort detected via event ${timeSinceAbort}ms ago`, { sessionID })
+          state.abortDetectedAt = undefined
+          return
+        }
+        state.abortDetectedAt = undefined
       }
 
       const hasRunningBgTasks = backgroundManager
@@ -393,10 +414,13 @@ export function createTodoContinuationEnforcer(
             return
           }
         }
+        if (state) state.abortDetectedAt = undefined
         cancelCountdown(sessionID)
       }
 
       if (role === "assistant") {
+        const state = sessions.get(sessionID)
+        if (state) state.abortDetectedAt = undefined
         cancelCountdown(sessionID)
       }
       return
@@ -408,6 +432,8 @@ export function createTodoContinuationEnforcer(
       const role = info?.role as string | undefined
 
       if (sessionID && role === "assistant") {
+        const state = sessions.get(sessionID)
+        if (state) state.abortDetectedAt = undefined
         cancelCountdown(sessionID)
       }
       return
@@ -417,6 +443,8 @@ export function createTodoContinuationEnforcer(
       const sessionID = props?.sessionID as string | undefined
       const toolName = props?.tool as string | undefined
       if (sessionID) {
+        const state = sessions.get(sessionID)
+        if (state) state.abortDetectedAt = undefined
         cancelCountdown(sessionID)
         // Track interactive_bash usage for debounce
         if (toolName?.toLowerCase() === "interactive_bash" && event.type === "tool.execute.after") {
