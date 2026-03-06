@@ -1,3 +1,23 @@
+// ===== New 3-tier doctor types =====
+
+export type DoctorMode = "default" | "status" | "verbose"
+
+export interface DoctorOptions {
+  mode: DoctorMode
+  json?: boolean
+  verbose?: boolean
+  category?: CheckCategory
+  test?: boolean
+}
+
+export interface DoctorIssue {
+  title: string
+  description: string
+  fix?: string
+  affects?: string[]
+  severity: "error" | "warning"
+}
+
 export type CheckStatus = "pass" | "fail" | "warn" | "skip"
 
 export interface CheckResult {
@@ -5,32 +25,40 @@ export interface CheckResult {
   status: CheckStatus
   message: string
   details?: string[]
+  issues: DoctorIssue[]
   duration?: number
 }
 
 export type CheckFunction = () => Promise<CheckResult>
 
-export type CheckCategory =
-  | "installation"
-  | "configuration"
-  | "authentication"
-  | "dependencies"
-  | "tools"
-  | "updates"
-
 export interface CheckDefinition {
   id: string
   name: string
-  category: CheckCategory
+  category?: CheckCategory
   check: CheckFunction
   critical?: boolean
 }
 
-export interface DoctorOptions {
-  verbose?: boolean
-  json?: boolean
-  category?: CheckCategory
-  test?: boolean
+export interface SystemInfo {
+  opencodeVersion: string | null
+  opencodePath: string | null
+  pluginVersion: string | null
+  loadedVersion: string | null
+  bunVersion: string | null
+  configPath: string | null
+  configValid: boolean
+  isLocalDev: boolean
+}
+
+export interface ToolsSummary {
+  lspInstalled: number
+  lspTotal: number
+  astGrepCli: boolean
+  astGrepNapi: boolean
+  commentChecker: boolean
+  ghCli: { installed: boolean; authenticated: boolean; username: string | null }
+  mcpBuiltin: string[]
+  mcpUser: string[]
 }
 
 export interface DoctorSummary {
@@ -44,9 +72,21 @@ export interface DoctorSummary {
 
 export interface DoctorResult {
   results: CheckResult[]
+  systemInfo: SystemInfo
+  tools: ToolsSummary
   summary: DoctorSummary
   exitCode: number
 }
+
+// ===== Legacy types (used by existing checks until migration) =====
+
+export type CheckCategory =
+  | "installation"
+  | "configuration"
+  | "authentication"
+  | "dependencies"
+  | "tools"
+  | "updates"
 
 export interface OpenCodeInfo {
   installed: boolean

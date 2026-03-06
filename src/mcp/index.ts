@@ -3,7 +3,7 @@ import { context7 } from "./context7"
 import { grep_app } from "./grep-app"
 import type { OhMyOpenCodeConfig } from "../config/schema"
 import { log } from "../shared/logger"
-import { resolveMcpTemplates } from "./templates"
+import { resolveMcpTemplates, type McpTemplateConfig } from "./templates"
 import { createLazyMcpRegistry } from "./lazy-loader"
 import { createMcpHealthChecker } from "./health-checker"
 import { createPostHookTrigger } from "./post-hook-trigger"
@@ -20,6 +20,11 @@ type RemoteMcpConfig = {
   enabled: boolean
   headers?: Record<string, string>
   oauth?: false
+}
+
+type McpConfig = {
+  templates?: Record<string, McpTemplateConfig | string>
+  tool_count_warning_threshold?: number
 }
 
 const DEFAULT_TOOL_COUNT_WARNING_THRESHOLD = 80
@@ -50,6 +55,7 @@ export function checkMcpToolCount(
 
 export function createBuiltinMcps(disabledMcps: string[] = [], config?: OhMyOpenCodeConfig) {
   const mcps: Record<string, RemoteMcpConfig> = {}
+  const mcpConfig = (config as (OhMyOpenCodeConfig & { mcp?: McpConfig }) | undefined)?.mcp
 
   if (!disabledMcps.includes("websearch")) {
     mcps.websearch = createWebsearchConfig(config?.websearch)
@@ -64,8 +70,8 @@ export function createBuiltinMcps(disabledMcps: string[] = [], config?: OhMyOpen
   }
 
   // Add template-based MCPs if configured
-  if (config?.mcp?.templates) {
-    const templateMcps = resolveMcpTemplates(config.mcp.templates)
+  if (mcpConfig?.templates) {
+    const templateMcps = resolveMcpTemplates(mcpConfig.templates)
     for (const [name, mcpConfig] of Object.entries(templateMcps)) {
       if (!disabledMcps.includes(name)) {
         mcps[name] = mcpConfig
@@ -74,7 +80,7 @@ export function createBuiltinMcps(disabledMcps: string[] = [], config?: OhMyOpen
   }
 
   const toolCount = Object.keys(mcps).length
-  checkMcpToolCount(toolCount, { threshold: config?.mcp?.tool_count_warning_threshold })
+  checkMcpToolCount(toolCount, { threshold: mcpConfig?.tool_count_warning_threshold })
 
   return mcps
 }
