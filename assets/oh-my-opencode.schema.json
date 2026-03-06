@@ -3239,6 +3239,12 @@
           "prompt_append": {
             "type": "string"
           },
+          "defaultSkills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "max_prompt_tokens": {
             "type": "integer",
             "exclusiveMinimum": 0,

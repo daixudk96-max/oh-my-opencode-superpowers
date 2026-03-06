@@ -9,12 +9,72 @@ interface OpenCodeSessionMessage {
 	parts?: Array<{ type: string; text?: string }>
 }
 
+interface TranscriptEntry {
+	type?: string
+	content?: unknown
+	tool_output?: unknown
+}
+
 function escapeRegex(str: string): string {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+	const specialCharacters = new Set([
+		"\\",
+		".",
+		"*",
+		"+",
+		"?",
+		"^",
+		"$",
+		"{",
+		"}",
+		"(",
+		")",
+		"|",
+		"[",
+		"]",
+	])
+
+	let escaped = ""
+	for (const character of str) {
+		escaped += specialCharacters.has(character) ? `\\${character}` : character
+	}
+	return escaped
 }
 
 function buildPromisePattern(promise: string): RegExp {
 	return new RegExp(`<promise>\\s*${escapeRegex(promise)}\\s*</promise>`, "is")
+}
+
+function isInstructionLikePromiseMention(text: string): boolean {
+	if (!text) return false
+
+	const normalized = text.replace(/\s+/g, " ").trim().toLowerCase()
+	if (!normalized.includes("<promise")) return false
+
+	if (/\binstruction\b/.test(normalized)) return true
+
+	return /(?:when|once|if)\s+.{0,80}\bcomplete\b.{0,120}\b(?:output|return|print|emit|respond)\b/.test(
+		normalized,
+	)
+}
+
+function isCompletionText(text: string, pattern: RegExp): boolean {
+	if (!pattern.test(text)) return false
+	return !isInstructionLikePromiseMention(text)
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+function getToolOutputTextCandidates(toolOutput: unknown): string[] {
+	if (typeof toolOutput === "string") return [toolOutput]
+	if (!isRecord(toolOutput)) return []
+
+	const candidates: string[] = []
+	if (typeof toolOutput.output === "string") candidates.push(toolOutput.output)
+	if (typeof toolOutput.content === "string") candidates.push(toolOutput.content)
+	if (typeof toolOutput.text === "string") candidates.push(toolOutput.text)
+	return candidates
 }
 
 export function detectCompletionInTranscript(
@@ -32,11 +92,21 @@ export function detectCompletionInTranscript(
 
 		for (const line of lines) {
 			try {
-				const entry = JSON.parse(line) as { type?: string }
-				if (entry.type === "user") continue
-				if (pattern.test(line)) return true
+				const entry = JSON.parse(line) as TranscriptEntry
+
+				if (entry.type !== "user" && entry.type !== "tool_use") {
+					if (entry.type === "assistant") {
+						if (typeof entry.content === "string" && isCompletionText(entry.content, pattern)) {
+							return true
+						}
+					} else if (entry.type === "tool_result") {
+						const candidates = getToolOutputTextCandidates(entry.tool_output)
+						if (candidates.some((candidate) => isCompletionText(candidate, pattern))) {
+							return true
+						}
+					}
+				}
 			} catch {
-				continue
 			}
 		}
 		return false
@@ -81,7 +151,7 @@ export async function detectCompletionInSessionMessages(
 				? messageArray.slice(options.sinceMessageIndex)
 				: messageArray
 
-		const assistantMessages = (scopedMessages as OpenCodeSessionMessage[]).filter((msg) => msg.info?.role === "assistant")
+		const assistantMessages = (scopedMessages as OpenCodeSessionMessage[]).filter((message) => message.info?.role === "assistant")
 		if (assistantMessages.length === 0) return false
 
 		const pattern = buildPromisePattern(options.promise)
@@ -95,17 +165,17 @@ export async function detectCompletionInSessionMessages(
 				responseText += `${responseText ? "\n" : ""}${part.text ?? ""}`
 			}
 
-			if (pattern.test(responseText)) {
+			if (isCompletionText(responseText, pattern)) {
 				return true
 			}
 		}
 
 		return false
-	} catch (err) {
+	} catch (error) {
 		setTimeout(() => {
 			log(`[${HOOK_NAME}] Session messages check failed`, {
 				sessionID: options.sessionID,
-				error: String(err),
+				error: String(error),
 			})
 		}, 0)
 		return false
