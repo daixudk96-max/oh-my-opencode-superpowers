@@ -10,6 +10,7 @@ export { createEmptyTaskResponseDetectorHook } from "./empty-task-response-detec
 export { createAnthropicContextWindowLimitRecoveryHook, type AnthropicContextWindowLimitRecoveryOptions } from "./anthropic-context-window-limit-recovery";
 
 export { createThinkModeHook } from "./think-mode";
+export { createModelFallbackHook, setPendingModelFallback, clearPendingModelFallback, type ModelFallbackState } from "./model-fallback/hook";
 export { createClaudeCodeHooksHook } from "./claude-code-hooks";
 export { createRulesInjectorHook } from "./rules-injector";
 export { createBackgroundNotificationHook } from "./background-notification"
@@ -28,6 +29,8 @@ export { createAutoSlashCommandHook } from "./auto-slash-command";
 export { createEditErrorRecoveryHook } from "./edit-error-recovery";
 export { createPrometheusMdOnlyHook } from "./prometheus-md-only";
 export { createSisyphusJuniorNotepadHook } from "./sisyphus-junior-notepad";
+export { createNoSisyphusGptHook } from "./no-sisyphus-gpt";
+export { createNoHephaestusNonGptHook } from "./no-hephaestus-non-gpt";
 export { createTaskResumeInfoHook } from "./task-resume-info";
 export { createStartWorkHook } from "./start-work";
 export { createAtlasHook } from "./atlas";
@@ -97,15 +100,20 @@ export { createPhaseRulesInjectorHook } from "./phase-rules-injector";
 export { createKnowledgeInjectionHook } from "./knowledge-injection";
 export { createProjectContextInjectorHook } from "./project-context-injector";
 export { createPrContextInjectorHook } from "./pr-context-injector";
-
+ 
 // Upstream hooks
-export { createSubagentQuestionBlockerHook } from "./subagent-question-blocker";
 export { createStopContinuationGuardHook, type StopContinuationGuard } from "./stop-continuation-guard";
-export { createCompactionContextInjector, type SummarizeContext } from "./compaction-context-injector";
+export { createCompactionContextInjector } from "./compaction-context-injector/hook";
+export type { SummarizeContext } from "./compaction-context-injector";
+export { createCompactionTodoPreserverHook } from "./compaction-todo-preserver";
 export { createUnstableAgentBabysitterHook } from "./unstable-agent-babysitter";
 export { createPreemptiveCompactionHook } from "./preemptive-compaction";
+export { createRuntimeFallbackHook, type RuntimeFallbackHook, type RuntimeFallbackOptions } from "./runtime-fallback";
 export { createTasksTodowriteDisablerHook } from "./tasks-todowrite-disabler";
 export { createWriteExistingFileGuardHook } from "./write-existing-file-guard";
 export { createTasksMdCreationGuardHook } from "./tasks-md-creation-guard";
+export { createHashlineReadEnhancerHook } from "./hashline-read-enhancer";
+export { createJsonErrorRecoveryHook } from "./json-error-recovery";
+export { createReadImageResizerHook } from "./read-image-resizer";
 export { createCommitSizeChecker } from "./pre-tool-use/commit-size-checker";
 export { createFinalAuditHook } from "./stop/final-audit-hook";

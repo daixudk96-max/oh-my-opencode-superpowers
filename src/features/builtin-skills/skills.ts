@@ -1,9 +1,10 @@
 import { existsSync, readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import type { BuiltinSkill } from "./types"
 import type { BrowserAutomationProvider } from "../../config/schema"
 import { parseSkillTemplate, type ParsedSkillTemplate } from "./skill-parser"
+import { playwrightCliSkill } from "./skills/playwright-cli"
+import type { BuiltinSkill } from "./types"
 
 const builtinSkillRoot = dirname(fileURLToPath(import.meta.url))
 const sourceSkillRoot = join(builtinSkillRoot, "..", "..", "..", "src", "features", "builtin-skills")
@@ -2026,8 +2027,6 @@ const continuousLearningSkill: BuiltinSkill = {
   template: readBuiltinSkillTemplate("continuous-learning"),
 }
 
-// 注意: 上游使用模块化导入 (./skills/index)，但本地已有完整定义
-// 保留本地定义以维持缓存机制和所有本地独有 skills
 
 export interface CreateBuiltinSkillsOptions {
   browserProvider?: BrowserAutomationProvider
@@ -2037,7 +2036,14 @@ export interface CreateBuiltinSkillsOptions {
 export function createBuiltinSkills(options: CreateBuiltinSkillsOptions = {}): BuiltinSkill[] {
   const { browserProvider = "playwright", disabledSkills } = options
 
-  const browserSkill = browserProvider === "agent-browser" ? agentBrowserSkill : playwrightSkill
+  let browserSkill: BuiltinSkill
+  if (browserProvider === "agent-browser") {
+    browserSkill = agentBrowserSkill
+  } else if (browserProvider === "playwright-cli") {
+    browserSkill = playwrightCliSkill
+  } else {
+    browserSkill = playwrightSkill
+  }
 
   const skills = [
     browserSkill,

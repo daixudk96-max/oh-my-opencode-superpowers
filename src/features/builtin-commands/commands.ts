@@ -6,6 +6,7 @@ import {
 } from "./templates/agent-chains";
 import { BUILD_FIX_TEMPLATE } from "./templates/build-fix";
 import { EVOLVE_TEMPLATE } from "./templates/evolve";
+import { HANDOFF_TEMPLATE } from "./templates/handoff";
 import { INIT_DEEP_TEMPLATE } from "./templates/init-deep";
 import { INSTINCT_EXPORT_TEMPLATE } from "./templates/instinct-export";
 import { INSTINCT_IMPORT_TEMPLATE } from "./templates/instinct-import";
@@ -107,6 +108,23 @@ $ARGUMENTS
 		template: `<command-instruction>
 ${STOP_CONTINUATION_TEMPLATE}
 </command-instruction>`,
+	},
+	handoff: {
+		description:
+			"(builtin) Create a detailed context summary for continuing work in a new session",
+		template: `<command-instruction>
+${HANDOFF_TEMPLATE}
+</command-instruction>
+
+<session-context>
+Session ID: $SESSION_ID
+Timestamp: $TIMESTAMP
+</session-context>
+
+<user-request>
+$ARGUMENTS
+</user-request>`,
+		argumentHint: "[goal]",
 	},
 	status: {
 		description: "(builtin) Display current change execution status",

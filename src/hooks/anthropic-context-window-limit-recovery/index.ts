@@ -1,179 +1,132 @@
 import type { PluginInput } from "@opencode-ai/plugin"
-import type { AutoCompactState, ParsedTokenLimitError } from "./types"
-import type { ExperimentalConfig } from "../../config"
-import { parseAnthropicTokenLimitError } from "./parser"
-import { executeCompact, getLastAssistant } from "./executor"
 import { log } from "../../shared/logger"
-import { isCompactionInProgress, markCompactionInProgress, clearCompactionInProgress } from "../compaction-state"
+import { clearCompactionInProgress, isCompactionInProgress, markCompactionInProgress } from "../compaction-state"
+import { parseAnthropicTokenLimitError as parseTokenLimitError } from "./parser"
+import {
+  createAnthropicContextWindowLimitRecoveryHook as createRecoveryHook,
+  type AnthropicContextWindowLimitRecoveryOptions,
+} from "./recovery-hook"
 
-export interface AnthropicContextWindowLimitRecoveryOptions {
-  experimental?: ExperimentalConfig
+interface HookEvent {
+  type: string
+  properties?: unknown
 }
 
-function createRecoveryState(): AutoCompactState {
-  return {
-    pendingCompact: new Set<string>(),
-    errorDataBySession: new Map<string, ParsedTokenLimitError>(),
-    retryStateBySession: new Map(),
-    truncateStateBySession: new Map(),
-    emptyContentAttemptBySession: new Map(),
-    compactionInProgress: new Set<string>(),
+const SHARED_COMPACTION_GUARD_TIMEOUT_MS = 60_000
+const pendingGuardClearBySession = new Map<string, ReturnType<typeof setTimeout>>()
+const ownedSharedCompactionSessions = new Set<string>()
+
+function clearPendingGuardTimeout(sessionID: string): void {
+  const timeoutID = pendingGuardClearBySession.get(sessionID)
+  if (timeoutID !== undefined) {
+    clearTimeout(timeoutID)
+    pendingGuardClearBySession.delete(sessionID)
   }
 }
 
-export function createAnthropicContextWindowLimitRecoveryHook(ctx: PluginInput, options?: AnthropicContextWindowLimitRecoveryOptions) {
-  const autoCompactState = createRecoveryState()
-  const experimental = options?.experimental
+function clearSharedCompactionGuard(sessionID: string): void {
+  clearPendingGuardTimeout(sessionID)
+  ownedSharedCompactionSessions.delete(sessionID)
+  clearCompactionInProgress(sessionID)
+}
 
-  const eventHandler = async ({ event }: { event: { type: string; properties?: unknown } }) => {
-    const props = event.properties as Record<string, unknown> | undefined
+function scheduleSharedCompactionGuardClear(sessionID: string): void {
+  clearPendingGuardTimeout(sessionID)
+  const timeoutID = setTimeout(() => {
+    clearSharedCompactionGuard(sessionID)
+  }, SHARED_COMPACTION_GUARD_TIMEOUT_MS)
+  pendingGuardClearBySession.set(sessionID, timeoutID)
+}
 
-    if (event.type === "session.deleted") {
-      const sessionInfo = props?.info as { id?: string } | undefined
-      if (sessionInfo?.id) {
-        autoCompactState.pendingCompact.delete(sessionInfo.id)
-        autoCompactState.errorDataBySession.delete(sessionInfo.id)
-        autoCompactState.retryStateBySession.delete(sessionInfo.id)
-        autoCompactState.truncateStateBySession.delete(sessionInfo.id)
-        autoCompactState.emptyContentAttemptBySession.delete(sessionInfo.id)
-        autoCompactState.compactionInProgress.delete(sessionInfo.id)
+function getSessionID(event: HookEvent): string | undefined {
+  const props = event.properties as Record<string, unknown> | undefined
+  if (event.type === "session.deleted") {
+    const info = props?.info as { id?: string } | undefined
+    return info?.id
+  }
+
+  if (event.type === "message.updated") {
+    const info = props?.info as Record<string, unknown> | undefined
+    return info?.sessionID as string | undefined
+  }
+
+  return props?.sessionID as string | undefined
+}
+
+function isTokenLimitSessionError(event: HookEvent): boolean {
+  if (event.type !== "session.error") {
+    return false
+  }
+
+  const props = event.properties as Record<string, unknown> | undefined
+  return parseTokenLimitError(props?.error) !== null
+}
+
+export function createAnthropicContextWindowLimitRecoveryHook(
+  ctx: PluginInput,
+  options?: AnthropicContextWindowLimitRecoveryOptions,
+) {
+  const baseHook = createRecoveryHook(ctx, options)
+
+  return {
+    event: async ({ event }: { event: HookEvent }) => {
+      const sessionID = getSessionID(event)
+
+      if (event.type === "session.deleted" && sessionID) {
+        clearSharedCompactionGuard(sessionID)
       }
-      return
-    }
 
-    if (event.type === "session.error") {
-      const sessionID = props?.sessionID as string | undefined
-      log("[auto-compact] session.error received", { sessionID, error: props?.error })
-      if (!sessionID) return
-
-      const parsed = parseAnthropicTokenLimitError(props?.error)
-      log("[auto-compact] parsed result", { parsed, hasError: !!props?.error })
-      if (parsed) {
-        autoCompactState.pendingCompact.add(sessionID)
-        autoCompactState.errorDataBySession.set(sessionID, parsed)
-
-        // Check shared compaction guard (bidirectional prevention with onSummarize)
+      if (event.type === "session.error" && sessionID && isTokenLimitSessionError(event)) {
         if (isCompactionInProgress(sessionID)) {
           log("[auto-compact] skipped: shared compaction already in progress", { sessionID })
           return
         }
 
-        if (autoCompactState.compactionInProgress.has(sessionID)) {
+        markCompactionInProgress(sessionID)
+        ownedSharedCompactionSessions.add(sessionID)
+        scheduleSharedCompactionGuardClear(sessionID)
+
+        try {
+          return await baseHook.event({ event })
+        } catch (error) {
+          clearSharedCompactionGuard(sessionID)
+          throw error
+        }
+      }
+
+      if (event.type === "session.idle" && sessionID) {
+        const sharedCompactionInProgress = isCompactionInProgress(sessionID)
+        const ownedByThisHook = ownedSharedCompactionSessions.has(sessionID)
+
+        if (sharedCompactionInProgress && !ownedByThisHook) {
+          log("[auto-compact] session.idle skipped: shared compaction already in progress", { sessionID })
           return
         }
 
-        // Mark shared compaction in progress before starting
-        markCompactionInProgress(sessionID)
+        if (!sharedCompactionInProgress) {
+          markCompactionInProgress(sessionID)
+          ownedSharedCompactionSessions.add(sessionID)
+          scheduleSharedCompactionGuardClear(sessionID)
+        }
 
-        const lastAssistant = await getLastAssistant(sessionID, ctx.client, ctx.directory)
-        const providerID = parsed.providerID ?? (lastAssistant?.providerID as string | undefined)
-        const modelID = parsed.modelID ?? (lastAssistant?.modelID as string | undefined)
-
-        await ctx.client.tui
-          .showToast({
-            body: {
-              title: "Context Limit Hit",
-              message: "Truncating large tool outputs and recovering...",
-              variant: "warning" as const,
-              duration: 3000,
-            },
-          })
-          .catch(() => {})
-
-        setTimeout(() => {
-          executeCompact(
-            sessionID,
-            { providerID, modelID },
-            autoCompactState,
-            ctx.client,
-            ctx.directory,
-            experimental
-          ).finally(() => {
-            // Clear shared compaction flag when done
-            clearCompactionInProgress(sessionID)
-          })
-        }, 300)
-      }
-      return
-    }
-
-    if (event.type === "message.updated") {
-      const info = props?.info as Record<string, unknown> | undefined
-      const sessionID = info?.sessionID as string | undefined
-
-      if (sessionID && info?.role === "assistant" && info.error) {
-        log("[auto-compact] message.updated with error", { sessionID, error: info.error })
-        const parsed = parseAnthropicTokenLimitError(info.error)
-        log("[auto-compact] message.updated parsed result", { parsed })
-        if (parsed) {
-          parsed.providerID = info.providerID as string | undefined
-          parsed.modelID = info.modelID as string | undefined
-          autoCompactState.pendingCompact.add(sessionID)
-          autoCompactState.errorDataBySession.set(sessionID, parsed)
+        try {
+          return await baseHook.event({ event })
+        } finally {
+          if (ownedSharedCompactionSessions.has(sessionID)) {
+            clearSharedCompactionGuard(sessionID)
+          }
         }
       }
-      return
-    }
 
-    if (event.type === "session.idle") {
-      const sessionID = props?.sessionID as string | undefined
-      if (!sessionID) return
-
-      if (!autoCompactState.pendingCompact.has(sessionID)) return
-
-      // Check shared compaction guard (bidirectional prevention with onSummarize)
-      if (isCompactionInProgress(sessionID)) {
-        log("[auto-compact] session.idle skipped: shared compaction already in progress", { sessionID })
-        autoCompactState.pendingCompact.delete(sessionID)
-        return
-      }
-
-      const errorData = autoCompactState.errorDataBySession.get(sessionID)
-      const lastAssistant = await getLastAssistant(sessionID, ctx.client, ctx.directory)
-
-      if (lastAssistant?.summary === true) {
-        autoCompactState.pendingCompact.delete(sessionID)
-        return
-      }
-
-      // Mark shared compaction in progress before starting
-      markCompactionInProgress(sessionID)
-
-      const providerID = errorData?.providerID ?? (lastAssistant?.providerID as string | undefined)
-      const modelID = errorData?.modelID ?? (lastAssistant?.modelID as string | undefined)
-
-      await ctx.client.tui
-        .showToast({
-          body: {
-            title: "Auto Compact",
-            message: "Token limit exceeded. Attempting recovery...",
-            variant: "warning" as const,
-            duration: 3000,
-          },
-        })
-        .catch(() => {})
-
-      try {
-        await executeCompact(
-          sessionID,
-          { providerID, modelID },
-          autoCompactState,
-          ctx.client,
-          ctx.directory,
-          experimental
-        )
-      } finally {
-        // Clear shared compaction flag when done
-        clearCompactionInProgress(sessionID)
-      }
-    }
-  }
-
-  return {
-    event: eventHandler,
+      return baseHook.event({ event })
+    },
   }
 }
 
+export type { AnthropicContextWindowLimitRecoveryOptions } from "./recovery-hook"
 export type { AutoCompactState, ParsedTokenLimitError, TruncateState } from "./types"
 export { parseAnthropicTokenLimitError } from "./parser"
 export { executeCompact, getLastAssistant } from "./executor"
+export * from "./state"
+export * from "./message-builder"
+export * from "./recovery-strategy"

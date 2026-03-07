@@ -102,6 +102,8 @@ export interface BoulderState {
   wave_execution?: WaveExecutionState
   /** Agent type to use when resuming (e.g., 'atlas') */
   agent?: string
+  /** Absolute path to the git worktree root where work happens */
+  worktree_path?: string
 
   // === Fields migrated from .superpowers/status.json ===
   /** Current change name (e.g., feature being worked on) */

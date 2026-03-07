@@ -71,6 +71,8 @@ export interface ContextCollectorOptions {
   sourceOrder?: ContextSourceType[]
 }
 
+let registrationCounter = 0
+
 export class ContextCollector {
   private sessions: Map<string, Map<string, ContextEntry>> = new Map()
   private sourceOrderMap: Map<ContextSourceType, number>
@@ -85,15 +87,16 @@ export class ContextCollector {
       this.sessions.set(sessionID, new Map())
     }
 
-    const sessionMap = this.sessions.get(sessionID)!
-    const key = `${options.source}:${options.id}`
+    const sessionMap = this.sessions.get(sessionID)
+    if (!sessionMap) return;
+    const key = options.source + ":" + options.id
 
     const entry: ContextEntry = {
       id: options.id,
       source: options.source,
       content: options.content,
       priority: options.priority ?? "normal",
-      timestamp: Date.now(),
+      registrationOrder: ++registrationCounter,
       metadata: options.metadata,
     }
 
@@ -136,7 +139,7 @@ export class ContextCollector {
     return sessionMap !== undefined && sessionMap.size > 0
   }
 
-private sortEntries(entries: ContextEntry[]): ContextEntry[] {
+  private sortEntries(entries: ContextEntry[]): ContextEntry[] {
     return entries.sort((a, b) => {
       // First: sort by source order (for cache-friendly injection)
       const sourceOrderA = this.sourceOrderMap.get(a.source) ?? 999
@@ -151,8 +154,8 @@ private sortEntries(entries: ContextEntry[]): ContextEntry[] {
       const relevanceDiff = scoreEntryRelevance(b) - scoreEntryRelevance(a)
       if (relevanceDiff !== 0) return relevanceDiff
 
-      // Fourth: sort by timestamp within same priority/relevance
-      return a.timestamp - b.timestamp
+      // Fourth: preserve registration order within same priority/relevance
+      return a.registrationOrder - b.registrationOrder
     })
   }
 }

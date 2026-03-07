@@ -1,6 +1,6 @@
 # Dependencies
-.sisyphus/
-.superpowers/
+.sisyphus/*
+!.sisyphus/rules/
 node_modules/
 
 # Build output
@@ -34,8 +34,12 @@ yarn.lock
 test-injection/
 notepad.md
 oauth-success.html
-# Worktrees
-.worktrees/
-
-# Bun build artifacts
 *.bun-build
+
+# Downstream additions
+.worktrees/
+.test-*/
+NUL
+test-patch-id/
+tmpopencode-source/
+changess/

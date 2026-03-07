@@ -1,12 +1,29 @@
-import type { DoctorOptions } from "./types"
-import { runDoctor } from "./runner"
 import { runTests } from "../test-runner"
-import type { DoctorResult } from "./types"
+import { runDoctor } from "./runner"
+import type { DoctorOptions, DoctorResult } from "./types"
 
 export interface DoctorDependencies {
   runDoctorFn: (options: DoctorOptions) => Promise<DoctorResult>
   runTestsFn: typeof runTests
   logFn: (message?: string) => void
+}
+
+export interface RunDoctorWithTestsOptions {
+  mode?: DoctorOptions["mode"]
+  json?: DoctorOptions["json"]
+  verbose?: DoctorOptions["verbose"]
+  category?: DoctorOptions["category"]
+  test?: DoctorOptions["test"]
+}
+
+function normalizeDoctorOptions(options: RunDoctorWithTestsOptions): DoctorOptions {
+  return {
+    mode: options.mode ?? "default",
+    json: options.json ?? false,
+    verbose: options.verbose,
+    category: options.category,
+    test: options.test,
+  }
 }
 
 function printTestSummary(
@@ -33,18 +50,19 @@ const defaultDependencies: DoctorDependencies = {
 }
 
 export async function runDoctorWithTests(
-  options: DoctorOptions = {},
+  options: RunDoctorWithTestsOptions = {},
   dependencies: DoctorDependencies = defaultDependencies
 ): Promise<number> {
-  const result = await dependencies.runDoctorFn(options)
+  const normalizedOptions = normalizeDoctorOptions(options)
+  const result = await dependencies.runDoctorFn(normalizedOptions)
 
-  if (!options.test) {
+  if (!normalizedOptions.test) {
     return result.exitCode
   }
 
-  const testResult = await dependencies.runTestsFn({ verbose: options.verbose })
+  const testResult = await dependencies.runTestsFn({ verbose: normalizedOptions.verbose })
 
-  if (!options.json) {
+  if (!normalizedOptions.json) {
     printTestSummary(
       dependencies.logFn,
       testResult.total,
@@ -70,10 +88,10 @@ export async function runDoctorWithTests(
   return 0
 }
 
-export async function doctor(options: DoctorOptions = {}): Promise<number> {
+export async function doctor(options: DoctorOptions = { mode: "default" }): Promise<number> {
   return runDoctorWithTests(options)
 }
 
 export * from "./types"
 export { runDoctor } from "./runner"
-export { formatJsonOutput } from "./formatter"
+export { formatDoctorOutput, formatJsonOutput } from "./formatter"

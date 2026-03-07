@@ -20,6 +20,7 @@ export type BuiltinCommandName =
   | "refactor"
   | "start-work"
   | "stop-continuation"  // 上游新增
+  | "handoff"            // 上游新增
   | "status"             // 本地独有
   | "revert"             // 本地独有
   | "evolve"             // 本地独有

@@ -288,8 +288,8 @@ export function createMomusAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
     "write",
     "edit",
+    "apply_patch",
     "task",
-    "delegate_task",
   ])
 
   const base = {

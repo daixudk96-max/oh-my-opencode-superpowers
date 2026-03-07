@@ -28,8 +28,8 @@ export function createExploreAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
     "write",
     "edit",
+    "apply_patch",
     "task",
-    "delegate_task",
     "call_omo_agent",
   ])
 
@@ -126,12 +126,10 @@ Scoring and sorting rules (required):
 
 ## Success Criteria
 
-| Criterion | Requirement |
-|-----------|-------------|
-| **Paths** | ALL paths must be **absolute** (start with /) |
-| **Completeness** | Find ALL relevant matches, not just the first one |
-| **Actionability** | Caller can proceed **without asking follow-up questions** |
-| **Intent** | Address their **actual need**, not just literal request |
+- **Paths** — ALL paths must be **absolute** (start with /)
+- **Completeness** — Find ALL relevant matches, not just the first one
+- **Actionability** — Caller can proceed **without asking follow-up questions**
+- **Intent** — Address their **actual need**, not just literal request
 
 ## Failure Conditions
 
