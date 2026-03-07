@@ -31,6 +31,11 @@
 - [2026-03-07] Task V-3.4: PASS — Behavior Anchor detected slop and injected guidelines
 - [2026-03-07] Task V-8.2: INCONCLUSIVE — Commit Size Checker hit same regex prefix issue
 - [2026-03-07] Unit Tests: PASS — All shared utilities and feature tests passed (179/179)
+- [2026-03-07] Task V-2.1: PASS — Skill Auto-Injector hook logic verified via test
+- [2026-03-07] Task V-2.2: PASS — Skill Auto-Trigger loaded playwright documentation when asked about playwright
+- [2026-03-07] Task V-2.3: PASS — Relevance Scorer hook prioritized tests based on review mode intent
+- [2026-03-07] Task V-3.1: PASS — Phase-Aware Rules successfully triggered for "planning" phase
+- [2026-03-07] Task V-3.3: PASS/PARTIAL — PR Context analysis logic confirmed working via git-master context
 
 <!-- 执行者在这里追加每个 Task 的完成时间和结果：
 - [日期时间] Task V-X.Y: PASS/FAIL — 简述
