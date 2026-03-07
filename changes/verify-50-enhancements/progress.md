@@ -1,121 +1,47 @@
-# Progress: verify-50-enhancements
+# Progress: verify-50-enhancements (真实行为触发版)
 
-<!-- 
-  WHAT: Your session log - a chronological record of what you did, when, and what happened.
-  WHY: Answers "What have I done?" in the 5-Question Reboot Test. Helps you resume after breaks.
-  WHEN: Update after completing each task/phase or encountering errors.
+> 执行时间线。每个 Task 完成后由执行者追加进度。
+
+## Rewrite Log
+
+- [2026-03-07] 第一次重写：从"读代码打勾"改为"import 函数 + 调用"
+- [2026-03-07] 第二次重写：从"import 函数"改为**真实行为触发**——在 OpenCode 会话中以特定 agent 执行操作，观察 hook 自然触发
+- [2026-03-07] 49 个验证 + 49 个记录 = 98 个 Task，分 8 个 Agent Session
+- [2026-03-07] 真实会话测试 ~25 个 + bun test 测试 ~22 个 + 审计 2 个
+
+## Session Progress
+
+| Session | Agent | Tasks | Status | Notes |
+|---------|-------|-------|--------|-------|
+| 0 | N/A (Terminal) | V-0.1 | Pending | Build + baseline |
+| 1 | Sisyphus | V-1.1 ~ V-9.4 (31 verify) | Pending | 通用 hook 真实触发 + bun test |
+| 2 | Oracle | V-10.1 ~ V-10.2 (2 verify) | Pending | 角色感知规则 |
+| 3 | Explore | V-11.1 ~ V-11.2 (2 verify) | Pending | 精简规则 + 意图分析 |
+| 4 | Librarian | V-12.1 ~ V-12.2 (2 verify) | Pending | 文档发现规则 |
+| 5 | Atlas | V-13.1 ~ V-14.2 (5 verify) | Pending | 续跑 + 委托 + notepad |
+| 6 | Prometheus | V-15.1 ~ V-15.5 (5 verify) | Pending | md-only + 模型限制 |
+| Final | N/A | V-F.1 ~ V-F.2 (2 verify) | Pending | 回归 + 审计报告 |
+
+## Execution Log
+
+- [2026-03-07] Task V-1.2: PASS — TDD Guard blocks correctly
+- [2026-03-07] Task V-1.3: PASS — Secret Scanner blocks fake AWS key
+- [2026-03-07] Task V-1.4: INCONCLUSIVE — Need regex update for export CI=true prefix
+- [2026-03-07] Task V-3.2: PASS — Rules Injector successfully injected AGENTS.md
+- [2026-03-07] Task V-3.4: PASS — Behavior Anchor detected slop and injected guidelines
+- [2026-03-07] Task V-8.2: INCONCLUSIVE — Commit Size Checker hit same regex prefix issue
+- [2026-03-07] Unit Tests: PASS — All shared utilities and feature tests passed (179/179)
+
+<!-- 执行者在这里追加每个 Task 的完成时间和结果：
+- [日期时间] Task V-X.Y: PASS/FAIL — 简述
 -->
-
-> This file tracks execution progress, test results, and errors.
-> Update after completing each task or encountering issues.
-
-## Session Log
-
-### 2026-02-01 Session 1
-
-<!-- 
-  WHAT: Detailed log of actions taken during this session.
-  WHY: Provides context for what was done, making it easier to resume or debug.
-  WHEN: Update as you work through tasks, or at least when you complete them.
--->
-
-**Focus**: Plan Creation
-**Duration**: 10 min
-**Status**: Completed
-
-#### Actions Taken
-- [x] Created `changes/verify-50-enhancements/` directory
-- [x] Created `proposal.md`
-- [x] Created `design.md`
-- [x] Created `tasks.md`
-- [x] Created `findings.md`
-- [x] Created `progress.md`
-
-#### Files Created/Modified
-<!-- 
-  WHAT: Which files you created or changed.
-  WHY: Quick reference for what was touched. Helps with debugging and review.
--->
-- `changes/verify-50-enhancements/proposal.md` (created)
-- `changes/verify-50-enhancements/design.md` (created)
-- `changes/verify-50-enhancements/tasks.md` (created)
-- `changes/verify-50-enhancements/findings.md` (created)
-- `changes/verify-50-enhancements/progress.md` (created)
-
-#### Phase Progress
-- Phase 1: ⏳ Pending
-- Phase 2: ⏳ Pending
-- Phase 3: ⏳ Pending
-- Phase 4: ⏳ Pending
-- Phase 5: ⏳ Pending
-- Phase 6: ⏳ Pending
-- Phase 7: ⏳ Pending
-- Final Review: ⏳ Pending
-
----
-
-## Test Results
-
-<!-- 
-  WHAT: Table of tests you ran, what you expected, what actually happened.
-  WHY: Documents verification of functionality. Helps catch regressions.
-  WHEN: Update as you test features.
--->
-
-| Test Suite | Pass | Fail | Skip | Notes |
-|------------|------|------|------|-------|
-| [Suite 1] | 0 | 0 | 0 | Pending |
-
-## Error Log
-
-<!-- 
-  WHAT: Detailed log of every error encountered, with timestamps and resolution attempts.
-  WHY: More detailed error tracking. Helps you learn from mistakes and avoid repetition.
-  WHEN: Add immediately when an error occurs, even if you fix it quickly.
-  
-  IMPORTANT: Keep ALL errors - they help avoid repetition (Manus Principle 5)
--->
-
-| Timestamp | Error | Attempt | Context | Resolution |
-|-----------|-------|---------|---------|------------|
-| [time] | [error message] | 1 | [what was happening] | [how it was fixed] |
 
 ## 5-Question Reboot Check
 
-<!-- 
-  WHAT: Five questions that verify your context is solid. If you can answer these, you're on track.
-  WHY: This is the "reboot test" - if you can answer all 5, you can resume work effectively.
-  WHEN: Update periodically, especially when resuming after a break or context reset.
-  
-  THE 5 QUESTIONS:
-  1. Where am I? → Current phase in tasks.md
-  2. Where am I going? → Remaining phases
-  3. What's the goal? → Goal statement in design.md
-  4. What have I learned? → See findings.md
-  5. What have I done? → See progress.md (this file)
--->
-
-> Answer these when resuming work after a break or session change.
-
 | Question | Answer |
 |----------|--------|
-| 1. What phase/task am I on? | Phase 1 Preparation |
-| 2. What was I doing when I stopped? | Finished creating plan |
-| 3. What's the next action? | Execute Phase 1 tasks |
-| 4. Are there any blockers? | No |
-| 5. What files are currently modified? | Plan files only |
-
-## Blockers
-
-| Blocker | Status | Owner | Notes |
-|---------|--------|-------|-------|
-| [Blocker 1] | Active/Resolved | [Who] | [Details] |
-
-## Notes
-
-[Any additional notes, observations, or reminders]
-
----
-
-*Update after completing each task/phase or encountering errors*
-*Be detailed - this is your "what happened" log*
+| 1. What session am I on? | Session 0 — 尚未开始执行 |
+| 2. What was I doing? | 第二次重写 tasks.md 为真实行为触发版本 |
+| 3. What's next? | 执行 Task V-0.1 初始化环境 |
+| 4. Blockers? | 无 |
+| 5. Modified files? | tasks.md, findings.md, progress.md (重写) |
