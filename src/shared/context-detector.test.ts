@@ -8,8 +8,6 @@ import { describe, it, expect, beforeEach } from "bun:test"
 import {
   ContextDetector,
   createContextDetector,
-  PackageManager,
-  Framework,
   type ProjectContext,
 } from "./context-detector"
 
@@ -28,35 +26,35 @@ describe("ContextDetector", () => {
       detector.setMockFiles(["bun.lockb", "package.json"])
       const context = detector.detect(".")
 
-      expect(context.packageManager).toBe(PackageManager.BUN)
+      expect(context.packageManager).toBe("bun")
     })
 
     it("should detect npm from package-lock.json", () => {
       detector.setMockFiles(["package-lock.json", "package.json"])
       const context = detector.detect(".")
 
-      expect(context.packageManager).toBe(PackageManager.NPM)
+      expect(context.packageManager).toBe("npm")
     })
 
     it("should detect yarn from yarn.lock", () => {
       detector.setMockFiles(["yarn.lock", "package.json"])
       const context = detector.detect(".")
 
-      expect(context.packageManager).toBe(PackageManager.YARN)
+      expect(context.packageManager).toBe("yarn")
     })
 
     it("should detect pnpm from pnpm-lock.yaml", () => {
       detector.setMockFiles(["pnpm-lock.yaml", "package.json"])
       const context = detector.detect(".")
 
-      expect(context.packageManager).toBe(PackageManager.PNPM)
+      expect(context.packageManager).toBe("pnpm")
     })
 
     it("should return unknown when no lock file found", () => {
       detector.setMockFiles(["package.json"])
       const context = detector.detect(".")
 
-      expect(context.packageManager).toBe(PackageManager.UNKNOWN)
+      expect(context.packageManager).toBe("unknown")
     })
   })
 
@@ -68,7 +66,7 @@ describe("ContextDetector", () => {
       detector.setMockFiles(["next.config.js", "package.json"])
       const context = detector.detect(".")
 
-      expect(context.framework).toBe(Framework.NEXTJS)
+      expect(context.framework).toBe("nextjs")
     })
 
     it("should detect React from react dependency", () => {
@@ -76,14 +74,14 @@ describe("ContextDetector", () => {
       detector.setMockDependencies({ react: "^18.0.0" })
       const context = detector.detect(".")
 
-      expect(context.framework).toBe(Framework.REACT)
+      expect(context.framework).toBe("react")
     })
 
     it("should detect Vue from vue.config.js", () => {
       detector.setMockFiles(["vue.config.js", "package.json"])
       const context = detector.detect(".")
 
-      expect(context.framework).toBe(Framework.VUE)
+      expect(context.framework).toBe("vue")
     })
 
     it("should return unknown when no framework detected", () => {
@@ -91,7 +89,7 @@ describe("ContextDetector", () => {
       detector.setMockDependencies({})
       const context = detector.detect(".")
 
-      expect(context.framework).toBe(Framework.UNKNOWN)
+      expect(context.framework).toBe("unknown")
     })
   })
 
@@ -104,7 +102,7 @@ describe("ContextDetector", () => {
       const context = detector.detect(".")
 
       const matches = detector.matchesCondition(context, {
-        packageManager: PackageManager.BUN,
+        packageManager: "bun",
       })
 
       expect(matches).toBe(true)
@@ -115,7 +113,7 @@ describe("ContextDetector", () => {
       const context = detector.detect(".")
 
       const matches = detector.matchesCondition(context, {
-        packageManager: PackageManager.BUN,
+        packageManager: "bun",
       })
 
       expect(matches).toBe(false)
@@ -126,7 +124,7 @@ describe("ContextDetector", () => {
       const context = detector.detect(".")
 
       const matches = detector.matchesCondition(context, {
-        framework: Framework.NEXTJS,
+        framework: "nextjs",
       })
 
       expect(matches).toBe(true)
@@ -137,8 +135,8 @@ describe("ContextDetector", () => {
       const context = detector.detect(".")
 
       const matches = detector.matchesCondition(context, {
-        packageManager: PackageManager.BUN,
-        framework: Framework.NEXTJS,
+        packageManager: "bun",
+        framework: "nextjs",
       })
 
       expect(matches).toBe(true)
@@ -150,8 +148,8 @@ describe("ContextDetector", () => {
       const context = detector.detect(".")
 
       const matches = detector.matchesCondition(context, {
-        packageManager: PackageManager.BUN,
-        framework: Framework.NEXTJS,
+        packageManager: "bun",
+        framework: "nextjs",
       })
 
       expect(matches).toBe(false)
