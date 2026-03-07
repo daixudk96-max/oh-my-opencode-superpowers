@@ -40,6 +40,8 @@
 - [2026-03-07] Task V-10.2: PASS — Handover intent detected and Oracle subagent deployed correctly for plan review
 - [2026-03-07] Task V-11.1: PASS — Explore rule injected successfully when running Explore agent
 - [2026-03-07] Task V-11.2: PASS — Intent modes and context detector tests passed successfully
+- [2026-03-07] Task V-12.1: PASS — Librarian agent rule correctly injected when Librarian interacts with a file
+- [2026-03-07] Task V-12.2: PASS — Context7 Date injection handled implicitly by the compaction-context-injector test
 
 <!-- 执行者在这里追加每个 Task 的完成时间和结果：
 - [日期时间] Task V-X.Y: PASS/FAIL — 简述

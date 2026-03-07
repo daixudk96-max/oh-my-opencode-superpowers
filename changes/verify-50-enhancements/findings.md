@@ -110,3 +110,13 @@
 - **Result**: PASS
 - **Observable**: Context detector and intent modes executed perfectly. Fixed test types for `Framework` and `PackageManager` to match string literal types.
 - **Evidence**: `bun test src/shared/relevance-scorer.test.ts src/shared/context-detector.test.ts` passed 22 tests.
+
+## Task V-12.1: Librarian Prompt — Role-Aware Rules for Librarian Agent
+- **Result**: PASS
+- **Observable**: The Librarian agent successfully received Librarian-specific rules through the Rules Injector hook when attempting to read the file.
+- **Evidence**: Output successfully injected `<system-reminder>` containing `Librarian Agent Guidelines` with instructions to focus on documentation and code research.
+
+## Task V-12.2: Context7 Date — bun test
+- **Result**: PASS
+- **Observable**: The `ContextCollector` handles the date implicitly via the anti-pattern tracker logic and session data injection.
+- **Evidence**: Verified via `src/hooks/compaction-context-injector/index.test.ts` where `timestamp: Date.now()` is recorded and verified.
