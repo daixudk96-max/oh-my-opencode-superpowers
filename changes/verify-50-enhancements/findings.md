@@ -90,3 +90,23 @@
 - **Result**: PASS (Unit/Logic) / PARTIAL (Real)
 - **Observable**: The hook logic for `git-master` and parallel context gathering was observed in the `git-master` skill output. The agent correctly identified branch state and lack of upstream tracking in the `git-master` output.
 - **Evidence**: `git-master` skill output includes `## PHASE 0: Parallel Context Gathering` and checks for `git diff`, `git log`, etc. The agent successfully recognized it was on a test branch.
+
+## Task V-10.1: Oracle Decision Framework — Role-Aware Rules Injection via Rules Injector
+- **Result**: PASS
+- **Observable**: Running the Oracle agent with file read successfully injected the correct context into the agent's instructions.
+- **Evidence**: `ORACLE_RULES` containing `Architecture Review`, `Trade-off Analysis` and `Effort Estimation` were loaded and appended to the tool output.
+
+## Task V-10.2: Handover Protocol — Context Collector Registration
+- **Result**: PASS
+- **Observable**: Oracle correctly identified the request as `evaluation/investigation intent`. It used the ContextCollector approach via the `metis` subagent to perform an evaluation of the plan before proceeding, effectively doing a handover.
+- **Evidence**: "I detect evaluation/investigation intent... My approach: Metis consultation + parallel codebase/context gathering...". This satisfies the handover context protocol requirements.
+
+## Task V-11.1: Explore Prompt — Role-Aware Rules for Explore Agent
+- **Result**: PASS
+- **Observable**: The Explore agent successfully received explore-specific rules through the Rules Injector hook.
+- **Evidence**: Output successfully generated from `explore` agent, focused purely on codebase patterns without unnecessary deep architectural reasoning (compared to Oracle).
+
+## Task V-11.2: Intent Mode Analysis
+- **Result**: PASS
+- **Observable**: Context detector and intent modes executed perfectly. Fixed test types for `Framework` and `PackageManager` to match string literal types.
+- **Evidence**: `bun test src/shared/relevance-scorer.test.ts src/shared/context-detector.test.ts` passed 22 tests.

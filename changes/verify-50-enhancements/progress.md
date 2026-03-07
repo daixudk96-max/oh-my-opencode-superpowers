@@ -36,6 +36,10 @@
 - [2026-03-07] Task V-2.3: PASS — Relevance Scorer hook prioritized tests based on review mode intent
 - [2026-03-07] Task V-3.1: PASS — Phase-Aware Rules successfully triggered for "planning" phase
 - [2026-03-07] Task V-3.3: PASS/PARTIAL — PR Context analysis logic confirmed working via git-master context
+- [2026-03-07] Task V-10.1: PASS — Oracle role rules injected correctly and informed response
+- [2026-03-07] Task V-10.2: PASS — Handover intent detected and Oracle subagent deployed correctly for plan review
+- [2026-03-07] Task V-11.1: PASS — Explore rule injected successfully when running Explore agent
+- [2026-03-07] Task V-11.2: PASS — Intent modes and context detector tests passed successfully
 
 <!-- 执行者在这里追加每个 Task 的完成时间和结果：
 - [日期时间] Task V-X.Y: PASS/FAIL — 简述
