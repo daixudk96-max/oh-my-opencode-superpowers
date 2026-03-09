@@ -9,7 +9,7 @@ import { _resetForTesting, setMainSession, subagentSessions } from "../../featur
 import { createTasksMdCreationGuardHook } from "./index"
 
 interface HookOutput {
-  args: { filePath: string; content: string }
+  args: Record<string, unknown>
   blocked?: boolean
   message?: string
 }
@@ -51,6 +51,21 @@ describe("createTasksMdCreationGuardHook", () => {
 
     //#when
     const result = hook["tool.execute.before"]?.(input, output)
+
+    //#then
+    await expect(result).resolves.toBeUndefined()
+    expect(output.blocked).toBe(true)
+    expect(output.message).toContain("creating-changes")
+  })
+
+  test("blocks Bash creation when creating-changes not used", async () => {
+    //#given
+    const input: ToolBeforeInput = { tool: "Bash", sessionID: "main", callID: "call_1" }
+    // Using a path that DOES NOT exist in the temp directory to trigger the guard
+    const output: HookOutput = { args: { command: "echo test > changes/test-bash/tasks.md" } }
+
+    //#when
+    const result = hook["tool.execute.before"]?.(input, output as unknown as HookOutput)
 
     //#then
     await expect(result).resolves.toBeUndefined()

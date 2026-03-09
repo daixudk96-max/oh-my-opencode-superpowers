@@ -28,18 +28,19 @@ Renaming the file will NOT bypass this check.`;
 export const INTERCEPTED_TOOLS = ['Write', 'Edit', 'MultiEdit', 'Bash'] as const;
 
 // Bash command patterns that create files
+// TDD-EXEMPT: Fixing obvious double-backslash escape errors in regex literals that were already detected as failing in manual verification
 export const BASH_FILE_CREATION_PATTERNS = [
-  />\\s*["']?([^"'\\s|&;]+tasks\\.md)["']?/i,           // > tasks.md, > "tasks.md"
-  />>\\s*["']?([^"'\\s|&;]+tasks\\.md)["']?/i,          // >> tasks.md
-  /\\bcat\\s+.*>\\s*["']?([^"'\\s|&;]+tasks\\.md)["']?/i, // cat ... > tasks.md
-  /\\btee\\s+["']?([^"'\\s|&;]+tasks\\.md)["']?/i,       // tee tasks.md
-  /\\btouch\\s+["']?([^"'\\s|&;]+tasks\\.md)["']?/i,     // touch tasks.md
-  /\\bcp\\s+.*\\s+["']?([^"'\\s|&;]+tasks\\.md)["']?/i,   // cp ... tasks.md
-  /\\bmv\\s+.*\\s+["']?([^"'\\s|&;]+tasks\\.md)["']?/i,   // mv ... tasks.md
+  />\s*["']?([^"'\s|&;]+tasks\.md)["']?/i,           // > tasks.md, > "tasks.md"
+  />>\s*["']?([^"'\s|&;]+tasks\.md)["']?/i,          // >> tasks.md
+  /\bcat\s+.*>\s*["']?([^"'\s|&;]+tasks\.md)["']?/i, // cat ... > tasks.md
+  /\btee\s+["']?([^"'\s|&;]+tasks\.md)["']?/i,       // tee tasks.md
+  /\btouch\s+["']?([^"'\s|&;]+tasks\.md)["']?/i,     // touch tasks.md
+  /\bcp\s+.*\s+["']?([^"'\s|&;]+tasks\.md)["']?/i,   // cp ... tasks.md
+  /\bmv\s+.*\s+["']?([^"'\s|&;]+tasks\.md)["']?/i,   // mv ... tasks.md
   // Plan file patterns
-  />\\s*["']?([^"'\\s|&;]+plan\\.md)["']?/i,
-  />>\\s*["']?([^"'\\s|&;]+plan\\.md)["']?/i,
-  /\\btouch\\s+["']?([^"'\\s|&;]+plan\\.md)["']?/i,
-  /\\bcp\\s+.*\\s+["']?([^"'\\s|&;]+plan\\.md)["']?/i,
-  /\\bmv\\s+.*\\s+["']?([^"'\\s|&;]+plan\\.md)["']?/i,
+  />\s*["']?([^"'\s|&;]+plan\.md)["']?/i,
+  />>\s*["']?([^"'\s|&;]+plan\.md)["']?/i,
+  /\btouch\s+["']?([^"'\s|&;]+plan\.md)["']?/i,
+  /\bcp\s+.*\s+["']?([^"'\s|&;]+plan\.md)["']?/i,
+  /\bmv\s+.*\s+["']?([^"'\s|&;]+plan\.md)["']?/i,
 ] as const;
