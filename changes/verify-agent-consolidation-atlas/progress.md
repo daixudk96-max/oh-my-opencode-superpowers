@@ -6,8 +6,8 @@
 |---------|---------|-------|--------|-------|
 | Session 0 | 前置检查 | V-0.1 | completed | Agent 注册和实例化 |
 | Session 1 | Hephaestus | V-1.1 ~ V-1.3 | completed | prompt + fallback + 正向触发 |
-| Session 2 | Atlas | V-2.1 ~ V-2.5 | in_progress | 路由 + QA + 工具限制 + hook + 正向触发 |
-| Session 3 | agent-consolidation | V-3.1, V-3.2 | pending | Implementer 废弃 + 术语迁移 |
+| Session 2 | Atlas | V-2.1 ~ V-2.5 | completed | 路由 + QA + 工具限制 + hook + 正向触发 |
+| Session 3 | agent-consolidation | V-3.1, V-3.2 | completed | Implementer 废弃 + 术语迁移 |
 
 ## Execution Log
 
@@ -19,6 +19,9 @@
 - [2026-03-10] Task V-2.2: PASS — Atlas QA 协议验证 (Gemini/GPT/Claude 均包含 4-Phase QA)
 - [2026-03-10] Task V-2.3: PASS — Atlas 工具限制验证 (Prompt-based + Hook-based)
 - [2026-03-10] Task V-2.4: PASS — Atlas Hook 集成验证 (Continuation, Event handler, Boulder logic)
+- [2026-03-10] Task V-2.5: PASS — Atlas 正向触发（编排分析 agents 任务成功）
+- [2026-03-10] Task V-3.1: PASS — Implementer 废弃确认 (无注册、无文件、TDD 逻辑已合并)
+- [2026-03-10] Task V-3.2: PASS — 术语迁移确认 (全局 delegate_task 化，保留 backward compat alias)
 
 ## Reboot Check
 

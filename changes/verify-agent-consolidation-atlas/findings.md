@@ -45,7 +45,29 @@
 
 ---
 
-<!-- Task 结果从这里开始追加 -->
+### Task V-3.1: Implementer Agent 废弃确认
+
+- **注册状态**: `builtin-agents.ts` 中无 `implementer` 注册。
+- **文件存续**: `src/agents/implementer.ts` 已不存在。
+- **TDD 迁移**: 3-phase TDD 纪律已作为 "Skill Discipline" 合并到 Sisyphus 主 prompt 中（`src/agents/sisyphus.ts:257-266`）。
+- **结论**: **PASS**。Implementer 已完全废弃，其核心职能（TDD 纪律）已成功迁移到 Sisyphus 架构中。
+
+### Task V-3.2: sisyphus_task → delegate_task 术语迁移
+
+- **全局搜索**: 
+    - `src/` 下大部分功能代码已切换到 `delegate_task`。
+    - `sisyphus_task` 仅作为 backward compat alias 存在于 `failure-counter` 的 `MONITORED_TOOLS` 中 (`src/hooks/failure-counter/constants.ts:27`)，这证实了向后兼容性的设计。
+- **Hook 迁移**: `failure-counter`, `planning-flow-guide`, `atlas` 等核心 hook 已优先识别并支持 `delegate_task`。
+- **结论**: **PASS**。术语迁移已完成，核心链路均已适配新名称。
+
+### Task V-2.5: Atlas — 正向触发（编排任务）
+
+- **编排行为验证**:
+    - Atlas 被指派分析 `src/agents/` 目录并列出 agent。
+    - **观察**: Atlas 并没有尝试自己读取文件或列出列表，而是严格遵循 "Conductor, not musician" 的设定，使用 `delegate_task` 委派给 `explore` 代理。
+    - **QA 协议**: 在子代理返回结果后，Atlas 表现出了对结果的审查行为（对应 4-Phase QA 协议）。
+- **结论**: **PASS**。Atlas 成功展现了编排器的角色，拒绝直接执行，并成功委派任务。
+
 
 ### Task V-2.1: Atlas — 多模型 Prompt 路由验证
 

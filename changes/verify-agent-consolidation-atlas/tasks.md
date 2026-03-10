@@ -269,7 +269,7 @@ src/index.ts:60-197 (OhMyOpenCodePlugin → createBuiltinAgents 动态加载)
 
 ---
 
-### Task V-2.5: Atlas — 正向触发（编排任务） <!-- Mode: 2 -->
+### Task V-2.5: Atlas — 正向触发（编排任务） [x] <!-- Mode: 2 -->
 
 **Trigger**: `delegate_task` 工具 — 将多步骤任务派发给 Atlas
 **Do**:
@@ -278,9 +278,9 @@ src/index.ts:60-197 (OhMyOpenCodePlugin → createBuiltinAgents 动态加载)
 3. 观察 QA 协议是否被执行
 
 **Expected**:
-- [ ] Atlas 接收任务并尝试委派给子代理
-- [ ] Atlas 不直接使用 Edit/Write 工具
-- [ ] 返回结果或委派记录
+- [x] Atlas 接收任务并尝试委派给子代理
+- [x] Atlas 不直接使用 Edit/Write 工具
+- [x] 返回结果或委派记录
 
 **Pass**: Atlas 行为符合编排器角色
 **Fail**: Atlas 不可用 / 自己写代码 / 无返回
@@ -289,14 +289,14 @@ src/index.ts:60-197 (OhMyOpenCodePlugin → createBuiltinAgents 动态加载)
 
 ---
 
-### Task V-2.5-record: 记录 Atlas 正向触发结果
+### Task V-2.5-record: 记录 Atlas 正向触发结果 [x]
 将 V-2.5 结果追加到 findings 和 progress。
 
 ---
 
 ## Session 3: agent-consolidation 术语迁移验证
 
-### Task V-3.1: Implementer Agent 废弃确认 <!-- Mode: 2 -->
+### Task V-3.1: Implementer Agent 废弃确认 [x] <!-- Mode: 2 -->
 
 **Trigger**: 静态检查
 **Do**:
@@ -305,21 +305,21 @@ src/index.ts:60-197 (OhMyOpenCodePlugin → createBuiltinAgents 动态加载)
 3. 确认 Implementer 的 3-phase TDD 纪律已合并到 Sisyphus-Junior
 
 **Expected**:
-- [ ] `agentSources` 中无 `implementer` 条目
-- [ ] 无 `src/agents/implementer.ts` 文件
-- [ ] TDD 纪律存在于 Sisyphus-Junior 的 prompt 或 category 系统中
+- [x] `agentSources` 中无 `implementer` 条目
+- [x] 无 `src/agents/implementer.ts` 文件
+- [x] TDD 纪律存在于 Sisyphus-Junior 的 prompt 或 category 系统中
 
 **Pass**: Implementer 完全废弃，TDD 纪律已迁移
 **Fail**: 仍有 Implementer 残留注册或独立文件
 
 ---
 
-### Task V-3.1-record: 记录 Implementer 废弃确认结果
+### Task V-3.1-record: 记录 Implementer 废弃确认结果 [x]
 将 V-3.1 结果追加到 findings 和 progress。
 
 ---
 
-### Task V-3.2: sisyphus_task → delegate_task 术语迁移 <!-- Mode: 2 -->
+### Task V-3.2: sisyphus_task → delegate_task 术语迁移 [x] <!-- Mode: 2 -->
 
 **Trigger**: 静态检查
 **Do**:
@@ -331,17 +331,18 @@ src/index.ts:60-197 (OhMyOpenCodePlugin → createBuiltinAgents 动态加载)
    - `src/hooks/atlas/`
 
 **Expected**:
-- [ ] `src/` 下无 `sisyphus_task` 字面引用（文档注释除外）
-- [ ] hook 中使用 `delegate_task` 术语
-- [ ] Atlas, failure-counter, planning-flow-guide 中术语已更新
+- [x] `src/` 下无 `sisyphus_task` 字面引用（文档注释除外）
+- [x] hook 中使用 `delegate_task` 术语
+- [x] Atlas, failure-counter, planning-flow-guide 中术语已更新
 
 **Pass**: 术语迁移完整
 **Fail**: 仍有功能代码中的 `sisyphus_task` 残留
 
 ---
 
-### Task V-3.2-record: 记录术语迁移结果
+### Task V-3.2-record: 记录术语迁移结果 [x]
 将 V-3.2 结果追加到 findings 和 progress。
+
 
 ---
 
