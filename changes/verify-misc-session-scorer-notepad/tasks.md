@@ -166,10 +166,10 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 **Do**: 运行 `bun test src/hooks/sisyphus-junior-notepad/index.test.ts`
 
 **Expected**:
-- [ ] 全部测试 PASS
-- [ ] 覆盖条件触发（tool === "task" && isCallerOrchestrator）
-- [ ] 覆盖防重复注入（已有 SYSTEM_DIRECTIVE_PREFIX 时不再注入）
-- [ ] 覆盖非 Atlas 调用不注入的场景
+- [x] 全部测试 PASS
+- [x] 覆盖条件触发（tool === "task" && isCallerOrchestrator）
+- [x] 覆盖防重复注入（已有 SYSTEM_DIRECTIVE_PREFIX 时不再注入）
+- [x] 覆盖非 Atlas 调用不注入的场景
 
 **Pass**: 全部通过
 **Fail**: 任何测试失败
@@ -177,7 +177,7 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 ---
 
 ### Task V-2.1-record: 记录 sisyphus-junior-notepad 单元测试结果
-将 V-2.1 结果追加到 findings 和 progress。
+[x] 将 V-2.1 结果追加到 findings 和 progress。
 
 ---
 
@@ -194,10 +194,10 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 3. 确认指令对子代理的行为约束合理
 
 **Expected**:
-- [ ] NOTEPAD_DIRECTIVE 包含 findings.md append 指令
-- [ ] NOTEPAD_DIRECTIVE 包含 progress.md append 指令
-- [ ] tasks.md 被标记为只读
-- [ ] SYSTEM_DIRECTIVE_PREFIX 存在且唯一
+- [x] NOTEPAD_DIRECTIVE 包含 findings.md append 指令
+- [x] NOTEPAD_DIRECTIVE 包含 progress.md append 指令
+- [x] tasks.md 被标记为只读
+- [x] SYSTEM_DIRECTIVE_PREFIX 存在且唯一
 
 **Pass**: 指令内容完整且约束合理
 **Fail**: 关键指令缺失
@@ -205,7 +205,7 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 ---
 
 ### Task V-2.2-record: 记录 NOTEPAD_DIRECTIVE 内容验证结果
-将 V-2.2 结果追加到 findings 和 progress。
+[x] 将 V-2.2 结果追加到 findings 和 progress。
 
 ---
 
