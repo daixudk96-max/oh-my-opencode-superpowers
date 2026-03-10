@@ -92,10 +92,10 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 **Do**: 运行 `bun test src/features/session-scorer/index.test.ts`
 
 **Expected**:
-- [ ] 全部测试 PASS
-- [ ] 覆盖 3 个评分维度（测试覆盖、代码质量、任务完成度）
-- [ ] 覆盖等级划分（A/B/C/D/F/N/A）
-- [ ] 覆盖边界条件（0 文件、0 任务、负分 clamp）
+- [x] 全部测试 PASS
+- [x] 覆盖 3 个评分维度（测试覆盖、代码质量、任务完成度）
+- [x] 覆盖等级划分（A/B/C/D/F/N/A）
+- [x] 覆盖边界条件（0 文件、0 任务、负分 clamp）
 
 **Pass**: 全部通过
 **Fail**: 任何测试失败
@@ -103,7 +103,7 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 ---
 
 ### Task V-1.1-record: 记录 session-scorer 单元测试结果
-将 V-1.1 结果追加到 findings 和 progress。
+[x] 将 V-1.1 结果追加到 findings 和 progress。
 
 ---
 
@@ -117,10 +117,10 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 4. 确认 Grade 映射：A≥90, B≥80, C≥70, D≥60, F<60, N/A=无数据
 
 **Expected**:
-- [ ] 权重正确：0.4 + 0.3 + 0.3 = 1.0
-- [ ] codeQuality = 100 - lintErrors*2 - typeErrors*5, clamped to min 0
-- [ ] Grade 边界值正确
-- [ ] N/A 条件：modifiedFiles === 0 && tasksTotal === 0
+- [x] 权重正确：0.4 + 0.3 + 0.3 = 1.0
+- [x] codeQuality = 100 - lintErrors*2 - typeErrors*5, clamped to min 0
+- [x] Grade 边界值正确
+- [x] N/A 条件：modifiedFiles === 0 && tasksTotal === 0
 
 **Pass**: 公式和映射完全正确
 **Fail**: 权重不对、缺少 clamp、边界错误
@@ -128,7 +128,7 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 ---
 
 ### Task V-1.2-record: 记录评分公式验证结果
-将 V-1.2 结果追加到 findings 和 progress。
+[x] 将 V-1.2 结果追加到 findings 和 progress。
 
 ---
 
@@ -141,19 +141,20 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 3. 确认输出格式为 `会话质量: X (N/100)`
 
 **Expected**:
-- [ ] sessionScorer 在 event handler 中被调用
-- [ ] 事件类型为 `session.stop`
-- [ ] 调用后通过 log 输出评分结果
+- [x] sessionScorer 在 event handler 中被调用
+- [x] 事件类型为 `session.stop`
+- [x] 调用后通过 log 输出评分结果
 
 **Pass**: 链路完整
 **Fail**: sessionScorer 未在 session.stop 中被调用
+
 
 **Notes**: session.stop 是会话结束事件，agent 自身无法在会话中触发。标记为 AGENT_INVISIBLE — log 输出在终端可见但不在 output.output 中。
 
 ---
 
 ### Task V-1.3-record: 记录 session.stop 事件注册结果
-将 V-1.3 结果追加到 findings 和 progress。
+[x] 将 V-1.3 结果追加到 findings 和 progress。
 
 ---
 

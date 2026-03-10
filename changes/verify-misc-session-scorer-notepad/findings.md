@@ -42,4 +42,42 @@
 
 ---
 
-<!-- Task 结果从这里开始追加 -->
+---
+
+## V-1.1: session-scorer — 单元测试结果
+
+- **运行命令**: `bun test src/features/session-scorer/index.test.ts`
+- **结果**: 20 个测试全部通过 (Pass)，共 24 个 `expect()` 调用。
+- **覆盖范围**: 
+    - **评分维度**: 测试覆盖 (Test Coverage)、代码质量 (Code Quality)、任务完成度 (Task Completion)。
+    - **评分等级**: A, B, C, D, F, N/A。
+    - **边界条件**: 0 修改文件 (N/A 级)、任务 0 (N/A 级)、负分钳制 (Negative Clamping)。
+- **代码规范**: 测试文件遵循 `describe`/`it` 模式，并包含 Gherkin 风格的注释 (`#given`, `#when`, `#then`)。
+
+## V-1.2: session-scorer — 评分公式验证结果
+
+- **权重验证**:
+  - 测试覆盖 (testCoverage): 0.4
+  - 代码质量 (codeQuality): 0.3
+  - 任务完成度 (taskCompletion): 0.3
+  - **结论**: 权重总和为 1.0，符合设计。
+- **评分公式验证**:
+  - `codeQualityScore = Math.max(0, 100 - (lintErrors * 2 + typeErrors * 5))`
+  - **结论**: 包含下限 clamp (min 0)，扣分项比例正确。
+- **等级映射验证**:
+  - A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, F < 60
+  - **结论**: 边界值符合设计。
+- **N/A 条件验证**:
+  - 当 `modifiedFiles === 0 && tasksTotal === 0` 时返回 `QualityGrade.NA`
+  - **结论**: 条件检查正确。
+
+## V-1.3: session-scorer — session.stop 事件注册结果
+
+- **实例化及注册**:
+  - 在 `src/index.ts` (L240-242) 中根据配置动态实例化。
+  - 在 `src/index.ts` (L296) 的 `event` hook 中注册了 `await sessionScorer?.event?.(input as never)`。
+- **session.stop 事件处理**:
+  - 在 `src/features/session-scorer/index.ts` (L185-189) 的 `event` 方法中包含 `if (input.event.type === "session.stop")` 分支。
+  - 当事件匹配时，会调用 `log(this.getDisplayString())` 输出评分结果 (L187)。
+- **输出格式**:
+  - `getDisplayString()` 返回的格式为 `会话质量: ${grade} (${score}/100)` (L171)，符合预期。
