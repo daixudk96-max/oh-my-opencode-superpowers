@@ -1,0 +1,92 @@
+// 项目级配置：仅在 oh-my-opencode-merge 目录下生效
+// 所有 agent 和 category 统一使用 gemini-3-flash-preview-high
+{
+  "agents": {
+    "sisyphus": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "atlas": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "hephaestus": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "oracle": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "librarian": {
+      "model": "gcl/gemini-3-flash-preview-high-search"
+    },
+    "explore": {
+      "model": "gcl/gemini-3-flash-preview-high-search"
+    },
+    "frontend-ui-ux-engineer": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "document-writer": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "multimodal-looker": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "archiver": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "metis": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "momus": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "prometheus": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "sisyphus-junior": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "observer": {
+      "model": "gcl/gemini-3-flash-preview-high"
+    }
+  },
+  "categories": {
+    "visual-engineering": {
+      "description": "Frontend, UI/UX, design tasks",
+      "model": "gcl/gemini-3-flash-preview-high",
+      "temperature": 0.3
+    },
+    "ultrabrain": {
+      "description": "Deep reasoning",
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "artistry": {
+      "description": "Creative tasks",
+      "model": "gcl/gemini-3-flash-preview-high",
+      "temperature": 0.7
+    },
+    "quick": {
+      "description": "Fast tasks",
+      "model": "gcl/gemini-3-flash-preview-high",
+      "temperature": 0.1
+    },
+    "unspecified-low": {
+      "description": "Low effort tasks",
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "unspecified-high": {
+      "description": "High effort tasks",
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "writing": {
+      "description": "Writing tasks",
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "most-capable": {
+      "description": "Most capable model",
+      "model": "gcl/gemini-3-flash-preview-high"
+    },
+    "general": {
+      "description": "General purpose tasks",
+      "model": "gcl/gemini-3-flash-preview-high"
+    }
+  }
+}

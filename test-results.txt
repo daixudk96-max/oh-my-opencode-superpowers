@@ -1,0 +1,3278 @@
+bun test v1.3.5 (1e86cebd)
+
+script\build-binaries.test.ts:
+🔨 Building oh-my-opencode platform binaries
+   Entry point: src/cli/index.ts
+   Platforms: 11
+
+📦 Building macOS ARM64...
+   Target: bun-darwin-arm64
+   Output: packages\darwin-arm64\bin\oh-my-opencode
+  [73ms]  minify  -0.99 MB (estimate)
+ [221ms]  bundle  400 modules
+[3.704s] compile  packages\darwin-arm64\bin\oh-my-opencode bun-darwin-aarch64-v1.3.5
+
+src\cli\cli-installer.test.ts:
+   ✓ Binary created successfully
+
+📦 Building macOS x64...
+   Target: bun-darwin-x64
+   Output: packages\darwin-x64\bin\oh-my-opencode
+  [62ms]  minify  -0.99 MB (estimate)
+ [176ms]  bundle  400 modules
+[3.94s] compile  packages\darwin-x64\bin\oh-my-opencode bun-darwin-x64-v1.3.5
+  [65ms]  minify  -0.99 MB (estimate)
+ [201ms]  bundle  400 modules
+
+src\cli\install.test.ts:
+(fail) install CLI - binary check behavior > non-TUI mode: should show warning but continue when OpenCode binary not found [5015.00ms]
+  ^ this test timed out after 5000ms.
+
+src\cli\model-fallback.test.ts:
+25 | 
+26 |       // #when generateModelConfig is called
+27 |       const result = generateModelConfig(config)
+28 | 
+29 |       // #then should use ULTIMATE_FALLBACK for everything
+30 |       expect(result).toMatchSnapshot()
+                          ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -25,5 +25,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/big-pickle",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:30:22)
+(fail) generateModelConfig > no providers available > returns ULTIMATE_FALLBACK for all agents and categories when no providers
+38 | 
+39 |       // #when generateModelConfig is called
+40 |       const result = generateModelConfig(config)
+41 | 
+42 |       // #then should use Claude models per NATIVE_FALLBACK_CHAINS
+43 |       expect(result).toMatchSnapshot()
+                          ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:43:22)
+(fail) generateModelConfig > single native provider > uses Claude models when only Claude is available
+49 | 
+50 |       // #when generateModelConfig is called
+51 |       const result = generateModelConfig(config)
+52 | 
+53 |       // #then should use higher capability models for Sisyphus
+54 |       expect(result).toMatchSnapshot()
+                          ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:54:22)
+(fail) generateModelConfig > single native provider > uses Claude models with isMax20 flag
+60 | 
+61 |       // #when generateModelConfig is called
+62 |       const result = generateModelConfig(config)
+63 | 
+64 |       // #then should use OpenAI models
+65 |       expect(result).toMatchSnapshot()
+                          ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/big-pickle",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:65:22)
+(fail) generateModelConfig > single native provider > uses OpenAI models when only OpenAI is available
+71 | 
+72 |       // #when generateModelConfig is called
+73 |       const result = generateModelConfig(config)
+74 | 
+75 |       // #then should use higher capability models
+76 |       expect(result).toMatchSnapshot()
+                          ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/big-pickle",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:76:22)
+(fail) generateModelConfig > single native provider > uses OpenAI models with isMax20 flag
+82 | 
+83 |       // #when generateModelConfig is called
+84 |       const result = generateModelConfig(config)
+85 | 
+86 |       // #then should use Gemini models
+87 |       expect(result).toMatchSnapshot()
+                          ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "google/gemini-3-flash",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:87:22)
+(fail) generateModelConfig > single native provider > uses Gemini models when only Gemini is available [31.00ms]
+93 | 
+94 |       // #when generateModelConfig is called
+95 |       const result = generateModelConfig(config)
+96 | 
+97 |       // #then should use higher capability models
+98 |       expect(result).toMatchSnapshot()
+                          ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "google/gemini-3-flash",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:98:22)
+(fail) generateModelConfig > single native provider > uses Gemini models with isMax20 flag
+110 | 
+111 |       // #when generateModelConfig is called
+112 |       const result = generateModelConfig(config)
+113 | 
+114 |       // #then should use first provider in each fallback chain
+115 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:115:22)
+(fail) generateModelConfig > all native providers > uses preferred models from fallback chains when all natives available
+126 | 
+127 |       // #when generateModelConfig is called
+128 |       const result = generateModelConfig(config)
+129 | 
+130 |       // #then should use higher capability models
+131 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:131:22)
+(fail) generateModelConfig > all native providers > uses preferred models with isMax20 flag when all natives available
+139 | 
+140 |       // #when generateModelConfig is called
+141 |       const result = generateModelConfig(config)
+142 | 
+143 |       // #then should use OPENCODE_ZEN_MODELS
+144 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:144:22)
+(fail) generateModelConfig > fallback providers > uses OpenCode Zen models when only OpenCode Zen is available
+150 | 
+151 |       // #when generateModelConfig is called
+152 |       const result = generateModelConfig(config)
+153 | 
+154 |       // #then should use higher capability models
+155 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:155:22)
+(fail) generateModelConfig > fallback providers > uses OpenCode Zen models with isMax20 flag
+161 | 
+162 |       // #when generateModelConfig is called
+163 |       const result = generateModelConfig(config)
+164 | 
+165 |       // #then should use GITHUB_COPILOT_MODELS
+166 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "github-copilot/gemini-3-flash",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:166:22)
+(fail) generateModelConfig > fallback providers > uses GitHub Copilot models when only Copilot is available
+172 | 
+173 |       // #when generateModelConfig is called
+174 |       const result = generateModelConfig(config)
+175 | 
+176 |       // #then should use higher capability models
+177 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "github-copilot/gemini-3-flash",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:177:22)
+(fail) generateModelConfig > fallback providers > uses GitHub Copilot models with isMax20 flag [16.00ms]
+183 | 
+184 |       // #when generateModelConfig is called
+185 |       const result = generateModelConfig(config)
+186 | 
+187 |       // #then should use ZAI_MODEL for librarian
+188 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -22,5 +22,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/big-pickle",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:188:22)
+(fail) generateModelConfig > fallback providers > uses ZAI model for librarian when only ZAI is available
+194 | 
+195 |       // #when generateModelConfig is called
+196 |       const result = generateModelConfig(config)
+197 | 
+198 |       // #then should use ZAI_MODEL for librarian
+199 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -22,5 +22,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/big-pickle",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:199:22)
+(fail) generateModelConfig > fallback providers > uses ZAI model for librarian with isMax20 flag [15.00ms]
+210 | 
+211 |       // #when generateModelConfig is called
+212 |       const result = generateModelConfig(config)
+213 | 
+214 |       // #then should prefer Claude (native) over OpenCode Zen
+215 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:215:22)
+(fail) generateModelConfig > mixed provider scenarios > uses Claude + OpenCode Zen combination
+224 | 
+225 |       // #when generateModelConfig is called
+226 |       const result = generateModelConfig(config)
+227 | 
+228 |       // #then should prefer OpenAI (native) over Copilot
+229 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "github-copilot/gemini-3-flash",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:229:22)
+(fail) generateModelConfig > mixed provider scenarios > uses OpenAI + Copilot combination
+238 | 
+239 |       // #when generateModelConfig is called
+240 |       const result = generateModelConfig(config)
+241 | 
+242 |       // #then librarian should use ZAI, others use Claude
+243 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:243:22)
+(fail) generateModelConfig > mixed provider scenarios > uses Claude + ZAI combination (librarian uses ZAI)
+252 | 
+253 |       // #when generateModelConfig is called
+254 |       const result = generateModelConfig(config)
+255 | 
+256 |       // #then explore should use Gemini flash
+257 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -24,5 +24,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:257:22)
+(fail) generateModelConfig > mixed provider scenarios > uses Gemini + Claude combination (explore uses Gemini)
+267 | 
+268 |       // #when generateModelConfig is called
+269 |       const result = generateModelConfig(config)
+270 | 
+271 |       // #then should prefer OpenCode Zen, but librarian uses ZAI
+272 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "opencode/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:272:22)
+(fail) generateModelConfig > mixed provider scenarios > uses all fallback providers together
+285 | 
+286 |       // #when generateModelConfig is called
+287 |       const result = generateModelConfig(config)
+288 | 
+289 |       // #then should prefer native providers, librarian uses ZAI
+290 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:290:22)
+(fail) generateModelConfig > mixed provider scenarios > uses all providers together
+304 | 
+305 |       // #when generateModelConfig is called
+306 |       const result = generateModelConfig(config)
+307 | 
+308 |       // #then should use higher capability models
+309 |       expect(result).toMatchSnapshot()
+                           ^
+error: expect(received).toMatchSnapshot(expected)
+
+@@ -29,5 +29,3 @@
+      },
+-     "observer": {
+-       "model": "anthropic/claude-haiku-4-5",
+-     },
+      "oracle": {
+
+- Expected  - 3
++ Received  + 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\model-fallback.test.ts:309:22)
+(fail) generateModelConfig > mixed provider scenarios > uses all providers with isMax20 flag
+
+src\mcp\index.test.ts:
+122 |     const result = createBuiltinMcps(disabledMcps, config)
+123 |     const after = fs.existsSync(logFile) ? fs.readFileSync(logFile, "utf8") : ""
+124 | 
+125 |     // then
+126 |     expect(Object.keys(result)).toHaveLength(3)
+127 |     expect(after.length).toBeGreaterThan(before.length)
+                               ^
+error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 25817493
+Received: 25817493
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\mcp\index.test.ts:127:26)
+(fail) createBuiltinMcps > should log warning using configured tool count threshold [31.00ms]
+[3.946s] compile  packages\darwin-x64-baseline\bin\oh-my-opencode bun-darwin-x64-baseline-v1.3.5
+  [62ms]  minify  -0.99 MB (estimate)
+ [189ms]  bundle  400 modules
+
+src\plugin\ultrawork-db-model-override.test.ts:
+51 |   })
+52 | 
+53 |   afterEach(() => {
+54 |     getDataDirSpy?.mockRestore()
+55 |     logSpy?.mockRestore()
+56 |     rmSync(tempDir, { recursive: true, force: true })
+         ^
+error: EBUSY: resource busy or locked, rm 'C:\Users\daixu\AppData\Local\Temp\ultrawork-db-test-rz3Ohk'
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\plugin\ultrawork-db-model-override.test.ts:56:5)
+(fail) scheduleDeferredModelOverride > should update model in DB after microtask flushes [46.00ms]
+51 |   })
+52 | 
+53 |   afterEach(() => {
+54 |     getDataDirSpy?.mockRestore()
+55 |     logSpy?.mockRestore()
+56 |     rmSync(tempDir, { recursive: true, force: true })
+         ^
+error: EBUSY: resource busy or locked, rm 'C:\Users\daixu\AppData\Local\Temp\ultrawork-db-test-YDVqEv'
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\plugin\ultrawork-db-model-override.test.ts:56:5)
+(fail) scheduleDeferredModelOverride > should update variant and thinking fields when variant provided [94.00ms]
+51 |   })
+52 | 
+53 |   afterEach(() => {
+54 |     getDataDirSpy?.mockRestore()
+55 |     logSpy?.mockRestore()
+56 |     rmSync(tempDir, { recursive: true, force: true })
+         ^
+error: EBUSY: resource busy or locked, rm 'C:\Users\daixu\AppData\Local\Temp\ultrawork-db-test-dI3uU1'
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\plugin\ultrawork-db-model-override.test.ts:56:5)
+(fail) scheduleDeferredModelOverride > should fall back to setTimeout when message never appears [31.00ms]
+51 |   })
+52 | 
+53 |   afterEach(() => {
+54 |     getDataDirSpy?.mockRestore()
+55 |     logSpy?.mockRestore()
+56 |     rmSync(tempDir, { recursive: true, force: true })
+         ^
+error: EBUSY: resource busy or locked, rm 'C:\Users\daixu\AppData\Local\Temp\ultrawork-db-test-HetsM0'
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\plugin\ultrawork-db-model-override.test.ts:56:5)
+(fail) scheduleDeferredModelOverride > should not update variant fields when variant is undefined [47.00ms]
+192 |       { providerID: "anthropic", modelID: "claude-opus-4-6" },
+193 |     )
+194 |     await flushMicrotasks(5)
+195 | 
+196 |     //#then
+197 |     expect(logSpy).toHaveBeenCalledWith(
+                         ^
+error: expect(received).toHaveBeenCalledWith(...expected)
+
+@@ -1,4 +1,6 @@
+  [
+-   StringContaining "Failed to open DB",
+-   ObjectContaining {
++   "[ultrawork-db-override] Deferred DB update failed with error",
++   {
++     "attempt": 0,
++     "error": "SQLiteError: file is not a database",
+      "messageId": "msg_corrupt",
+
+- Expected  - 2
++ Received  + 4
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\plugin\ultrawork-db-model-override.test.ts:197:20)
+(fail) scheduleDeferredModelOverride > should not crash when DB file exists but is corrupted [31.00ms]
+
+src\shared\authenticate.test.ts:
+14 |         status: "active",
+15 |       },
+16 |       secretMatches: false,
+17 |     })
+18 | 
+19 |     expect(missingAccount).toEqual({
+                                ^
+error: expect(received).toEqual(expected)
+
+@@ -1,3 +1,3 @@
+  {
+-   "code": "INVALID_CREDENTIALS",
++   "code": "ACCOUNT_LOCKED",
+    "ok": false,
+
+- Expected  - 1
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\authenticate.test.ts:19:28)
+(fail) authenticate > #given missing account and wrong secret paths #when authenticating #then both return INVALID_CREDENTIALS
+[2.991s] compile  packages\linux-x64\bin\oh-my-opencode bun-linux-x64-v1.3.5
+  [68ms]  minify  -0.99 MB (estimate)
+ [181ms]  bundle  400 modules
+
+src\shared\model-requirements.test.ts:
+205 | 
+206 |     // when - checking AGENT_MODEL_REQUIREMENTS
+207 |     const definedAgents = Object.keys(AGENT_MODEL_REQUIREMENTS)
+208 | 
+209 |     // #then - all agents present with valid fallbackChain
+210 |     expect(definedAgents).toHaveLength(11)
+                                ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 11
+Received length: 10
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-requirements.test.ts:210:27)
+(fail) AGENT_MODEL_REQUIREMENTS > all 11 builtin agents have valid fallbackChain arrays
+
+src\shared\model-resolution-pipeline.test.ts:
+17 |     const hasExplicitUserConfigField = result
+18 |       ? Object.prototype.hasOwnProperty.call(result, "explicitUserConfig")
+19 |       : false
+20 | 
+21 |     // then
+22 |     expect(result).toEqual({ model: "openai/gpt-5.3-codex", provenance: "override" })
+                        ^
+error: expect(received).toEqual(expected)
+
+  {
+-   "model": "openai/gpt-5.3-codex",
+-   "provenance": "override",
++   "model": "anthropic/claude-opus-4-6",
++   "provenance": "provider-fallback",
++   "variant": "max",
+  }
+
+- Expected  - 2
++ Received  + 3
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolution-pipeline.test.ts:22:20)
+(fail) resolveModelPipeline > does not return unused explicit user config metadata in override result
+
+src\shared\model-resolver.test.ts:
+129 | 
+130 |       // when
+131 |       const result = resolveModelWithFallback(input)
+132 | 
+133 |       // then
+134 |       expect(result!.model).toBe("opencode/big-pickle")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "opencode/big-pickle"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:134:29)
+(fail) resolveModelWithFallback > Step 1: UI Selection (highest priority) > returns uiSelectedModel with override source when provided
+147 | 
+148 |       // when
+149 |       const result = resolveModelWithFallback(input)
+150 | 
+151 |       // then
+152 |       expect(result!.model).toBe("opencode/big-pickle")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "opencode/big-pickle"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:152:29)
+(fail) resolveModelWithFallback > Step 1: UI Selection (highest priority) > UI selection takes priority over config override
+165 |       // when
+166 |       const result = resolveModelWithFallback(input)
+167 | 
+168 |       // then
+169 |       expect(result!.model).toBe("anthropic/claude-opus-4-6")
+170 |       expect(logSpy).toHaveBeenCalledWith("Model resolved via config override", { model: "anthropic/claude-opus-4-6" })
+                           ^
+error: expect(received).toHaveBeenCalledWith(...expected)
+
+Expected: [ "Model resolved via config override", {
+    model: "anthropic/claude-opus-4-6",
+  } ]
+But it was not called.
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:170:22)
+(fail) resolveModelWithFallback > Step 1: UI Selection (highest priority) > whitespace-only uiSelectedModel is treated as not provided
+202 |       // when
+203 |       const result = resolveModelWithFallback(input)
+204 | 
+205 |       // then
+206 |       expect(result!.model).toBe("anthropic/claude-opus-4-6")
+207 |       expect(result!.source).toBe("override")
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "override"
+Received: "provider-fallback"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:207:30)
+(fail) resolveModelWithFallback > Step 2: Config Override > returns userModel with override source when userModel is provided
+221 | 
+222 |       // when
+223 |       const result = resolveModelWithFallback(input)
+224 | 
+225 |       // then
+226 |       expect(result!.model).toBe("custom/my-model")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "custom/my-model"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:226:29)
+(fail) resolveModelWithFallback > Step 2: Config Override > override takes priority even if model not in availableModels
+287 | 
+288 |       // when
+289 |       const result = resolveModelWithFallback(input)
+290 | 
+291 |       // then
+292 |       expect(result!.model).toBe("github-copilot/claude-opus-4-6-preview")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "github-copilot/claude-opus-4-6-preview"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:292:29)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > tries providers in order within entry and returns first match
+311 | 
+312 |       // when
+313 |       const result = resolveModelWithFallback(input)
+314 | 
+315 |       // then
+316 |       expect(result!.model).toBe("openai/gpt-5.2")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "openai/gpt-5.2"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:316:29)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > respects provider priority order within entry
+329 | 
+330 |       // when
+331 |       const result = resolveModelWithFallback(input)
+332 | 
+333 |       // then
+334 |       expect(result!.model).toBe("opencode/gpt-5-nano")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "opencode/gpt-5-nano"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:334:29)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > tries next provider when first provider has no match
+362 | 
+363 |       // when
+364 |       const result = resolveModelWithFallback(input)
+365 | 
+366 |       // then
+367 |       expect(result!.source).toBe("system-default")
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "system-default"
+Received: "provider-fallback"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:367:30)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > skips fallback chain when not provided
+377 | 
+378 |       // when
+379 |       const result = resolveModelWithFallback(input)
+380 | 
+381 |       // then
+382 |       expect(result!.source).toBe("system-default")
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "system-default"
+Received: "provider-fallback"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:382:30)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > skips fallback chain when empty
+413 | 
+414 |       // when
+415 |       const result = resolveModelWithFallback(input)
+416 | 
+417 |       // then - should find glm-5 from opencode via cross-provider fuzzy match
+418 |       expect(result!.model).toBe("opencode/glm-5")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "opencode/glm-5"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:418:29)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > cross-provider fuzzy match when preferred provider unavailable (librarian scenario)
+436 | 
+437 |       // when
+438 |       const result = resolveModelWithFallback(input)
+439 | 
+440 |       // then - should prefer zai-coding-plan (specified provider) over opencode
+441 |       expect(result!.model).toBe("zai-coding-plan/glm-5")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "zai-coding-plan/glm-5"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:441:29)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > prefers specified provider over cross-provider match
+454 | 
+455 |       // when
+456 |       const result = resolveModelWithFallback(input)
+457 | 
+458 |       // then - variant should be preserved
+459 |       expect(result!.model).toBe("opencode/glm-5")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "opencode/glm-5"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:459:29)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > cross-provider match preserves variant from entry
+473 | 
+474 |       // when
+475 |       const result = resolveModelWithFallback(input)
+476 | 
+477 |       // then - should fall through to second entry
+478 |       expect(result!.model).toBe("anthropic/claude-sonnet-4-6")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "anthropic/claude-sonnet-4-6"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:478:29)
+(fail) resolveModelWithFallback > Step 3: Provider fallback chain > cross-provider match tries next entry if no match found anywhere
+506 | 
+507 |       // when
+508 |       const result = resolveModelWithFallback(input)
+509 | 
+510 |       // then
+511 |       expect(result!.model).toBe("google/gemini-3.1-pro")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:511:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > returns system default when no availability match found in fallback chain
+526 | 
+527 |       // when
+528 |       const result = resolveModelWithFallback(input)
+529 | 
+530 |       // then - should return undefined to let OpenCode use Provider.defaultModel()
+531 |       expect(result).toBeUndefined()
+                           ^
+error: expect(received).toBeUndefined()
+
+Received: {
+  model: "anthropic/claude-opus-4-6",
+  source: "provider-fallback",
+  variant: "max",
+}
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:531:22)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > returns undefined when availableModels empty and no connected providers cache exists [16.00ms]
+546 | 
+547 |       // when
+548 |       const result = resolveModelWithFallback(input)
+549 | 
+550 |       // then - should use connected provider (openai) from fallback chain
+551 |       expect(result!.model).toBe("openai/claude-opus-4-6")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "openai/claude-opus-4-6"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:551:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > uses connected provider from fallback when availableModels empty but cache exists
+571 | 
+572 |       // when
+573 |       const result = resolveModelWithFallback(input)
+574 | 
+575 |       // then - should skip connected provider fallback
+576 |       expect(result!.model).toBe("google/gemini-3-pro")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3-pro"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:576:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > falls through to system default when provider-models cache is empty
+592 | 
+593 |       // when
+594 |       const result = resolveModelWithFallback(input)
+595 | 
+596 |       // then - opencode should be filtered out
+597 |       expect(result!.model).toBe("google/gemini-3-pro")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3-pro"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:597:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > skips providers not present in config
+613 |       // when
+614 |       const result = resolveModelWithFallback(input)
+615 | 
+616 |       // then - should use github-copilot (second provider) since google not connected
+617 |       // model name is transformed to preview variant for github-copilot provider
+618 |       expect(result!.model).toBe("github-copilot/gemini-3.1-pro-preview")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "github-copilot/gemini-3.1-pro-preview"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:618:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > uses github-copilot when google not connected (visual-engineering scenario)
+633 | 
+634 |       // when
+635 |       const result = resolveModelWithFallback(input)
+636 | 
+637 |       // then - no provider in fallback is connected, fall through to system default
+638 |       expect(result!.model).toBe("anthropic/claude-opus-4-6-20251101")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "anthropic/claude-opus-4-6-20251101"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:638:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > falls through to system default when no provider in fallback is connected [16.00ms]
+653 | 
+654 |       // when
+655 |       const result = resolveModelWithFallback(input)
+656 | 
+657 |       // then - should fall through to system default
+658 |       expect(result!.model).toBe("google/gemini-3.1-pro")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:658:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > falls through to system default when no cache and systemDefaultModel is provided
+669 | 
+670 |       // when
+671 |       const result = resolveModelWithFallback(input)
+672 | 
+673 |       // then
+674 |       expect(result!.model).toBe("google/gemini-3.1-pro")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:674:29)
+(fail) resolveModelWithFallback > Step 4: System default fallback (no availability match) > returns system default when fallbackChain is not provided
+709 |         availableModels,
+710 |         systemDefaultModel: "system/default",
+711 |       })
+712 | 
+713 |       // then
+714 |       expect(result!.model).toBe("google/gemini-3.1-pro")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:714:29)
+(fail) resolveModelWithFallback > Multi-entry fallbackChain > tries all providers in first entry before moving to second entry
+731 |         availableModels,
+732 |         systemDefaultModel: "system/default",
+733 |       })
+734 | 
+735 |       // then
+736 |       expect(result!.model).toBe("openai/gpt-5.2")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "openai/gpt-5.2"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:736:29)
+(fail) resolveModelWithFallback > Multi-entry fallbackChain > returns first matching entry even if later entries have better matches
+751 |         availableModels,
+752 |         systemDefaultModel: "system/default",
+753 |       })
+754 | 
+755 |       // then
+756 |       expect(result!.model).toBe("system/default")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "system/default"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:756:29)
+(fail) resolveModelWithFallback > Multi-entry fallbackChain > falls through to system default when none match availability
+791 | 
+792 |       // when
+793 |       const result = resolveModelWithFallback(input)
+794 | 
+795 |       // then - should fuzzy match gemini-3.1-pro → gemini-3.1-pro-preview
+796 |       expect(result!.model).toBe("google/gemini-3.1-pro-preview")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro-preview"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:796:29)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > applies fuzzy matching to categoryDefaultModel when userModel not provided
+810 | 
+811 |       // when
+812 |       const result = resolveModelWithFallback(input)
+813 | 
+814 |       // then - should use exact match
+815 |       expect(result!.model).toBe("google/gemini-3.1-pro")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:815:29)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > categoryDefaultModel uses exact match when available
+850 |       // when
+851 |       const result = resolveModelWithFallback(input)
+852 | 
+853 |       // then - userModel wins
+854 |       expect(result!.model).toBe("anthropic/claude-opus-4-6")
+855 |       expect(result!.source).toBe("override")
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "override"
+Received: "provider-fallback"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:855:30)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > userModel takes priority over categoryDefaultModel
+866 | 
+867 |       // when
+868 |       const result = resolveModelWithFallback(input)
+869 | 
+870 |       // then - should use transformed categoryDefaultModel since google is connected
+871 |       expect(result!.model).toBe("google/gemini-3.1-pro-preview")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro-preview"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:871:29)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > categoryDefaultModel works when availableModels is empty but connected provider exists
+884 | 
+885 |       // when
+886 |       const result = resolveModelWithFallback(input)
+887 | 
+888 |       // then - gemini-3-flash should be transformed to gemini-3-flash-preview
+889 |       expect(result!.model).toBe("google/gemini-3-flash-preview")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3-flash-preview"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:889:29)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > transforms gemini-3-flash in categoryDefaultModel for google connected provider
+902 | 
+903 |       // when
+904 |       const result = resolveModelWithFallback(input)
+905 | 
+906 |       // then - should NOT become gemini-3.1-pro-preview-preview
+907 |       expect(result!.model).toBe("google/gemini-3.1-pro-preview")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro-preview"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:907:29)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > does not double-transform categoryDefaultModel already containing -preview
+922 | 
+923 |       // when
+924 |       const result = resolveModelWithFallback(input)
+925 | 
+926 |       // then - should transform to preview variant for google provider
+927 |       expect(result!.model).toBe("google/gemini-3.1-pro-preview")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-3.1-pro-preview"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:927:29)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > transforms gemini-3.1-pro in fallback chain for google connected provider [15.00ms]
+940 | 
+941 |       // when
+942 |       const result = resolveModelWithFallback(input)
+943 | 
+944 |       // then - should pass through unchanged
+945 |       expect(result!.model).toBe("google/gemini-2.5-flash")
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: "google/gemini-2.5-flash"
+Received: "anthropic/claude-opus-4-6"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:945:29)
+(fail) resolveModelWithFallback > categoryDefaultModel (fuzzy matching for category defaults) > passes through non-gemini-3 models for google connected provider
+961 | 
+962 |       // when
+963 |       const result = resolveModelWithFallback(input)
+964 | 
+965 |       // then
+966 |       expect(result).toBeUndefined()
+                           ^
+error: expect(received).toBeUndefined()
+
+Received: {
+  model: "anthropic/claude-opus-4-6",
+  source: "provider-fallback",
+  variant: "max",
+}
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:966:22)
+(fail) resolveModelWithFallback > Optional systemDefaultModel > returns undefined when systemDefaultModel is undefined and no fallback found
+975 | 
+976 |       // when
+977 |       const result = resolveModelWithFallback(input)
+978 | 
+979 |       // then
+980 |       expect(result).toBeUndefined()
+                           ^
+error: expect(received).toBeUndefined()
+
+Received: {
+  model: "anthropic/claude-opus-4-6",
+  source: "provider-fallback",
+  variant: "max",
+}
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:980:22)
+(fail) resolveModelWithFallback > Optional systemDefaultModel > returns undefined when no fallbackChain and systemDefaultModel is undefined
+992 |       const result = resolveModelWithFallback(input)
+993 | 
+994 |       // then
+995 |       expect(result).toBeDefined()
+996 |       expect(result!.model).toBe("anthropic/claude-opus-4-6")
+997 |       expect(result!.source).toBe("override")
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "override"
+Received: "provider-fallback"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\model-resolver.test.ts:997:30)
+(fail) resolveModelWithFallback > Optional systemDefaultModel > still returns override when userModel provided even if systemDefaultModel undefined
+
+src\shared\session-bucket-repair.test.ts:
+79 |       directory: "C:/github/OpenViking",
+80 |       sessionID: childID,
+81 |       storageRoot: sessionRoot,
+82 |     })
+83 | 
+84 |     expect(result.repaired).toBe(1)
+                                 ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\session-bucket-repair.test.ts:84:29)
+(fail) session-bucket-repair > repairs mis-bucketed child session using parent bucket
+122 |       directory: "C:/github/OpenViking",
+123 |       sessionID: mainID,
+124 |       storageRoot: sessionRoot,
+125 |     })
+126 | 
+127 |     expect(result.repaired).toBe(1)
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\session-bucket-repair.test.ts:127:29)
+(fail) session-bucket-repair > repairs mis-bucketed main session from global using projectID when parentID is missing [15.00ms]
+214 |     const result = await repairMisbucketedSessionMetadata({
+215 |       directory: "C:/github/OpenViking",
+216 |       storageRoot: sessionRoot,
+217 |     })
+218 | 
+219 |     expect(result.repaired).toBe(2)
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\session-bucket-repair.test.ts:219:29)
+(fail) session-bucket-repair > repairs all matching global child sessions in sweep mode [16.00ms]
+
+src\shared\skill-path-resolver.test.ts:
+ 9 | 
+10 | 		//#when
+11 | 		const result = resolveSkillPathReferences(content, basePath)
+12 | 
+13 | 		//#then
+14 | 		expect(result).toBe(
+                      ^
+error: expect(received).toBe(expected)
+
+Expected: "Run `python3 /home/user/.config/opencode/skills/frontend-ui-ux/scripts/search.py` to search"
+Received: "Run `python3 \home\user\.config\opencode\skills\frontend-ui-ux\scripts\search.py` to search"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\skill-path-resolver.test.ts:14:18)
+(fail) resolveSkillPathReferences > resolves @path references containing a slash to absolute paths
+23 | 
+24 | 		//#when
+25 | 		const result = resolveSkillPathReferences(content, basePath)
+26 | 
+27 | 		//#then
+28 | 		expect(result).toBe(
+                      ^
+error: expect(received).toBe(expected)
+
+- "Script: /skills/frontend/scripts/search.py
+- Data: /skills/frontend/data/styles.csv"
++ "Script: \skills\frontend\scripts\search.py
++ Data: \skills\frontend\data\styles.csv"
+
+- Expected  - 2
++ Received  + 2
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\skill-path-resolver.test.ts:28:18)
+(fail) resolveSkillPathReferences > resolves multiple @path references in the same content
+37 | 
+38 | 		//#when
+39 | 		const result = resolveSkillPathReferences(content, basePath)
+40 | 
+41 | 		//#then
+42 | 		expect(result).toBe("Data files: /skills/frontend/data/")
+                      ^
+error: expect(received).toBe(expected)
+
+Expected: "Data files: /skills/frontend/data/"
+Received: "Data files: \skills\frontend\data\"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\skill-path-resolver.test.ts:42:18)
+(fail) resolveSkillPathReferences > resolves directory references with trailing slash
+73 | 
+74 | 		//#when
+75 | 		const result = resolveSkillPathReferences(content, basePath)
+76 | 
+77 | 		//#then
+78 | 		expect(result).toBe("/skills/frontend/data/stacks/html-tailwind.csv")
+                      ^
+error: expect(received).toBe(expected)
+
+Expected: "/skills/frontend/data/stacks/html-tailwind.csv"
+Received: "\skills\frontend\data\stacks\html-tailwind.csv"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\skill-path-resolver.test.ts:78:18)
+(fail) resolveSkillPathReferences > handles deeply nested path references
+ 97 | 
+ 98 | 		//#when
+ 99 | 		const result = resolveSkillPathReferences(content, basePath)
+100 | 
+101 | 		//#then
+102 | 		expect(result).toBe("/skills/frontend/scripts/search.py")
+                       ^
+error: expect(received).toBe(expected)
+
+Expected: "/skills/frontend/scripts/search.py"
+Received: "\skills\frontend\scripts\search.py"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\shared\skill-path-resolver.test.ts:102:18)
+(fail) resolveSkillPathReferences > handles basePath with trailing slash
+
+src\agents\builtin-agents\resolve-file-uri.test.ts:
+47 | 
+48 |     //#when
+49 |     const resolved = resolvePromptAppend(input)
+50 | 
+51 |     //#then
+52 |     expect(resolved).toBe("absolute-content")
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: "absolute-content"
+Received: "[WARNING: Could not resolve file URI: file://C:\Users\daixu\AppData\Local\Temp\resolve-file-uri-1772884995624\absolute.txt]"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\agents\builtin-agents\resolve-file-uri.test.ts:52:22)
+(fail) resolvePromptAppend > resolves absolute file URI to file contents
+58 | 
+59 |     //#when
+60 |     const resolved = resolvePromptAppend(input, configDir)
+61 | 
+62 |     //#then
+63 |     expect(resolved).toBe("relative-content")
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: "relative-content"
+Received: "[WARNING: Could not resolve file URI: file://./relative.txt]"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\agents\builtin-agents\resolve-file-uri.test.ts:63:22)
+(fail) resolvePromptAppend > resolves relative file URI using configDir
+69 | 
+70 |     //#when
+71 |     const resolved = resolvePromptAppend(input)
+72 | 
+73 |     //#then
+74 |     expect(resolved).toBe("home-content")
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: "home-content"
+Received: "[WARNING: Could not resolve file URI: file://~/C:\Users\daixu\.resolve-file-uri-home-1772884995624/home.txt]"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\agents\builtin-agents\resolve-file-uri.test.ts:74:22)
+(fail) resolvePromptAppend > resolves home directory URI path
+80 | 
+81 |     //#when
+82 |     const resolved = resolvePromptAppend(input)
+83 | 
+84 |     //#then
+85 |     expect(resolved).toBe("encoded-content")
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: "encoded-content"
+Received: "[WARNING: Could not resolve file URI: file://C%3A%5CUsers%5Cdaixu%5CAppData%5CLocal%5CTemp%5Cresolve-file-uri-1772884995624%5Cwith%20space.txt]"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\agents\builtin-agents\resolve-file-uri.test.ts:85:22)
+(fail) resolvePromptAppend > resolves percent-encoded URI path [15.00ms]
+
+src\cli\config-manager\auth-plugins.test.ts:
+55 |       const result = await addAuthPlugins(testConfig)
+56 | 
+57 |       expect(result.success).toBe(true)
+58 | 
+59 |       const newContent = readFileSync(result.configPath, "utf-8")
+60 |       expect(newContent).toContain('// "plugin": ["old-plugin"]')
+                              ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "// \"plugin\": [\"old-plugin\"]"
+Received: "{\"dependencies\":{\"react\":\"^18.0.0\"}}"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:60:26)
+(fail) addAuthPlugins > Test 1: JSONC with commented plugin line > preserves comment, does NOT add antigravity plugin
+84 | 
+85 |       const newContent = readFileSync(testConfigPath, "utf-8")
+86 |       const parsed = parseJsonc<Record<string, unknown>>(newContent)
+87 |       const plugins = parsed.plugin as string[]
+88 | 
+89 |       const antigravityCount = plugins.filter((p) => p.startsWith('opencode-antigravity-auth')).length
+                                    ^
+TypeError: undefined is not an object (evaluating 'plugins.filter')
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:89:32)
+(fail) addAuthPlugins > Test 2: Plugin array already contains antigravity > preserves existing antigravity, does not add another
+103 | 
+104 |       const { addAuthPlugins } = await import("./auth-plugins")
+105 |       const result = await addAuthPlugins(testConfig)
+106 | 
+107 |       expect(result.success).toBe(true)
+108 |       expect(existsSync(`${result.configPath}.bak`)).toBe(true)
+                                                           ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:108:54)
+(fail) addAuthPlugins > Test 3: Backup created before write > creates .bak file
+125 |       const result = await addAuthPlugins(testConfig)
+126 | 
+127 |       expect(result.success).toBe(true)
+128 | 
+129 |       const newContent = readFileSync(testConfigPath, "utf-8")
+130 |       expect(newContent).toContain('// This comment has } special characters')
+                               ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "// This comment has } special characters"
+Received: "{\"dependencies\":{\"react\":\"^18.0.0\"}}"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:130:26)
+(fail) addAuthPlugins > Test 4: Comment with } character > preserves comments with special characters [16.00ms]
+146 |       const result = await addAuthPlugins(testConfig)
+147 | 
+148 |       expect(result.success).toBe(true)
+149 | 
+150 |       const newContent = readFileSync(testConfigPath, "utf-8")
+151 |       expect(newContent).toContain('// "plugin": ["fake"]')
+                               ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "// \"plugin\": [\"fake\"]"
+Received: "{\"dependencies\":{\"react\":\"^18.0.0\"}}"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:151:26)
+(fail) addAuthPlugins > Test 5: Comment containing 'plugin' string > must NOT match comment location
+170 |       expect(result.success).toBe(true)
+171 | 
+172 |       const newContent = readFileSync(result.configPath, "utf-8")
+173 | 
+174 |       const parsed = parseJsonc<Record<string, unknown>>(newContent)
+175 |       expect(parsed).toHaveProperty('plugin')
+                           ^
+error: expect(received).toHaveProperty(path)
+
+Expected path: "plugin"
+
+Unable to find property
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:175:22)
+(fail) addAuthPlugins > Test 6: No existing plugin array > creates empty plugin array when none exists, does NOT add antigravity
+195 | 
+196 |       const newContent = readFileSync(testConfigPath, "utf-8")
+197 |       expect(() => parseJsonc(newContent)).not.toThrow()
+198 | 
+199 |       const parsed = parseJsonc<Record<string, unknown>>(newContent)
+200 |       expect(parsed).toHaveProperty('plugin')
+                           ^
+error: expect(received).toHaveProperty(path)
+
+Expected path: "plugin"
+
+Unable to find property
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:200:22)
+(fail) addAuthPlugins > Test 7: Post-write validation ensures valid JSONC > result file must be valid JSONC
+217 | 
+218 |       const newContent = readFileSync(result.configPath, "utf-8")
+219 |       const parsed = parseJsonc<Record<string, unknown>>(newContent)
+220 |       const plugins = parsed.plugin as string[]
+221 | 
+222 |       expect(plugins).toContain('plugin-1')
+                            ^
+error: Received value must be an array type, or both received and expected values must be strings.
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\auth-plugins.test.ts:222:23)
+(fail) addAuthPlugins > Test 8: Multiple plugins in array > preserves existing plugins, does NOT add antigravity [15.00ms]
+
+src\cli\config-manager\write-omo-config.test.ts:
+68 |     expect(result.success).toBe(true)
+69 | 
+70 |     const savedConfig = parseJsonc<Record<string, unknown>>(readFileSync(testConfigPath, "utf-8"))
+71 |     const savedAgents = getRecord(savedConfig.agents)
+72 |     const savedSisyphus = getRecord(savedAgents.sisyphus)
+73 |     expect(savedSisyphus.model).toBe("custom/provider-model")
+                                     ^
+error: expect(received).toBe(expected)
+
+Expected: "custom/provider-model"
+Received: undefined
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\config-manager\write-omo-config.test.ts:73:33)
+(fail) writeOmoConfig > preserves existing user values while adding new defaults
+
+src\cli\mcp-oauth\login.test.ts:
+Error: --server-url is required for server "test-server"
+Error: Failed to authenticate with test-server: Network error
+Error: --server-url is required for server "test-server"
+
+src\cli\mcp-oauth\logout.test.ts:
+Error: --server-url is required for logout. Token storage uses server URLs, not names.
+  Usage: mcp oauth logout test-server --server-url https://your-server.example.com
+
+src\cli\run\completion-continuation.test.ts:
+67 | 
+68 |     // when
+69 |     const result = await checkCompletionConditions(ctx)
+70 | 
+71 |     // then
+72 |     expect(result).toBe(false)
+                        ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\run\completion-continuation.test.ts:72:20)
+(fail) checkCompletionConditions continuation coverage > returns false when active boulder continuation exists for this session [16.00ms]
+108 | 
+109 |     // when
+110 |     const result = await checkCompletionConditions(ctx)
+111 | 
+112 |     // then
+113 |     expect(result).toBe(false)
+                         ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\run\completion-continuation.test.ts:113:20)
+(fail) checkCompletionConditions continuation coverage > returns false when active ralph-loop continuation exists for this session [16.00ms]
+
+src\cli\run\continuation-state-marker.test.ts:
+31 | 
+32 |     // when
+33 |     const state = getContinuationState(directory, sessionID)
+34 | 
+35 |     // then
+36 |     expect(state.hasActiveHookMarker).toBe(true)
+                                           ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\run\continuation-state-marker.test.ts:36:39)
+(fail) getContinuationState marker integration > reports active marker state from continuation hooks
+
+  [36m⚙[39m [1mread_file[22m [2mfilePath=/src/index.ts[22m  
+[3.009s] compile  packages\linux-x64-baseline\bin\oh-my-opencode bun-linux-x64-baseline-v1.3.5
+  [66ms]  minify  -0.99 MB (estimate)
+ [222ms]  bundle  400 modules
+
+src\cli\run\opencode-binary-resolver.test.ts:
+19 |     // when
+20 |     const candidates = collectCandidateBinaryPaths(pathEnv, which, "darwin")
+21 | 
+22 |     // then
+23 |     expect(candidates[0]).toBe("/bad/opencode")
+24 |     expect(candidates).toContain("/good/opencode")
+                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "/good/opencode"
+Received: [ "/bad/opencode", "\\bad\\opencode", "\\bad\\opencode-desktop", "\\good\\opencode",
+  "\\good\\opencode-desktop"
+]
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\run\opencode-binary-resolver.test.ts:24:24)
+(fail) collectCandidateBinaryPaths > includes Bun.which results first and removes duplicates
+39 | 
+40 |     // when
+41 |     const resolved = await findWorkingOpencodeBinary(pathEnv, probe, which, "darwin")
+42 | 
+43 |     // then
+44 |     expect(resolved).toBe("/good/opencode")
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: "/good/opencode"
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\cli\run\opencode-binary-resolver.test.ts:44:22)
+(fail) findWorkingOpencodeBinary > returns the first runnable candidate
+[2.805s] compile  packages\linux-arm64\bin\oh-my-opencode bun-linux-aarch64-v1.3.5
+  [61ms]  minify  -0.99 MB (estimate)
+ [178ms]  bundle  400 modules
+[2.864s] compile  packages\linux-x64-musl\bin\oh-my-opencode bun-linux-x64-musl-v1.3.5
+  [60ms]  minify  -0.99 MB (estimate)
+ [176ms]  bundle  400 modules
+[2.851s] compile  packages\linux-x64-musl-baseline\bin\oh-my-opencode bun-linux-x64-musl-baseline-v1.3.5
+  [68ms]  minify  -0.99 MB (estimate)
+ [203ms]  bundle  400 modules
+
+src\features\background-agent\compaction-aware-message-resolver.test.ts:
+78 | 
+79 |       // when
+80 |       const result = findNearestMessageExcludingCompaction(tempDir)
+81 | 
+82 |       // then
+83 |       expect(result).not.toBeNull()
+                              ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\background-agent\compaction-aware-message-resolver.test.ts:83:26)
+(fail) findNearestMessageExcludingCompaction > #given directory with messages > finds message with full agent and model
+101 | 
+102 |       // when
+103 |       const result = findNearestMessageExcludingCompaction(tempDir)
+104 | 
+105 |       // then
+106 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\background-agent\compaction-aware-message-resolver.test.ts:106:26)
+(fail) findNearestMessageExcludingCompaction > #given directory with messages > skips compaction agent messages
+120 | 
+121 |       // when
+122 |       const result = findNearestMessageExcludingCompaction(tempDir)
+123 | 
+124 |       // then
+125 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\background-agent\compaction-aware-message-resolver.test.ts:125:26)
+(fail) findNearestMessageExcludingCompaction > #given directory with messages > falls back to partial agent/model match
+160 | 
+161 |       // when
+162 |       const result = findNearestMessageExcludingCompaction(tempDir)
+163 | 
+164 |       // then
+165 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\background-agent\compaction-aware-message-resolver.test.ts:165:26)
+(fail) findNearestMessageExcludingCompaction > #given directory with messages > skips invalid JSON files and finds valid message
+181 | 
+182 |       // when
+183 |       const result = findNearestMessageExcludingCompaction(tempDir)
+184 | 
+185 |       // then
+186 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\background-agent\compaction-aware-message-resolver.test.ts:186:26)
+(fail) findNearestMessageExcludingCompaction > #given directory with messages > finds newest valid message (sorted by filename reverse)
+[2.696s] compile  packages\linux-arm64-musl\bin\oh-my-opencode bun-linux-aarch64-musl-v1.3.5
+
+src\features\boulder-state\retry-tracker.test.ts:
+44 |       incrementRetry(TEST_DIR, "task-1")
+45 |       incrementRetry(TEST_DIR, "task-1")
+46 |       //#when - increment again
+47 |       const count = incrementRetry(TEST_DIR, "task-1")
+48 |       //#then - count is 3
+49 |       expect(count).toBe(3)
+                         ^
+error: expect(received).toBe(expected)
+
+Expected: 3
+Received: 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:49:21)
+(fail) retry-tracker > incrementRetry > increments count on subsequent calls
+53 |       //#given - increment with reason
+54 |       incrementRetry(TEST_DIR, "task-1", "Bun segfault")
+55 |       //#when - get retry info
+56 |       const info = getRetryInfo(TEST_DIR, "task-1")
+57 |       //#then - reason is stored
+58 |       expect(info?.reason).toBe("Bun segfault")
+                                ^
+error: expect(received).toBe(expected)
+
+Expected: "Bun segfault"
+Received: undefined
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:58:28)
+(fail) retry-tracker > incrementRetry > stores reason when provided [16.00ms]
+65 |       incrementRetry(TEST_DIR, "task-2")
+66 |       //#when - get counts
+67 |       const count1 = getRetryCount(TEST_DIR, "task-1")
+68 |       const count2 = getRetryCount(TEST_DIR, "task-2")
+69 |       //#then - counts are independent
+70 |       expect(count1).toBe(2)
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:70:22)
+(fail) retry-tracker > incrementRetry > tracks separate counts for different tasks [15.00ms]
+89 |       incrementRetry(TEST_DIR, "task-1")
+90 |       incrementRetry(TEST_DIR, "task-1")
+91 |       //#when - check max (default 3)
+92 |       const result = isMaxRetries(TEST_DIR, "task-1")
+93 |       //#then - at max
+94 |       expect(result).toBe(true)
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:94:22)
+(fail) retry-tracker > isMaxRetries > returns true when count reaches max [16.00ms]
+100 |         incrementRetry(TEST_DIR, "task-1")
+101 |       }
+102 |       //#when - check max (default 3)
+103 |       const result = isMaxRetries(TEST_DIR, "task-1")
+104 |       //#then - over max
+105 |       expect(result).toBe(true)
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:105:22)
+(fail) retry-tracker > isMaxRetries > returns true when count exceeds max [31.00ms]
+110 |       incrementRetry(TEST_DIR, "task-1")
+111 |       incrementRetry(TEST_DIR, "task-1")
+112 |       //#when - check with custom max of 2
+113 |       const result = isMaxRetries(TEST_DIR, "task-1", 2)
+114 |       //#then - at custom max
+115 |       expect(result).toBe(true)
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:115:22)
+(fail) retry-tracker > isMaxRetries > uses custom max when provided [16.00ms]
+139 |       incrementRetry(TEST_DIR, "task-1")
+140 |       incrementRetry(TEST_DIR, "task-1")
+141 |       //#when - get count
+142 |       const count = getRetryCount(TEST_DIR, "task-1")
+143 |       //#then - returns 3
+144 |       expect(count).toBe(3)
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: 3
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:144:21)
+(fail) retry-tracker > getRetryCount > returns correct count for existing task [16.00ms]
+162 |       incrementRetry(TEST_DIR, "task-2")
+163 |       //#when - reset task-1
+164 |       resetRetry(TEST_DIR, "task-1")
+165 |       //#then - task-2 is unaffected
+166 |       expect(getRetryCount(TEST_DIR, "task-1")).toBe(0)
+167 |       expect(getRetryCount(TEST_DIR, "task-2")).toBe(1)
+                                                      ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:167:49)
+(fail) retry-tracker > resetRetry > does not affect other tasks [16.00ms]
+198 |       for (let i = 0; i < 3; i++) incrementRetry(TEST_DIR, "blocked-2")
+199 |       incrementRetry(TEST_DIR, "not-blocked")
+200 |       //#when - get blocked tasks
+201 |       const blocked = getBlockedTasks(TEST_DIR)
+202 |       //#then - only blocked tasks returned
+203 |       expect(blocked).toContain("blocked-1")
+                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "blocked-1"
+Received: []
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:203:23)
+(fail) retry-tracker > getBlockedTasks > returns tasks that reached max retries [47.00ms]
+210 |       incrementRetry(TEST_DIR, "task-1")
+211 |       incrementRetry(TEST_DIR, "task-1")
+212 |       //#when - get blocked with custom max of 2
+213 |       const blocked = getBlockedTasks(TEST_DIR, 2)
+214 |       //#then - task is blocked
+215 |       expect(blocked).toContain("task-1")
+                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "task-1"
+Received: []
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:215:23)
+(fail) retry-tracker > getBlockedTasks > uses custom max when provided
+229 |       //#given - task with retries
+230 |       incrementRetry(TEST_DIR, "task-1", "Test reason")
+231 |       //#when - get info
+232 |       const info = getRetryInfo(TEST_DIR, "task-1")
+233 |       //#then - has all fields
+234 |       expect(info).not.toBeNull()
+                             ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:234:24)
+(fail) retry-tracker > getRetryInfo > returns complete info for existing task [16.00ms]
+243 |       //#given - increment retry
+244 |       incrementRetry(TEST_DIR, "task-1")
+245 |       //#when - read in new context (simulated by direct call)
+246 |       const count = getRetryCount(TEST_DIR, "task-1")
+247 |       //#then - state is persisted
+248 |       expect(count).toBe(1)
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\retry-tracker.test.ts:248:21)
+(fail) retry-tracker > persistence > state persists across calls
+
+src\features\boulder-state\storage.test.ts:
+78 | 
+79 |       //#when
+80 |       const result = readBoulderState(TEST_DIR)
+81 | 
+82 |       //#then
+83 |       expect(result).not.toBeNull()
+                              ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:83:26)
+(fail) boulder-state > readBoulderState > should default session_ids to [] when missing from JSON
+ 96 | 
+ 97 |       //#when
+ 98 |       const result = readBoulderState(TEST_DIR)
+ 99 | 
+100 |       //#then
+101 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:101:26)
+(fail) boulder-state > readBoulderState > should default session_ids to [] when not an array
+109 | 
+110 |       //#when
+111 |       const result = readBoulderState(TEST_DIR)
+112 | 
+113 |       //#then
+114 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:114:26)
+(fail) boulder-state > readBoulderState > should default session_ids to [] for empty object [16.00ms]
+127 | 
+128 |       // when
+129 |       const result = readBoulderState(TEST_DIR)
+130 | 
+131 |       // then
+132 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:132:26)
+(fail) boulder-state > readBoulderState > should read valid boulder state
+150 |       const success = writeBoulderState(TEST_DIR, state)
+151 |       const readBack = readBoulderState(TEST_DIR)
+152 | 
+153 |       // then
+154 |       expect(success).toBe(true)
+155 |       expect(readBack).not.toBeNull()
+                                 ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:155:28)
+(fail) boulder-state > writeBoulderState > should write state and create .sisyphus directory if needed
+170 | 
+171 |       // when
+172 |       const result = appendSessionId(TEST_DIR, "session-2")
+173 | 
+174 |       // then
+175 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:175:26)
+(fail) boulder-state > appendSessionId > should append new session id to existing state
+189 |       // when
+190 |       appendSessionId(TEST_DIR, "session-1")
+191 |       const result = readBoulderState(TEST_DIR)
+192 | 
+193 |       // then
+194 |       expect(result?.session_ids).toEqual(["session-1"])
+                                        ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "session-1",
+- ]
++ undefined
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:194:35)
+(fail) boulder-state > appendSessionId > should not duplicate existing session id
+213 | 
+214 |       //#when
+215 |       const result = appendSessionId(TEST_DIR, "ses-new")
+216 | 
+217 |       //#then - should not crash and should contain the new session
+218 |       expect(result).not.toBeNull()
+                               ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:218:26)
+(fail) boulder-state > appendSessionId > should not crash when boulder.json has no session_ids field [15.00ms]
+262 | 
+263 |       // when
+264 |       const progress = getPlanProgress(planPath)
+265 | 
+266 |       // then
+267 |       expect(progress.total).toBe(4)
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: 4
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:267:30)
+(fail) boulder-state > getPlanProgress > should count completed and uncompleted checkboxes
+278 | 
+279 |       // when
+280 |       const progress = getPlanProgress(planPath)
+281 | 
+282 |       // then
+283 |       expect(progress.total).toBe(1)
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:283:30)
+(fail) boulder-state > getPlanProgress > should count space-indented unchecked checkbox
+294 | 
+295 |       // when
+296 |       const progress = getPlanProgress(planPath)
+297 | 
+298 |       // then
+299 |       expect(progress.total).toBe(1)
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:299:30)
+(fail) boulder-state > getPlanProgress > should count tab-indented unchecked checkbox
+311 | 
+312 |       // when
+313 |       const progress = getPlanProgress(planPath)
+314 | 
+315 |       // then
+316 |       expect(progress.total).toBe(2)
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:316:30)
+(fail) boulder-state > getPlanProgress > should count mixed top-level checked and indented unchecked checkboxes [16.00ms]
+327 | 
+328 |       // when
+329 |       const progress = getPlanProgress(planPath)
+330 | 
+331 |       // then
+332 |       expect(progress.total).toBe(1)
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:332:30)
+(fail) boulder-state > getPlanProgress > should count space-indented completed checkbox
+344 | 
+345 |       // when
+346 |       const progress = getPlanProgress(planPath)
+347 | 
+348 |       // then
+349 |       expect(progress.total).toBe(2)
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\storage.test.ts:349:30)
+(fail) boulder-state > getPlanProgress > should return isComplete true when all checked
+
+src\features\boulder-state\worktree-manager.test.ts:
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > findOrCreateWorktreeDir > creates .worktrees directory if none exists [1750.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > findOrCreateWorktreeDir > returns existing .worktrees if present [2015.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > findOrCreateWorktreeDir > returns existing worktrees (visible) if present and no hidden [813.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > findOrCreateWorktreeDir > prefers .worktrees over worktrees when both exist [1047.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > ensureGitignored > adds entry to new .gitignore [984.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > ensureGitignored > adds entry to existing .gitignore [1281.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > ensureGitignored > does not duplicate entry if already present [485.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > initializeWaveExecution > creates wave execution state with worktrees [468.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > initializeWaveExecution > persists wave execution state to boulder state [453.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > createWaveWorktree > creates git worktree for pending wave [688.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > createWaveWorktree > fails for non-existent wave [422.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > updateWaveStatus > updates wave status and SHAs [515.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > recordTaskCompletion > records task SHA in wave [438.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > getWaveExecutionSummary > returns correct counts for wave statuses [406.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > hasActiveWaveExecution > returns true when waves are pending [578.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > hasActiveWaveExecution > returns false when all waves completed [1063.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > getWaveWorktreePath > returns path for existing wave [375.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > getWaveWorktreePath > returns null for non-existent wave [422.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > listGitWorktrees > lists main worktree [359.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > pruneWorktrees > prunes successfully on clean repo [359.00ms]
+35 |   execSync("git init", { cwd: TEST_DIR, stdio: "pipe" })
+36 |   execSync('git config user.email "test@test.com"', { cwd: TEST_DIR, stdio: "pipe" })
+37 |   execSync('git config user.name "Test"', { cwd: TEST_DIR, stdio: "pipe" })
+38 |   writeFileSync(join(TEST_DIR, "README.md"), "# Test\n")
+39 |   execSync("git add .", { cwd: TEST_DIR, stdio: "pipe" })
+40 |   execSync('git commit -m "Initial commit"', { cwd: TEST_DIR, stdio: "pipe" })
+       ^
+error: Command failed: git commit -m "Initial commit"
+      at execSync (node:child_process:280:14)
+      at createTestGitRepo (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:40:3)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\boulder-state\worktree-manager.test.ts:102:5)
+(fail) worktree-manager > cleanupWaveWorktree > cleans up created worktree [360.00ms]
+  [88ms]  minify  -8.1 MB (estimate)
+ [445ms]  bundle  401 modules
+[7.346s] compile  packages\windows-x64\bin\oh-my-opencode.exe
+
+src\features\claude-code-mcp-loader\loader.test.ts:
+66 |       // when
+67 |       const { getSystemMcpServerNames } = await import("./loader")
+68 |       const names = getSystemMcpServerNames()
+69 | 
+70 |       // then
+71 |       expect(names.has("playwright")).toBe(true)
+                                           ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:71:39)
+(fail) getSystemMcpServerNames > returns server names from project .mcp.json
+ 97 |       // when
+ 98 |       const { getSystemMcpServerNames } = await import("./loader")
+ 99 |       const names = getSystemMcpServerNames()
+100 | 
+101 |       // then
+102 |       expect(names.has("memory")).toBe(true)
+                                        ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:102:35)
+(fail) getSystemMcpServerNames > returns server names from .claude/.mcp.json [16.00ms]
+130 |       const { getSystemMcpServerNames } = await import("./loader")
+131 |       const names = getSystemMcpServerNames()
+132 | 
+133 |       // then
+134 |       expect(names.has("playwright")).toBe(false)
+135 |       expect(names.has("active")).toBe(true)
+                                        ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:135:35)
+(fail) getSystemMcpServerNames > excludes disabled MCP servers
+163 |        // when
+164 |        const { getSystemMcpServerNames } = await import("./loader")
+165 |        const names = getSystemMcpServerNames()
+166 | 
+167 |        // then
+168 |        expect(names.has("playwright")).toBe(true)
+                                             ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:168:40)
+(fail) getSystemMcpServerNames > merges server names from multiple .mcp.json files
+192 |         // when
+193 |         const { getSystemMcpServerNames } = await import("./loader")
+194 |         const names = getSystemMcpServerNames()
+195 | 
+196 |         // then
+197 |         expect(names.has("user-server")).toBe(true)
+                                               ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:197:42)
+(fail) getSystemMcpServerNames > reads user-level MCP config from ~/.claude.json
+224 |         // when
+225 |         const { getSystemMcpServerNames } = await import("./loader")
+226 |         const names = getSystemMcpServerNames()
+227 | 
+228 |         // then
+229 |         expect(names.has("server-from-claude-json")).toBe(true)
+                                                           ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:229:54)
+(fail) getSystemMcpServerNames > reads both ~/.claude.json and ~/.claude/.mcp.json for user scope [15.00ms]
+275 |       const result = await loadMcpConfigs(["playwright", "sqlite"])
+276 | 
+277 |       //#then
+278 |       expect(result.servers).not.toHaveProperty("playwright")
+279 |       expect(result.servers).not.toHaveProperty("sqlite")
+280 |       expect(result.servers).toHaveProperty("active")
+                                   ^
+error: expect(received).toHaveProperty(path)
+
+Expected path: "active"
+
+Unable to find property
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:280:30)
+(fail) loadMcpConfigs > should skip MCPs in disabledMcps list
+303 |       //#when
+304 |       const { loadMcpConfigs } = await import("./loader")
+305 |       const result = await loadMcpConfigs([])
+306 | 
+307 |       //#then
+308 |       expect(result.servers).toHaveProperty("playwright")
+                                   ^
+error: expect(received).toHaveProperty(path)
+
+Expected path: "playwright"
+
+Unable to find property
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:308:30)
+(fail) loadMcpConfigs > should load all MCPs when disabledMcps is empty
+328 |       //#when
+329 |       const { loadMcpConfigs } = await import("./loader")
+330 |       const result = await loadMcpConfigs()
+331 | 
+332 |       //#then
+333 |       expect(result.servers).toHaveProperty("playwright")
+                                   ^
+error: expect(received).toHaveProperty(path)
+
+Expected path: "playwright"
+
+Unable to find property
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-code-mcp-loader\loader.test.ts:333:30)
+(fail) loadMcpConfigs > should load all MCPs when disabledMcps is not provided [16.00ms]
+
+src\features\claude-tasks\session-storage.test.ts:
+28 | 
+29 |     //#when
+30 |     const result = getSessionTaskDir(config, sessionID)
+31 | 
+32 |     //#then
+33 |     expect(result).toBe("/tmp/tasks/ses_abc123")
+                        ^
+error: expect(received).toBe(expected)
+
+Expected: "/tmp/tasks/ses_abc123"
+Received: "\tmp\tasks\ses_abc123"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\session-storage.test.ts:33:20)
+(fail) getSessionTaskDir > returns session-scoped subdirectory under base task dir
+81 | 
+82 |     //#when
+83 |     const result = listSessionTaskFiles(config, "ses_001")
+84 | 
+85 |     //#then
+86 |     expect(result).toHaveLength(2)
+                        ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 2
+Received length: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\session-storage.test.ts:86:20)
+(fail) listSessionTaskFiles > lists only T-*.json files in the session directory [15.00ms]
+100 | 
+101 |     //#when
+102 |     const result = listSessionTaskFiles(config, "ses_001")
+103 | 
+104 |     //#then
+105 |     expect(result).toEqual(["T-from-s1"])
+                         ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "T-from-s1",
+- ]
++ []
+
+- Expected  - 3
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\session-storage.test.ts:105:20)
+(fail) listSessionTaskFiles > does not list tasks from other sessions
+141 | 
+142 |     //#when
+143 |     const result = listAllSessionDirs(config)
+144 | 
+145 |     //#then
+146 |     expect(result).toHaveLength(2)
+                         ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 2
+Received length: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\session-storage.test.ts:146:20)
+(fail) listAllSessionDirs > returns only directory entries (not files) [16.00ms]
+184 | 
+185 |     //#when
+186 |     const result = findTaskAcrossSessions(config, "T-target")
+187 | 
+188 |     //#then
+189 |     expect(result).not.toBeNull()
+                             ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\session-storage.test.ts:189:24)
+(fail) findTaskAcrossSessions > finds task in the correct session directory
+
+src\features\claude-tasks\storage.test.ts:
+305 | 
+306 |     //#when
+307 |     const result = listTaskFiles(config)
+308 | 
+309 |     //#then
+310 |     expect(result).toHaveLength(2)
+                         ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 2
+Received length: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:310:20)
+(fail) listTaskFiles > lists task files with T- prefix and .json extension [15.00ms]
+323 | 
+324 |     //#when
+325 |     const result = listTaskFiles(config)
+326 | 
+327 |     //#then
+328 |     expect(result[0]).toBe("T-test-id")
+                            ^
+error: expect(received).toBe(expected)
+
+Expected: "T-test-id"
+Received: undefined
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:328:23)
+(fail) listTaskFiles > returns task IDs without .json extension
+368 | 
+369 |     //#when
+370 |     const result = readJsonSafe(filePath, testSchema)
+371 | 
+372 |     //#then
+373 |     expect(result).toEqual(data)
+                         ^
+error: expect(received).toEqual(expected)
+
+- {
+-   "id": "test",
+-   "value": 42,
+- }
++ null
+
+- Expected  - 4
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:373:20)
+(fail) readJsonSafe > returns parsed data for valid file
+419 | 
+420 |     //#when
+421 |     writeJsonAtomic(filePath, data)
+422 | 
+423 |     //#then
+424 |     expect(existsSync(filePath)).toBe(true)
+                                       ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:424:34)
+(fail) writeJsonAtomic > creates directory if it does not exist [172.00ms]
+431 | 
+432 |     //#when
+433 |     writeJsonAtomic(filePath, data)
+434 | 
+435 |     //#then
+436 |     expect(existsSync(filePath)).toBe(true)
+                                       ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:436:34)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:427:34)
+(fail) writeJsonAtomic > writes data atomically [156.00ms]
+  [58ms]  minify  -8.1 MB (estimate)
+ [169ms]  bundle  401 modules
+474 | 
+475 |     //#when
+476 |     const lock = acquireLock(dirPath)
+477 | 
+478 |     //#then
+479 |     expect(lock.acquired).toBe(true)
+                                ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:479:27)
+(fail) acquireLock > acquires lock when no lock exists [16.00ms]
+507 | 
+508 |     //#when
+509 |     const lock = acquireLock(dirPath)
+510 | 
+511 |     //#then
+512 |     expect(lock.acquired).toBe(true)
+                                ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\claude-tasks\storage.test.ts:512:27)
+(fail) acquireLock > acquires lock when stale lock exists (>30s) [94.00ms]
+
+src\features\mcp-oauth\provider.test.ts:
+118 | 
+119 |       // when
+120 |       const provider = new McpOAuthProvider(options)
+121 | 
+122 |       // then
+123 |       expect(provider.tokens()).toBeNull()
+                            ^
+TypeError: provider.tokens is not a function. (In 'provider.tokens()', 'provider.tokens' is undefined)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\provider.test.ts:123:23)
+(fail) McpOAuthProvider > constructor and basic methods > stores serverUrl and optional clientId and scopes
+131 | 
+132 |       // when
+133 |       const provider = new McpOAuthProvider(options)
+134 | 
+135 |       // then
+136 |       expect(provider.redirectUrl()).toBe("http://127.0.0.1:19877/callback")
+                            ^
+TypeError: provider.redirectUrl is not a function. (In 'provider.redirectUrl()', 'provider.redirectUrl' is undefined)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\provider.test.ts:136:23)
+(fail) McpOAuthProvider > constructor and basic methods > defaults scopes to empty array
+141 |     it("stores and retrieves code verifier", () => {
+142 |       // given
+143 |       const provider = new McpOAuthProvider({ serverUrl: "https://mcp.example.com" })
+144 | 
+145 |       // when
+146 |       provider.saveCodeVerifier("my-verifier")
+                     ^
+TypeError: provider.saveCodeVerifier is not a function. (In 'provider.saveCodeVerifier("my-verifier")', 'provider.saveCodeVerifier' is undefined)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\provider.test.ts:146:16)
+(fail) McpOAuthProvider > saveCodeVerifier / codeVerifier > stores and retrieves code verifier
+179 |         refreshToken: "refresh-token-456",
+180 |         expiresAt: 1710000000,
+181 |       }
+182 | 
+183 |       // when
+184 |       const saved = provider.saveTokens(tokenData)
+                                   ^
+TypeError: provider.saveTokens is not a function. (In 'provider.saveTokens(tokenData)', 'provider.saveTokens' is undefined)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\provider.test.ts:184:30)
+(fail) McpOAuthProvider > saveTokens / tokens > persists and loads token data via storage
+199 |         tokenEndpoint: "https://auth.example.com/token",
+200 |         resource: "https://mcp.example.com",
+201 |       }
+202 | 
+203 |       // when
+204 |       const result = provider.redirectToAuthorization(metadata)
+                                    ^
+TypeError: provider.redirectToAuthorization is not a function. (In 'provider.redirectToAuthorization(metadata)', 'provider.redirectToAuthorization' is undefined)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\provider.test.ts:204:31)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\provider.test.ts:194:52)
+(fail) McpOAuthProvider > redirectToAuthorization > throws when no client information is set
+212 |     it("returns localhost callback URL with default port", () => {
+213 |       // given
+214 |       const provider = new McpOAuthProvider({ serverUrl: "https://mcp.example.com" })
+215 | 
+216 |       // when
+217 |       const url = provider.redirectUrl()
+                                 ^
+TypeError: new McpOAuthProvider({ serverUrl: "https://mcp.example.com" }).redirectUrl is not a function. (In 'new McpOAuthProvider({ serverUrl: "https://mcp.example.com" }).redirectUrl()', 'new McpOAuthProvider({ serverUrl: "https://mcp.example.com" }).redirectUrl' is undefined)
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\provider.test.ts:217:28)
+(fail) McpOAuthProvider > redirectUrl > returns localhost callback URL with default port
+
+src\features\mcp-oauth\storage.test.ts:
+50 |     const parsed = JSON.parse(readFileSync(storagePath, "utf-8")) as Record<string, OAuthTokenData>
+51 |     const mode = statSync(storagePath).mode & 0o777
+52 | 
+53 |     // then
+54 |     expect(success).toBe(true)
+55 |     expect(Object.keys(parsed)).toEqual(["example.com/mcp/v1"])
+                                     ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "example.com/mcp/v1",
++   "dependencies",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\storage.test.ts:55:33)
+(fail) mcp-oauth storage > should save tokens with {host}/{resource} key and set 0600 permissions [16.00ms]
+67 | 
+68 |     // when
+69 |     const loaded = loadToken("api.example.com:8443", "resource-a")
+70 | 
+71 |     // then
+72 |     expect(loaded).toEqual(token)
+                        ^
+error: expect(received).toEqual(expected)
+
+- {
+-   "accessToken": "access-2",
+-   "refreshToken": "refresh-2",
+- }
++ null
+
+- Expected  - 4
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\storage.test.ts:72:20)
+(fail) mcp-oauth storage > should load a saved token
+94 | 
+95 |     // when
+96 |     const entries = listTokensByHost("api.example.com:5555")
+97 | 
+98 |     // then
+99 |     expect(Object.keys(entries).sort()).toEqual([
+                                             ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "api.example.com/resource-a",
+-   "api.example.com/resource-b",
+- ]
++ []
+
+- Expected  - 4
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\mcp-oauth\storage.test.ts:99:41)
+(fail) mcp-oauth storage > should list tokens by host
+
+src\features\opencode-skill-loader\loader.test.ts:
+414 |         const raw = skill as unknown as {
+415 |           hooks?: string[]
+416 |           triggers?: string[]
+417 |           triggerPriority?: "high" | "medium" | "low"
+418 |         }
+419 |         expect(raw.hooks).toEqual(["tool.execute.before", "chat.message"])
+                                ^
+error: expect(received).toEqual(expected)
+
+- [
+-   "tool.execute.before",
+-   "chat.message",
+- ]
++ undefined
+
+- Expected  - 4
++ Received  + 1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\opencode-skill-loader\loader.test.ts:419:27)
+(fail) skill loader MCP parsing > allowed-tools parsing > parses hooks, triggers, and priority from SKILL.md frontmatter
+
+src\features\plan-progress-reader\reader.test.ts:
+80 | 
+81 |     // #when
+82 |     const result = readPlanProgress(TEST_DIR)
+83 | 
+84 |     // #then
+85 |     expect(result).not.toBeNull()
+                            ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\plan-progress-reader\reader.test.ts:85:24)
+(fail) plan-progress-reader > should parse checkboxes with correct status and priority
+120 | 
+121 |     // #when
+122 |     const result = readPlanProgress(TEST_DIR)
+123 | 
+124 |     // #then
+125 |     expect(result).not.toBeNull()
+                             ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\plan-progress-reader\reader.test.ts:125:24)
+(fail) plan-progress-reader > should include phase information from getPlanProgress [15.00ms]
+
+src\features\plan-reorganizer\reorganize.test.ts:
+38 |     // #when
+39 |     const result = reorganizePlan(planPath)
+40 | 
+41 |     // #then - Phase 1 should be moved, Phase 2 stays
+42 |     const content = readFileSync(planPath, "utf-8")
+43 |     expect(result).toBe(true)
+                        ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\plan-reorganizer\reorganize.test.ts:43:20)
+(fail) plan-reorganizer > should identify phase boundaries correctly
+63 |     // #when
+64 |     const result = reorganizePlan(planPath)
+65 | 
+66 |     // #then
+67 |     const content = readFileSync(planPath, "utf-8")
+68 |     expect(result).toBe(true)
+                        ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\plan-reorganizer\reorganize.test.ts:68:20)
+(fail) plan-reorganizer > should detect completed phases with all [x] checkboxes
+91 |     const phase1Index = content.indexOf("Phase 1")
+92 |     const phase2Index = content.indexOf("Phase 2")
+93 |     const completedIndex = content.indexOf("Completed Phases")
+94 | 
+95 |     // Phase 2 should come before Completed Phases
+96 |     expect(phase2Index).toBeLessThan(completedIndex)
+                             ^
+error: expect(received).toBeLessThan(expected)
+
+Expected: < -1
+Received: -1
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\plan-reorganizer\reorganize.test.ts:96:25)
+(fail) plan-reorganizer > should move completed phases to Completed Phases section
+114 |     // #when
+115 |     reorganizePlan(planPath)
+116 | 
+117 |     // #then
+118 |     const content = readFileSync(planPath, "utf-8")
+119 |     expect(content).toContain("## Completed Phases")
+                          ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "## Completed Phases"
+Received: "{\"dependencies\":{\"react\":\"^18.0.0\"}}"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\plan-reorganizer\reorganize.test.ts:119:21)
+(fail) plan-reorganizer > should create Completed Phases section if not exists
+134 |     reorganizePlan(planPath)
+135 | 
+136 |     // #then
+137 |     const content = readFileSync(planPath, "utf-8")
+138 |     // Original ## should become ###
+139 |     expect(content).toContain("### Phase 1: Done")
+                          ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "### Phase 1: Done"
+Received: "{\"dependencies\":{\"react\":\"^18.0.0\"}}"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\plan-reorganizer\reorganize.test.ts:139:21)
+(fail) plan-reorganizer > should downgrade ## to ### when moving to Completed Phases
+
+src\features\run-continuation-state\storage.test.ts:
+36 |     setContinuationMarkerSource(directory, sessionID, "todo", "active", "2 todos remaining")
+37 |     setContinuationMarkerSource(directory, sessionID, "stop", "stopped", "user requested stop")
+38 |     const marker = readContinuationMarker(directory, sessionID)
+39 | 
+40 |     // then
+41 |     expect(marker).not.toBeNull()
+                            ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\run-continuation-state\storage.test.ts:41:24)
+(fail) run-continuation-state storage > stores and reads per-source marker state [16.00ms]
+55 | 
+56 |     // when
+57 |     const isActive = isContinuationMarkerActive(marker)
+58 | 
+59 |     // then
+60 |     expect(isActive).toBe(true)
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\run-continuation-state\storage.test.ts:60:22)
+(fail) run-continuation-state storage > treats marker as active when any source is active
+
+src\features\session-catchup\analyzer.test.ts:
+35 |   // #given planning files don't exist
+36 |   // #when analyzeSessionCatchup is called
+37 |   // #then it should return empty report
+38 |   it("returns empty report when planning files don't exist", () => {
+39 |     const result = analyzeSessionCatchup(TEST_DIR, "changes/test-change/tasks.md")
+40 |     expect(result).not.toBeNull()
+                            ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\session-catchup\analyzer.test.ts:40:24)
+(fail) session-catchup > returns empty report when planning files don't exist
+49 |   it("detects planning file mtime", () => {
+50 |     const tasksPath = join(CHANGES_DIR, "tasks.md")
+51 |     writeFileSync(tasksPath, "# Tasks\n- [ ] Test task")
+52 | 
+53 |     const result = analyzeSessionCatchup(TEST_DIR, "changes/test-change/tasks.md")
+54 |     expect(result).not.toBeNull()
+                            ^
+error: expect(received).not.toBeNull()
+
+Received: null
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\features\session-catchup\analyzer.test.ts:54:24)
+(fail) session-catchup > detects planning file mtime [16.00ms]
+
+src\hooks\atlas\index.test.ts:
+178 |         output
+179 |       )
+180 | 
+181 |       // then - standalone verification reminder appended
+182 |       expect(output.output).toContain("Task completed successfully")
+183 |       expect(output.output).toContain("LYING")
+                                  ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "LYING"
+Received: "Task completed successfully"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:183:29)
+(fail) atlas hook > tool.execute.after handler > should append standalone verification when no boulder state but caller is Atlas [16.00ms]
+215 |         output
+216 |       )
+217 | 
+218 |       // then - output should be transformed (original output preserved for debugging)
+219 |       expect(output.output).toContain("Task completed successfully")
+220 |       expect(output.output).toContain("SUBAGENT WORK COMPLETED")
+                                  ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "SUBAGENT WORK COMPLETED"
+Received: "Task completed successfully"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:220:29)
+(fail) atlas hook > tool.execute.after handler > should transform output when caller is Atlas with boulder state
+253 |         { tool: "task", sessionID },
+254 |         output
+255 |       )
+256 | 
+257 |       // then - output transformed even when complete (shows 2/2 done)
+258 |       expect(output.output).toContain("SUBAGENT WORK COMPLETED")
+                                  ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "SUBAGENT WORK COMPLETED"
+Received: "Original output"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:258:29)
+(fail) atlas hook > tool.execute.after handler > should still transform when plan is complete (shows progress)
+291 |         output
+292 |       )
+293 | 
+294 |       // then - sessionID should be appended
+295 |       const updatedState = readBoulderState(TEST_DIR)
+296 |       expect(updatedState?.session_ids).toContain(sessionID)
+                                              ^
+error: Received value must be an array type, or both received and expected values must be strings.
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:296:41)
+(fail) atlas hook > tool.execute.after handler > should append session ID to boulder state if not present [15.00ms]
+328 |       )
+329 | 
+330 |       // then - should still have only one sessionID
+331 |       const updatedState = readBoulderState(TEST_DIR)
+332 |       const count = updatedState?.session_ids.filter((id) => id === sessionID).length
+333 |       expect(count).toBe(1)
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: undefined
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:333:21)
+(fail) atlas hook > tool.execute.after handler > should not duplicate existing session ID
+363 |         { tool: "task", sessionID },
+364 |         output
+365 |       )
+366 | 
+367 |       // then - output should contain plan name and progress
+368 |       expect(output.output).toContain("my-feature")
+                                  ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "my-feature"
+Received: "Task completed"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:368:29)
+(fail) atlas hook > tool.execute.after handler > should include boulder.json path and notepad path in transformed output
+400 |         { tool: "task", sessionID },
+401 |         output
+402 |       )
+403 | 
+404 |       // then - should include verification instructions
+405 |       expect(output.output).toContain("LYING")
+                                  ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "LYING"
+Received: "Task completed"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:405:29)
+(fail) atlas hook > tool.execute.after handler > should include session_id and checkbox instructions in reminder
+434 |           { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
+435 |           output
+436 |         )
+437 | 
+438 |         // then
+439 |         expect(output.output).toContain("ORCHESTRATOR, not an IMPLEMENTER")
+                                    ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "ORCHESTRATOR, not an IMPLEMENTER"
+Received: "File written successfully"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:439:31)
+(fail) atlas hook > tool.execute.after handler > Write/Edit tool direct work reminder > should append delegation reminder when orchestrator writes outside .sisyphus/ [16.00ms]
+455 |           { tool: "Edit", sessionID: ORCHESTRATOR_SESSION },
+456 |           output
+457 |         )
+458 | 
+459 |         // then
+460 |         expect(output.output).toContain("ORCHESTRATOR, not an IMPLEMENTER")
+                                    ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "ORCHESTRATOR, not an IMPLEMENTER"
+Received: "File edited successfully"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:460:31)
+(fail) atlas hook > tool.execute.after handler > Write/Edit tool direct work reminder > should append delegation reminder when orchestrator edits outside .sisyphus/
+625 |             { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
+626 |             output
+627 |           )
+628 | 
+629 |           // then
+630 |           expect(output.output).toContain("ORCHESTRATOR, not an IMPLEMENTER")
+                                      ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "ORCHESTRATOR, not an IMPLEMENTER"
+Received: "File written successfully"
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:630:33)
+(fail) atlas hook > tool.execute.after handler > Write/Edit tool direct work reminder > cross-platform path validation (Windows support) > should append reminder for Windows path outside .sisyphus\
+675 |           properties: { sessionID: MAIN_SESSION_ID },
+676 |         },
+677 |       })
+678 | 
+679 |       // then - should call prompt with continuation
+680 |       expect(mockInput._promptMock).toHaveBeenCalled()
+                                          ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:680:37)
+(fail) atlas hook > session.idle handler (boulder continuation) > should inject continuation when boulder has incomplete tasks
+898 |           properties: { sessionID: MAIN_SESSION_ID },
+899 |         },
+900 |       })
+901 | 
+902 |       // then - should call prompt because abort state was cleared
+903 |       expect(mockInput._promptMock).toHaveBeenCalled()
+                                          ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:903:37)
+(fail) atlas hook > session.idle handler (boulder continuation) > should clear abort state on message.updated
+926 |           properties: { sessionID: MAIN_SESSION_ID },
+927 |         },
+928 |       })
+929 | 
+930 |       // then - should include progress
+931 |       const callArgs = mockInput._promptMock.mock.calls[0][0]
+                                                              ^
+TypeError: undefined is not an object (evaluating 'mockInput._promptMock.mock.calls[0][0]')
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:931:57)
+(fail) atlas hook > session.idle handler (boulder continuation) > should include plan progress in continuation prompt
+961 |            properties: { sessionID: MAIN_SESSION_ID },
+962 |          },
+963 |        })
+964 | 
+965 |        // then - should call prompt because sisyphus is always allowed for atlas boulders
+966 |        expect(mockInput._promptMock).toHaveBeenCalled()
+                                           ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:966:38)
+(fail) atlas hook > session.idle handler (boulder continuation) > should inject when last agent is sisyphus and boulder targets atlas explicitly [15.00ms]
+1025 |            properties: { sessionID: MAIN_SESSION_ID },
+1026 |          },
+1027 |        })
+1028 | 
+1029 |        // then - should call prompt for sisyphus
+1030 |        expect(mockInput._promptMock).toHaveBeenCalled()
+                                            ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1030:38)
+(fail) atlas hook > session.idle handler (boulder continuation) > should inject when last agent matches boulder agent even if non-Atlas
+1067 |           properties: { sessionID: MAIN_SESSION_ID },
+1068 |         },
+1069 |       })
+1070 | 
+1071 |       // then - should only call prompt ONCE due to debouncing
+1072 |       expect(mockInput._promptMock).toHaveBeenCalledTimes(1)
+                                           ^
+error: expect(received).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 1
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1072:37)
+(fail) atlas hook > session.idle handler (boulder continuation) > should debounce rapid continuation injections (prevent infinite loop) [16.00ms]
+1105 | 
+1106 |         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+1107 |         await flushMicrotasks()
+1108 | 
+1109 |         //#then - should attempt only twice, then disable continuation
+1110 |         expect(promptMock).toHaveBeenCalledTimes(2)
+                                  ^
+error: expect(received).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 2
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1110:28)
+(fail) atlas hook > session.idle handler (boulder continuation) > should stop continuation after 2 consecutive prompt failures (issue #1355)
+1146 |           await flushMicrotasks()
+1147 |           now += 6000
+1148 |         }
+1149 | 
+1150 |         //#then - 4 prompt attempts; 5th idle is skipped after 2 consecutive failures
+1151 |         expect(promptMock).toHaveBeenCalledTimes(4)
+                                  ^
+error: expect(received).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 4
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1151:28)
+(fail) atlas hook > session.idle handler (boulder continuation) > should reset prompt failure counter on success and only stop after 2 consecutive failures
+1187 | 
+1188 |         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+1189 |         await flushMicrotasks()
+1190 | 
+1191 |         //#then - third attempt should still be skipped
+1192 |         expect(promptMock).toHaveBeenCalledTimes(2)
+                                  ^
+error: expect(received).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 2
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1192:28)
+(fail) atlas hook > session.idle handler (boulder continuation) > should keep skipping continuation during 5-minute backoff after 2 consecutive failures [16.00ms]
+1228 | 
+1229 |         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+1230 |         await flushMicrotasks()
+1231 | 
+1232 |         //#then - third attempt should run after backoff expiration
+1233 |         expect(promptMock).toHaveBeenCalledTimes(3)
+                                  ^
+error: expect(received).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 3
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1233:28)
+(fail) atlas hook > session.idle handler (boulder continuation) > should retry continuation after 5-minute backoff expires following 2 consecutive failures
+1284 | 
+1285 |         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+1286 |         await flushMicrotasks()
+1287 | 
+1288 |         //#then - success retry resets counter, so two additional failures are allowed before skip
+1289 |         expect(promptMock).toHaveBeenCalledTimes(5)
+                                  ^
+error: expect(received).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 5
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1289:28)
+(fail) atlas hook > session.idle handler (boulder continuation) > should reset prompt failure counter after successful retry beyond backoff window
+1331 | 
+1332 |         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+1333 |         await flushMicrotasks()
+1334 | 
+1335 |         //#then - 2 attempts + 1 after compaction (3 total)
+1336 |         expect(promptMock).toHaveBeenCalledTimes(3)
+                                  ^
+error: expect(received).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 3
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1336:28)
+(fail) atlas hook > session.idle handler (boulder continuation) > should reset continuation failure state on session.compacted event
+1382 |           properties: { sessionID: MAIN_SESSION_ID },
+1383 |         },
+1384 |       })
+1385 | 
+1386 |       // then - should call prompt because session state was cleaned
+1387 |       expect(mockInput._promptMock).toHaveBeenCalled()
+                                           ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1387:37)
+(fail) atlas hook > session.idle handler (boulder continuation) > should cleanup on session.deleted [125.00ms]
+1415 |           properties: { sessionID: MAIN_SESSION_ID },
+1416 |         },
+1417 |       })
+1418 | 
+1419 |       // then - should continue because start-work updated session agent to atlas
+1420 |       expect(mockInput._promptMock).toHaveBeenCalled()
+                                           ^
+error: expect(received).toHaveBeenCalled()
+
+Expected number of calls: >= 1
+Received number of calls: 0
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\atlas\index.test.ts:1420:37)
+(fail) atlas hook > session.idle handler (boulder continuation) > should inject when session agent was updated to atlas by start-work even if message storage agent differs [15.00ms]
+[7.233s] compile  packages\windows-x64-baseline\bin\oh-my-opencode.exe bun-windows-x64-baseline-v1.3.5
+
+src\hooks\auto-slash-command\executor.test.ts:
+128 |         skills: [],
+129 |         pluginsEnabled: true,
+130 |       },
+131 |     )
+132 | 
+133 |     expect(result.success).toBe(true)
+                                 ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\auto-slash-command\executor.test.ts:133:28)
+(fail) auto-slash command executor plugin dispatch > resolves marketplace plugin commands when plugin loading is enabled [16.00ms]
+147 |         pluginsEnabled: false,
+148 |       },
+149 |     )
+150 | 
+151 |     expect(result.success).toBe(false)
+152 |     expect(result.error).toBe(
+                               ^
+error: expect(received).toBe(expected)
+
+Expected: "Command "/daplug:run-prompt" not found. Use the skill tool to list available skills and commands."
+Received: "Command "/daplug:run-prompt" not found. Use the slashcommand tool to list available commands."
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\auto-slash-command\executor.test.ts:152:26)
+(fail) auto-slash command executor plugin dispatch > excludes marketplace commands when plugins are disabled via config toggle [16.00ms]
+166 |         pluginsEnabled: true,
+167 |       },
+168 |     )
+169 | 
+170 |     expect(result.success).toBe(false)
+171 |     expect(result.error).toBe(
+                               ^
+error: expect(received).toBe(expected)
+
+Expected: "Command "/daplug:missing" not found. Use the skill tool to list available skills and commands."
+Received: "Command "/daplug:missing" not found. Use the slashcommand tool to list available commands."
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\auto-slash-command\executor.test.ts:171:26)
+(fail) auto-slash command executor plugin dispatch > returns standard not-found for unknown namespaced commands [15.00ms]
+185 |         skills: [],
+186 |         pluginsEnabled: true,
+187 |       },
+188 |     )
+189 | 
+190 |     expect(result.success).toBe(true)
+                                 ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (E:\github\oh-my-opencode-merge\src\hooks\auto-slash-command\executor.test.ts:190:28)
+(fail) auto-slash command executor plugin dispatch > replaces $ARGUMENTS placeholders in plugin command templates [16.00ms]
+
+src\hooks\auto-slash-command\index.test.ts:
+   ❌ Binary not found after build: packages\windows-x64-baseline\bin\oh-my-opencode.exe

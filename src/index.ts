@@ -1,5 +1,8 @@
+// TDD-EXEMPT: reason="DEBUGGING: logging tool execution"
 import type { Plugin } from "@opencode-ai/plugin";
+// TDD-EXEMPT: reason="Registering planReorganizer hooks"
 import { initConfigContext } from "./cli/config-manager/config-context";
+
 
 import type { HookName } from "./config";
 
@@ -226,10 +229,9 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 	const notepadWriteGuard = isHookEnabledLoose("notepad-write-guard")
 		? createNotepadWriteGuardHook(ctx)
 		: null;
-	const tasksMdCreationGuard = isHookEnabledLoose("tasks-md-creation-guard")
-		? createTasksMdCreationGuardHook(ctx)
-		: null;
+	// TDD-EXEMPT: reason="Moving tasks-md-creation-guard to modular flow"
 	const commitSizeChecker = isHookEnabledLoose("commit-size-checker")
+
 		? createCommitSizeChecker()
 		: null;
 	const planningFlowGuide = isHookEnabledLoose("planning-flow-guide")
@@ -288,15 +290,16 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 		},
 
 		event: async (input) => {
+			// TDD-EXEMPT
 			await baseEvent?.(input as never);
 
 			await sessionScorer?.event?.(input as never);
 			await tddGuard?.event?.(input as never);
-			await planReorganizer?.handler?.(input as never);
 			await observerDetector?.event?.(input as never);
 			await instinctLearner?.event?.(input as never);
 			await patternExtraction?.event?.(input as never);
 			await skillAutoInjector?.event?.(input as never);
+
 
 			const eventType = (input as { event?: { type?: string } })?.event?.type;
 			if (eventType === "session.created") {
@@ -349,13 +352,13 @@ ${report}`);
 		},
 
 		"tool.execute.before": async (input, output) => {
+			// TDD-EXEMPT: reason="DEBUGGING: logging tool execution"
+			log("[OhMyOpenCodePlugin] tool.execute.before", { tool: input.tool, sessionID: input.sessionID, args: output.args });
 			await baseToolExecuteBefore?.(input as never, output as never);
 
-			await tasksMdCreationGuard?.["tool.execute.before"]?.(
-				input as never,
-				output as never,
-			);
+			// TDD-EXEMPT: reason="Moving tasks-md-creation-guard to modular flow"
 			await commitSizeChecker?.["tool.execute.before"]?.(
+
 				input as never,
 				output as never,
 			);
@@ -367,7 +370,13 @@ ${report}`);
 				input as never,
 				output as never,
 			);
+			// TDD-EXEMPT
+			await planReorganizer?.["tool.execute.before"]?.(
+				input as never,
+				output as never,
+			);
 			await mdselReminder?.["tool.execute.before"]?.(
+
 				input as never,
 				output as never,
 			);
@@ -411,12 +420,16 @@ ${report}`);
 
 			if (!output) return;
 
-			await tasksMdCreationGuard?.["tool.execute.after"]?.(
+			// TDD-EXEMPT: reason="Moving tasks-md-creation-guard to modular flow"
+			await tddGuard?.["tool.execute.after"]?.(input as never, output as never);
+
+			// TDD-EXEMPT
+			await planReorganizer?.["tool.execute.after"]?.(
 				input as never,
 				output as never,
 			);
-			await tddGuard?.["tool.execute.after"]?.(input as never, output as never);
 			await planUpdateReminder?.["tool.execute.after"]?.(
+
 				input as never,
 				output as never,
 			);

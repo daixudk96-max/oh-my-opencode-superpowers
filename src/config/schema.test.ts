@@ -405,6 +405,17 @@ describe("HookNameSchema", () => {
     //#then
     expect(result.success).toBe(false)
   })
+
+  test("accepts new plan related hook names", () => {
+    //#given
+    const hooks = ["plan-reorganizer", "plan-update-reminder", "plan-attention-refresher"]
+
+    //#when / #then
+    for (const hook of hooks) {
+      const result = HookNameSchema.safeParse(hook)
+      expect(result.success).toBe(true)
+    }
+  })
 })
 
 describe("Sisyphus-Junior agent override", () => {

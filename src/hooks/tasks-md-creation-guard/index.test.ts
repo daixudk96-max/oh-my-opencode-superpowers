@@ -73,6 +73,33 @@ describe("createTasksMdCreationGuardHook", () => {
     expect(output.message).toContain("creating-changes")
   })
 
+  test("blocks more complex Bash commands", async () => {
+    //#given
+    const input: ToolBeforeInput = { tool: "bash", sessionID: "main", callID: "call_1" }
+    const output: HookOutput = { args: { command: "mkdir -p changes/test && echo test > changes/test/tasks.md" } }
+
+    //#when
+    const result = hook["tool.execute.before"]?.(input, output as unknown as HookOutput)
+
+    //#then
+    await expect(result).resolves.toBeUndefined()
+    expect(output.blocked).toBe(true)
+  })
+
+  test("blocks Bash with different planning file names", async () => {
+    //#given
+    const input: ToolBeforeInput = { tool: "bash", sessionID: "main", callID: "call_1" }
+    // Note: currently Bash patterns only cover tasks.md and plan.md
+    const output: HookOutput = { args: { command: "echo test > changes/test/todo.md" } }
+
+    //#when
+    const result = hook["tool.execute.before"]?.(input, output as unknown as HookOutput)
+
+    //#then
+    await expect(result).resolves.toBeUndefined()
+    expect(output.blocked).toBe(true) 
+  })
+
   test("allows subagent after main session used creating-changes", async () => {
     //#given
     setMainSession("main")

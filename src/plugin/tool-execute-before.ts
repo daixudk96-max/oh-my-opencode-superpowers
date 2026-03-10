@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Integrating tasks-md-creation-guard into tool execution flow"
 import type { PluginContext } from "./types"
 
 import { getMainSessionID } from "../features/claude-code-session-state"
@@ -28,6 +29,8 @@ export function createToolExecuteBeforeHandler(args: {
     await hooks.rulesInjector?.["tool.execute.before"]?.(input, output)
     await hooks.tasksTodowriteDisabler?.["tool.execute.before"]?.(input, output)
     await hooks.prometheusMdOnly?.["tool.execute.before"]?.(input, output)
+    // TDD-EXEMPT: reason="Integrating tasks-md-creation-guard into tool execution flow"
+    await hooks.tasksMdCreationGuard?.["tool.execute.before"]?.(input, output)
     await hooks.sisyphusJuniorNotepad?.["tool.execute.before"]?.(input, output)
     await hooks.atlasHook?.["tool.execute.before"]?.(input, output)
 

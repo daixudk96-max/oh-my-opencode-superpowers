@@ -1,0 +1,1232 @@
+Not currently on any branch.
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	new file:   .github/assets/elestyle.jpg
+	modified:   .github/workflows/ci.yml
+	modified:   .github/workflows/cla.yml
+	modified:   .github/workflows/publish-platform.yml
+	modified:   .github/workflows/publish.yml
+	modified:   .github/workflows/sisyphus-agent.yml
+	modified:   .gitignore
+	new file:   .issue-comment-2064.md
+	modified:   .opencode/command/publish.md
+	modified:   .opencode/command/remove-deadcode.md
+	deleted:    .opencode/skills/github-issue-triage/SKILL.md
+	deleted:    .opencode/skills/github-pr-triage/SKILL.md
+	deleted:    .opencode/skills/github-pr-triage/scripts/gh_fetch.py
+	new file:   .opencode/skills/github-triage/SKILL.md
+	renamed:    .opencode/skills/github-issue-triage/scripts/gh_fetch.py -> .opencode/skills/github-triage/scripts/gh_fetch.py
+	new file:   .sisyphus/rules/modular-code-enforcement.md
+	modified:   AGENTS.md
+	modified:   CONTRIBUTING.md
+	modified:   README.ja.md
+	modified:   README.ko.md
+	modified:   README.md
+	new file:   README.ru.md
+	modified:   README.zh-cn.md
+	modified:   assets/oh-my-opencode.schema.json
+	new file:   benchmarks/bun.lock
+	new file:   benchmarks/headless.ts
+	new file:   benchmarks/package.json
+	new file:   benchmarks/test-edge-cases.ts
+	new file:   benchmarks/test-edit-ops.ts
+	new file:   benchmarks/test-multi-model.ts
+	modified:   bin/oh-my-opencode.js
+	new file:   bin/platform.d.ts
+	modified:   bin/platform.js
+	modified:   bin/platform.test.ts
+	new file:   bun-test.d.ts
+	modified:   bun.lock
+	deleted:    docs/category-skill-guide.md
+	deleted:    docs/configurations.md
+	deleted:    docs/features.md
+	new file:   docs/guide/agent-model-matching.md
+	modified:   docs/guide/installation.md
+	new file:   docs/guide/orchestration.md
+	modified:   docs/guide/overview.md
+	deleted:    docs/guide/understanding-orchestration-system.md
+	renamed:    docs/ultrawork-manifesto.md -> docs/manifesto.md
+	deleted:    docs/orchestration-guide.md
+	renamed:    docs/cli-guide.md -> docs/reference/cli.md
+	new file:   docs/reference/configuration.md
+	new file:   docs/reference/features.md
+	deleted:    docs/task-system.md
+	renamed:    docs/troubleshooting/ollama-streaming-issue.md -> docs/troubleshooting/ollama.md
+	deleted:    issue-1501-analysis.md
+	modified:   package.json
+	new file:   packages/darwin-arm64/bin/index.js.map
+	modified:   packages/darwin-arm64/package.json
+	new file:   packages/darwin-x64-baseline/bin/index.js.map
+	modified:   packages/darwin-x64-baseline/package.json
+	new file:   packages/darwin-x64/bin/index.js.map
+	modified:   packages/darwin-x64/package.json
+	new file:   packages/linux-arm64-musl/bin/index.js.map
+	modified:   packages/linux-arm64-musl/package.json
+	new file:   packages/linux-arm64/bin/index.js.map
+	modified:   packages/linux-arm64/package.json
+	new file:   packages/linux-x64-baseline/bin/index.js.map
+	modified:   packages/linux-x64-baseline/package.json
+	new file:   packages/linux-x64-musl-baseline/bin/index.js.map
+	modified:   packages/linux-x64-musl-baseline/package.json
+	new file:   packages/linux-x64-musl/bin/index.js.map
+	modified:   packages/linux-x64-musl/package.json
+	new file:   packages/linux-x64/bin/index.js.map
+	modified:   packages/linux-x64/package.json
+	new file:   packages/windows-x64-baseline/bin/index.js.map
+	modified:   packages/windows-x64-baseline/package.json
+	new file:   packages/windows-x64/bin/index.js.map
+	modified:   packages/windows-x64/package.json
+	modified:   postinstall.mjs
+	new file:   script/build-schema-document.ts
+	new file:   script/build-schema.test.ts
+	modified:   script/build-schema.ts
+	modified:   signatures/cla.json
+	deleted:    sisyphus-prompt.md
+	new file:   src/AGENTS.md
+	modified:   src/agents/AGENTS.md
+	new file:   src/agents/agent-builder.ts
+	new file:   src/agents/atlas/agent.ts
+	modified:   src/agents/atlas/default.ts
+	new file:   src/agents/atlas/gemini.ts
+	modified:   src/agents/atlas/gpt.ts
+	modified:   src/agents/atlas/index.ts
+	new file:   src/agents/atlas/prompt-section-builder.ts
+	deleted:    src/agents/atlas/utils.ts
+	new file:   src/agents/builtin-agents.ts
+	new file:   src/agents/builtin-agents/agent-overrides.ts
+	new file:   src/agents/builtin-agents/atlas-agent.ts
+	new file:   src/agents/builtin-agents/available-skills.ts
+	new file:   src/agents/builtin-agents/environment-context.ts
+	new file:   src/agents/builtin-agents/general-agents.ts
+	new file:   src/agents/builtin-agents/hephaestus-agent.ts
+	new file:   src/agents/builtin-agents/model-resolution.ts
+	new file:   src/agents/builtin-agents/resolve-file-uri.test.ts
+	new file:   src/agents/builtin-agents/resolve-file-uri.ts
+	new file:   src/agents/builtin-agents/sisyphus-agent.ts
+	new file:   src/agents/custom-agent-summaries.ts
+	modified:   src/agents/dynamic-agent-prompt-builder.test.ts
+	modified:   src/agents/dynamic-agent-prompt-builder.ts
+	new file:   src/agents/env-context.test.ts
+	new file:   src/agents/env-context.ts
+	modified:   src/agents/explore.ts
+	modified:   src/agents/hephaestus.ts
+	modified:   src/agents/index.ts
+	modified:   src/agents/librarian.ts
+	modified:   src/agents/metis.ts
+	modified:   src/agents/momus.ts
+	modified:   src/agents/oracle.ts
+	modified:   src/agents/prometheus-prompt.test.ts
+	modified:   src/agents/prometheus/behavioral-summary.ts
+	new file:   src/agents/prometheus/gemini.ts
+	new file:   src/agents/prometheus/gpt.ts
+	modified:   src/agents/prometheus/high-accuracy-mode.ts
+	modified:   src/agents/prometheus/identity-constraints.ts
+	modified:   src/agents/prometheus/index.ts
+	modified:   src/agents/prometheus/interview-mode.ts
+	modified:   src/agents/prometheus/plan-generation.ts
+	modified:   src/agents/prometheus/plan-template.ts
+	new file:   src/agents/prometheus/system-prompt.ts
+	new file:   src/agents/sisyphus-gemini-overlays.ts
+	new file:   src/agents/sisyphus-junior/agent.ts
+	modified:   src/agents/sisyphus-junior/default.ts
+	new file:   src/agents/sisyphus-junior/gemini.ts
+	modified:   src/agents/sisyphus-junior/gpt.ts
+	modified:   src/agents/sisyphus-junior/index.test.ts
+	modified:   src/agents/sisyphus-junior/index.ts
+	new file:   src/agents/tool-restrictions.test.ts
+	new file:   src/agents/types.test.ts
+	modified:   src/agents/types.ts
+	modified:   src/agents/utils.test.ts
+	modified:   src/cli/AGENTS.md
+	modified:   src/cli/__snapshots__/model-fallback.test.ts.snap
+	new file:   src/cli/cli-installer.test.ts
+	new file:   src/cli/cli-installer.ts
+	new file:   src/cli/cli-program.ts
+	modified:   src/cli/config-manager.test.ts
+	modified:   src/cli/config-manager.ts
+	new file:   src/cli/config-manager/AGENTS.md
+	new file:   src/cli/config-manager/add-plugin-to-opencode-config.ts
+	new file:   src/cli/config-manager/add-provider-config.test.ts
+	new file:   src/cli/config-manager/add-provider-config.ts
+	new file:   src/cli/config-manager/antigravity-provider-configuration.ts
+	new file:   src/cli/config-manager/auth-plugins.test.ts
+	new file:   src/cli/config-manager/auth-plugins.ts
+	new file:   src/cli/config-manager/bun-install.ts
+	new file:   src/cli/config-manager/config-context.ts
+	new file:   src/cli/config-manager/deep-merge-record.ts
+	new file:   src/cli/config-manager/detect-current-config.ts
+	new file:   src/cli/config-manager/ensure-config-directory-exists.ts
+	new file:   src/cli/config-manager/format-error-with-suggestion.ts
+	new file:   src/cli/config-manager/generate-omo-config.ts
+	new file:   src/cli/config-manager/jsonc-provider-editor.ts
+	new file:   src/cli/config-manager/npm-dist-tags.ts
+	new file:   src/cli/config-manager/opencode-binary.ts
+	new file:   src/cli/config-manager/opencode-config-format.ts
+	new file:   src/cli/config-manager/parse-opencode-config-file.ts
+	new file:   src/cli/config-manager/plugin-name-with-version.ts
+	new file:   src/cli/config-manager/write-omo-config.test.ts
+	new file:   src/cli/config-manager/write-omo-config.ts
+	deleted:    src/cli/doctor/checks/auth.test.ts
+	deleted:    src/cli/doctor/checks/auth.ts
+	modified:   src/cli/doctor/checks/config.test.ts
+	modified:   src/cli/doctor/checks/config.ts
+	modified:   src/cli/doctor/checks/dependencies.test.ts
+	modified:   src/cli/doctor/checks/dependencies.ts
+	deleted:    src/cli/doctor/checks/gh.test.ts
+	deleted:    src/cli/doctor/checks/gh.ts
+	modified:   src/cli/doctor/checks/index.ts
+	deleted:    src/cli/doctor/checks/lsp.test.ts
+	modified:   src/cli/doctor/checks/lsp.ts
+	deleted:    src/cli/doctor/checks/mcp-oauth.test.ts
+	deleted:    src/cli/doctor/checks/mcp-oauth.ts
+	deleted:    src/cli/doctor/checks/mcp.test.ts
+	deleted:    src/cli/doctor/checks/mcp.ts
+	new file:   src/cli/doctor/checks/model-resolution-cache.ts
+	new file:   src/cli/doctor/checks/model-resolution-config.ts
+	new file:   src/cli/doctor/checks/model-resolution-details.ts
+	new file:   src/cli/doctor/checks/model-resolution-effective-model.ts
+	new file:   src/cli/doctor/checks/model-resolution-types.ts
+	new file:   src/cli/doctor/checks/model-resolution-variant.ts
+	modified:   src/cli/doctor/checks/model-resolution.test.ts
+	modified:   src/cli/doctor/checks/model-resolution.ts
+	deleted:    src/cli/doctor/checks/opencode.test.ts
+	deleted:    src/cli/doctor/checks/opencode.ts
+	deleted:    src/cli/doctor/checks/plugin.test.ts
+	deleted:    src/cli/doctor/checks/plugin.ts
+	new file:   src/cli/doctor/checks/system-binary.ts
+	new file:   src/cli/doctor/checks/system-loaded-version.test.ts
+	new file:   src/cli/doctor/checks/system-loaded-version.ts
+	new file:   src/cli/doctor/checks/system-plugin.ts
+	new file:   src/cli/doctor/checks/system.test.ts
+	new file:   src/cli/doctor/checks/system.ts
+	new file:   src/cli/doctor/checks/tools-gh.ts
+	new file:   src/cli/doctor/checks/tools-lsp.ts
+	new file:   src/cli/doctor/checks/tools-mcp.ts
+	new file:   src/cli/doctor/checks/tools.ts
+	deleted:    src/cli/doctor/checks/version.test.ts
+	deleted:    src/cli/doctor/checks/version.ts
+	modified:   src/cli/doctor/constants.ts
+	new file:   src/cli/doctor/format-default.test.ts
+	new file:   src/cli/doctor/format-default.ts
+	new file:   src/cli/doctor/format-shared.ts
+	new file:   src/cli/doctor/format-status.ts
+	new file:   src/cli/doctor/format-verbose.ts
+	modified:   src/cli/doctor/formatter.test.ts
+	modified:   src/cli/doctor/formatter.ts
+	modified:   src/cli/doctor/index.ts
+	modified:   src/cli/doctor/runner.test.ts
+	modified:   src/cli/doctor/runner.ts
+	modified:   src/cli/doctor/types.ts
+	new file:   src/cli/fallback-chain-resolution.ts
+	new file:   src/cli/get-local-version/get-local-version.ts
+	modified:   src/cli/get-local-version/index.ts
+	modified:   src/cli/index.ts
+	new file:   src/cli/install-validators.ts
+	modified:   src/cli/install.ts
+	new file:   src/cli/model-fallback-requirements.ts
+	new file:   src/cli/model-fallback-types.ts
+	modified:   src/cli/model-fallback.test.ts
+	modified:   src/cli/model-fallback.ts
+	new file:   src/cli/provider-availability.ts
+	new file:   src/cli/provider-model-id-transform.test.ts
+	new file:   src/cli/provider-model-id-transform.ts
+	new file:   src/cli/run/AGENTS.md
+	new file:   src/cli/run/agent-profile-colors.ts
+	new file:   src/cli/run/agent-resolver.ts
+	new file:   src/cli/run/completion-continuation.test.ts
+	new file:   src/cli/run/completion-verbose-logging.test.ts
+	modified:   src/cli/run/completion.test.ts
+	modified:   src/cli/run/completion.ts
+	new file:   src/cli/run/continuation-state-marker.test.ts
+	new file:   src/cli/run/continuation-state.ts
+	new file:   src/cli/run/display-chars.ts
+	new file:   src/cli/run/event-formatting.ts
+	new file:   src/cli/run/event-handlers.test.ts
+	new file:   src/cli/run/event-handlers.ts
+	new file:   src/cli/run/event-state.ts
+	new file:   src/cli/run/event-stream-processor.ts
+	modified:   src/cli/run/events.test.ts
+	modified:   src/cli/run/events.ts
+	modified:   src/cli/run/index.ts
+	new file:   src/cli/run/integration.test.ts
+	new file:   src/cli/run/json-output.test.ts
+	new file:   src/cli/run/json-output.ts
+	new file:   src/cli/run/message-part-delta.test.ts
+	new file:   src/cli/run/on-complete-hook.test.ts
+	new file:   src/cli/run/on-complete-hook.ts
+	new file:   src/cli/run/opencode-binary-resolver.test.ts
+	new file:   src/cli/run/opencode-binary-resolver.ts
+	new file:   src/cli/run/output-renderer.ts
+	new file:   src/cli/run/poll-for-completion.test.ts
+	new file:   src/cli/run/poll-for-completion.ts
+	modified:   src/cli/run/runner.test.ts
+	modified:   src/cli/run/runner.ts
+	new file:   src/cli/run/server-connection.test.ts
+	new file:   src/cli/run/server-connection.ts
+	new file:   src/cli/run/session-resolver.test.ts
+	new file:   src/cli/run/session-resolver.ts
+	new file:   src/cli/run/stdin-suppression.test.ts
+	new file:   src/cli/run/stdin-suppression.ts
+	new file:   src/cli/run/timestamp-output.test.ts
+	new file:   src/cli/run/timestamp-output.ts
+	new file:   src/cli/run/tool-input-preview.ts
+	modified:   src/cli/run/types.ts
+	new file:   src/cli/tui-install-prompts.ts
+	new file:   src/cli/tui-installer.ts
+	new file:   src/config/AGENTS.md
+	modified:   src/config/index.ts
+	modified:   src/config/schema.test.ts
+	modified:   src/config/schema.ts
+	new file:   src/config/schema/agent-names.ts
+	new file:   src/config/schema/agent-overrides.ts
+	new file:   src/config/schema/babysitting.ts
+	new file:   src/config/schema/background-task.test.ts
+	new file:   src/config/schema/background-task.ts
+	new file:   src/config/schema/browser-automation.ts
+	new file:   src/config/schema/categories.ts
+	new file:   src/config/schema/claude-code.ts
+	new file:   src/config/schema/commands.ts
+	new file:   src/config/schema/comment-checker.ts
+	new file:   src/config/schema/dynamic-context-pruning.ts
+	new file:   src/config/schema/experimental.ts
+	new file:   src/config/schema/fallback-models.ts
+	new file:   src/config/schema/git-master.ts
+	new file:   src/config/schema/hooks.ts
+	new file:   src/config/schema/internal/permission.ts
+	new file:   src/config/schema/notification.ts
+	new file:   src/config/schema/oh-my-opencode-config.ts
+	new file:   src/config/schema/ralph-loop.ts
+	new file:   src/config/schema/runtime-fallback.ts
+	new file:   src/config/schema/sisyphus-agent.ts
+	new file:   src/config/schema/sisyphus.ts
+	new file:   src/config/schema/skills.ts
+	new file:   src/config/schema/start-work.ts
+	new file:   src/config/schema/tmux.ts
+	new file:   src/config/schema/websearch.ts
+	new file:   src/create-hooks.ts
+	new file:   src/create-managers.ts
+	new file:   src/create-tools.ts
+	modified:   src/features/AGENTS.md
+	new file:   src/features/background-agent/AGENTS.md
+	new file:   src/features/background-agent/background-task-notification-template.ts
+	new file:   src/features/background-agent/compaction-aware-message-resolver.test.ts
+	new file:   src/features/background-agent/compaction-aware-message-resolver.ts
+	modified:   src/features/background-agent/concurrency.test.ts
+	modified:   src/features/background-agent/constants.ts
+	new file:   src/features/background-agent/duration-formatter.ts
+	new file:   src/features/background-agent/error-classifier.test.ts
+	new file:   src/features/background-agent/error-classifier.ts
+	new file:   src/features/background-agent/fallback-retry-handler.test.ts
+	new file:   src/features/background-agent/fallback-retry-handler.ts
+	modified:   src/features/background-agent/index.ts
+	new file:   src/features/background-agent/manager.polling.test.ts
+	modified:   src/features/background-agent/manager.test.ts
+	new file:   src/features/background-agent/opencode-client.ts
+	new file:   src/features/background-agent/process-cleanup.test.ts
+	new file:   src/features/background-agent/process-cleanup.ts
+	deleted:    src/features/background-agent/result-handler.ts
+	new file:   src/features/background-agent/session-idle-event-handler.test.ts
+	new file:   src/features/background-agent/session-idle-event-handler.ts
+	new file:   src/features/background-agent/spawner.test.ts
+	modified:   src/features/background-agent/spawner.ts
+	new file:   src/features/background-agent/spawner/parent-directory-resolver.test.ts
+	new file:   src/features/background-agent/spawner/parent-directory-resolver.ts
+	modified:   src/features/background-agent/state.ts
+	new file:   src/features/background-agent/task-history.test.ts
+	new file:   src/features/background-agent/task-history.ts
+	new file:   src/features/background-agent/task-poller.test.ts
+	new file:   src/features/background-agent/task-poller.ts
+	modified:   src/features/background-agent/types.ts
+	modified:   src/features/boulder-state/storage.test.ts
+	new file:   src/features/builtin-commands/templates/handoff.ts
+	modified:   src/features/builtin-commands/templates/init-deep.ts
+	modified:   src/features/builtin-commands/templates/ralph-loop.ts
+	modified:   src/features/builtin-skills/git-master/SKILL.md
+	new file:   src/features/builtin-skills/skills/git-master-skill-metadata.ts
+	modified:   src/features/builtin-skills/skills/git-master.ts
+	modified:   src/features/builtin-skills/skills/index.ts
+	new file:   src/features/builtin-skills/skills/playwright-cli.ts
+	modified:   src/features/claude-code-agent-loader/loader.ts
+	modified:   src/features/claude-code-command-loader/loader.ts
+	modified:   src/features/claude-code-mcp-loader/loader.test.ts
+	modified:   src/features/claude-code-mcp-loader/loader.ts
+	new file:   src/features/claude-code-plugin-loader/agent-loader.ts
+	new file:   src/features/claude-code-plugin-loader/command-loader.ts
+	new file:   src/features/claude-code-plugin-loader/discovery.ts
+	new file:   src/features/claude-code-plugin-loader/hook-loader.ts
+	modified:   src/features/claude-code-plugin-loader/index.ts
+	modified:   src/features/claude-code-plugin-loader/loader.ts
+	new file:   src/features/claude-code-plugin-loader/mcp-server-loader.ts
+	new file:   src/features/claude-code-plugin-loader/plugin-path-resolver.ts
+	new file:   src/features/claude-code-plugin-loader/skill-loader.ts
+	modified:   src/features/claude-code-plugin-loader/types.ts
+	modified:   src/features/claude-code-session-state/state.ts
+	modified:   src/features/claude-tasks/AGENTS.md
+	new file:   src/features/claude-tasks/session-storage.test.ts
+	new file:   src/features/claude-tasks/session-storage.ts
+	modified:   src/features/claude-tasks/storage.test.ts
+	modified:   src/features/claude-tasks/storage.ts
+	modified:   src/features/context-injector/injector.test.ts
+	modified:   src/features/context-injector/injector.ts
+	modified:   src/features/context-injector/types.ts
+	modified:   src/features/hook-message-injector/constants.ts
+	modified:   src/features/hook-message-injector/index.ts
+	new file:   src/features/hook-message-injector/injector.test.ts
+	modified:   src/features/hook-message-injector/injector.ts
+	new file:   src/features/mcp-oauth/AGENTS.md
+	modified:   src/features/mcp-oauth/callback-server.test.ts
+	modified:   src/features/mcp-oauth/callback-server.ts
+	deleted:    src/features/mcp-oauth/index.ts
+	new file:   src/features/mcp-oauth/oauth-authorization-flow.ts
+	modified:   src/features/mcp-oauth/provider.ts
+	new file:   src/features/opencode-skill-loader/AGENTS.md
+	new file:   src/features/opencode-skill-loader/agents-skills-global.test.ts
+	new file:   src/features/opencode-skill-loader/allowed-tools-parser.ts
+	modified:   src/features/opencode-skill-loader/blocking.ts
+	new file:   src/features/opencode-skill-loader/config-source-discovery.test.ts
+	new file:   src/features/opencode-skill-loader/config-source-discovery.ts
+	modified:   src/features/opencode-skill-loader/discover-worker.ts
+	new file:   src/features/opencode-skill-loader/git-master-template-injection.ts
+	modified:   src/features/opencode-skill-loader/index.ts
+	new file:   src/features/opencode-skill-loader/loaded-skill-from-path.ts
+	new file:   src/features/opencode-skill-loader/loaded-skill-template-extractor.ts
+	modified:   src/features/opencode-skill-loader/loader.test.ts
+	new file:   src/features/opencode-skill-loader/merger.test.ts
+	modified:   src/features/opencode-skill-loader/merger.ts
+	new file:   src/features/opencode-skill-loader/merger/builtin-skill-converter.ts
+	new file:   src/features/opencode-skill-loader/merger/config-skill-entry-loader.ts
+	new file:   src/features/opencode-skill-loader/merger/scope-priority.ts
+	new file:   src/features/opencode-skill-loader/merger/skill-definition-merger.ts
+	new file:   src/features/opencode-skill-loader/merger/skills-config-normalizer.ts
+	modified:   src/features/opencode-skill-loader/skill-content.test.ts
+	new file:   src/features/opencode-skill-loader/skill-deduplication.ts
+	new file:   src/features/opencode-skill-loader/skill-definition-record.ts
+	new file:   src/features/opencode-skill-loader/skill-directory-loader.ts
+	new file:   src/features/opencode-skill-loader/skill-discovery.ts
+	new file:   src/features/opencode-skill-loader/skill-mcp-config.ts
+	new file:   src/features/opencode-skill-loader/skill-resolution-options.ts
+	new file:   src/features/opencode-skill-loader/skill-template-resolver.ts
+	new file:   src/features/run-continuation-state/constants.ts
+	renamed:    src/features/claude-tasks/index.ts -> src/features/run-continuation-state/index.ts
+	new file:   src/features/run-continuation-state/storage.test.ts
+	new file:   src/features/run-continuation-state/storage.ts
+	new file:   src/features/run-continuation-state/types.ts
+	new file:   src/features/skill-mcp-manager/cleanup.ts
+	new file:   src/features/skill-mcp-manager/connection-type.ts
+	new file:   src/features/skill-mcp-manager/connection.ts
+	new file:   src/features/skill-mcp-manager/http-client.ts
+	modified:   src/features/skill-mcp-manager/manager.ts
+	new file:   src/features/skill-mcp-manager/oauth-handler.ts
+	new file:   src/features/skill-mcp-manager/stdio-client.ts
+	modified:   src/features/skill-mcp-manager/types.ts
+	modified:   src/features/task-toast-manager/manager.test.ts
+	modified:   src/features/task-toast-manager/manager.ts
+	modified:   src/features/task-toast-manager/types.ts
+	new file:   src/features/tmux-subagent/AGENTS.md
+	new file:   src/features/tmux-subagent/action-executor-core.ts
+	new file:   src/features/tmux-subagent/action-executor.test.ts
+	modified:   src/features/tmux-subagent/action-executor.ts
+	new file:   src/features/tmux-subagent/cleanup.ts
+	modified:   src/features/tmux-subagent/decision-engine.test.ts
+	modified:   src/features/tmux-subagent/decision-engine.ts
+	new file:   src/features/tmux-subagent/event-handlers.ts
+	new file:   src/features/tmux-subagent/grid-planning.ts
+	modified:   src/features/tmux-subagent/index.ts
+	new file:   src/features/tmux-subagent/layout-config.test.ts
+	modified:   src/features/tmux-subagent/manager.test.ts
+	modified:   src/features/tmux-subagent/manager.ts
+	new file:   src/features/tmux-subagent/oldest-agent-pane.ts
+	new file:   src/features/tmux-subagent/pane-split-availability.ts
+	modified:   src/features/tmux-subagent/pane-state-querier.ts
+	new file:   src/features/tmux-subagent/polling-constants.ts
+	new file:   src/features/tmux-subagent/polling-manager.test.ts
+	new file:   src/features/tmux-subagent/polling-manager.ts
+	new file:   src/features/tmux-subagent/polling.ts
+	new file:   src/features/tmux-subagent/session-created-event.ts
+	new file:   src/features/tmux-subagent/session-created-handler.ts
+	new file:   src/features/tmux-subagent/session-deleted-handler.ts
+	new file:   src/features/tmux-subagent/session-message-count.ts
+	new file:   src/features/tmux-subagent/session-ready-waiter.ts
+	new file:   src/features/tmux-subagent/session-status-parser.ts
+	new file:   src/features/tmux-subagent/spawn-action-decider.ts
+	new file:   src/features/tmux-subagent/spawn-target-finder.ts
+	new file:   src/features/tmux-subagent/tmux-grid-constants.ts
+	modified:   src/features/tmux-subagent/types.ts
+	new file:   src/features/tool-metadata-store/index.test.ts
+	new file:   src/features/tool-metadata-store/index.ts
+	new file:   src/features/tool-metadata-store/store.ts
+	modified:   src/hooks/AGENTS.md
+	modified:   src/hooks/agent-usage-reminder/constants.ts
+	new file:   src/hooks/agent-usage-reminder/hook.ts
+	modified:   src/hooks/agent-usage-reminder/index.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/AGENTS.md
+	new file:   src/hooks/anthropic-context-window-limit-recovery/aggressive-truncation-strategy.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/client.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/deduplication-recovery.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/empty-content-recovery-sdk.test.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/empty-content-recovery-sdk.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/empty-content-recovery.ts
+	modified:   src/hooks/anthropic-context-window-limit-recovery/executor.test.ts
+	modified:   src/hooks/anthropic-context-window-limit-recovery/executor.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/message-builder.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/message-storage-directory.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/parser.test.ts
+	modified:   src/hooks/anthropic-context-window-limit-recovery/parser.ts
+	modified:   src/hooks/anthropic-context-window-limit-recovery/pruning-deduplication.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/pruning-tool-output-truncation.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/recovery-deduplication.test.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/recovery-hook.test.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/recovery-hook.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/recovery-strategy.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/state.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/storage-paths.ts
+	modified:   src/hooks/anthropic-context-window-limit-recovery/storage.test.ts
+	modified:   src/hooks/anthropic-context-window-limit-recovery/storage.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/summarize-retry-strategy.test.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/summarize-retry-strategy.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/target-token-truncation.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/tool-part-types.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/tool-result-storage-sdk.ts
+	new file:   src/hooks/anthropic-context-window-limit-recovery/tool-result-storage.ts
+	modified:   src/hooks/anthropic-context-window-limit-recovery/types.ts
+	new file:   src/hooks/anthropic-effort/hook.ts
+	new file:   src/hooks/anthropic-effort/index.test.ts
+	new file:   src/hooks/anthropic-effort/index.ts
+	new file:   src/hooks/atlas/AGENTS.md
+	new file:   src/hooks/atlas/atlas-hook.ts
+	new file:   src/hooks/atlas/boulder-continuation-injector.ts
+	new file:   src/hooks/atlas/event-handler.ts
+	new file:   src/hooks/atlas/hook-name.ts
+	modified:   src/hooks/atlas/index.test.ts
+	new file:   src/hooks/atlas/is-abort-error.ts
+	new file:   src/hooks/atlas/recent-model-resolver.ts
+	new file:   src/hooks/atlas/session-last-agent.ts
+	new file:   src/hooks/atlas/sisyphus-path.ts
+	new file:   src/hooks/atlas/subagent-session-id.ts
+	new file:   src/hooks/atlas/system-reminder-templates.ts
+	new file:   src/hooks/atlas/tool-execute-after.ts
+	new file:   src/hooks/atlas/tool-execute-before.ts
+	new file:   src/hooks/atlas/types.ts
+	new file:   src/hooks/atlas/verification-reminders.ts
+	new file:   src/hooks/atlas/write-edit-tool-policy.ts
+	new file:   src/hooks/auto-slash-command/constants.test.ts
+	modified:   src/hooks/auto-slash-command/constants.ts
+	modified:   src/hooks/auto-slash-command/detector.test.ts
+	new file:   src/hooks/auto-slash-command/executor.test.ts
+	new file:   src/hooks/auto-slash-command/hook.ts
+	modified:   src/hooks/auto-slash-command/index.test.ts
+	modified:   src/hooks/auto-slash-command/index.ts
+	modified:   src/hooks/auto-update-checker/checker.ts
+	new file:   src/hooks/auto-update-checker/checker/cached-version.ts
+	new file:   src/hooks/auto-update-checker/checker/check-for-update.ts
+	new file:   src/hooks/auto-update-checker/checker/config-paths.ts
+	new file:   src/hooks/auto-update-checker/checker/jsonc-strip.ts
+	new file:   src/hooks/auto-update-checker/checker/latest-version.ts
+	new file:   src/hooks/auto-update-checker/checker/local-dev-path.ts
+	new file:   src/hooks/auto-update-checker/checker/local-dev-version.ts
+	new file:   src/hooks/auto-update-checker/checker/package-json-locator.ts
+	new file:   src/hooks/auto-update-checker/checker/pinned-version-updater.test.ts
+	new file:   src/hooks/auto-update-checker/checker/pinned-version-updater.ts
+	new file:   src/hooks/auto-update-checker/checker/plugin-entry.test.ts
+	new file:   src/hooks/auto-update-checker/checker/plugin-entry.ts
+	modified:   src/hooks/auto-update-checker/constants.ts
+	new file:   src/hooks/auto-update-checker/hook.test.ts
+	new file:   src/hooks/auto-update-checker/hook.ts
+	new file:   src/hooks/auto-update-checker/hook/background-update-check.test.ts
+	new file:   src/hooks/auto-update-checker/hook/background-update-check.ts
+	new file:   src/hooks/auto-update-checker/hook/config-errors-toast.ts
+	new file:   src/hooks/auto-update-checker/hook/connected-providers-status.ts
+	new file:   src/hooks/auto-update-checker/hook/model-cache-warning.ts
+	new file:   src/hooks/auto-update-checker/hook/spinner-toast.ts
+	new file:   src/hooks/auto-update-checker/hook/startup-toasts.ts
+	new file:   src/hooks/auto-update-checker/hook/update-toasts.ts
+	modified:   src/hooks/auto-update-checker/index.ts
+	new file:   src/hooks/auto-update-checker/version-channel.ts
+	new file:   src/hooks/background-notification/hook.ts
+	modified:   src/hooks/background-notification/index.ts
+	new file:   src/hooks/category-skill-reminder/formatter.ts
+	new file:   src/hooks/category-skill-reminder/hook.ts
+	modified:   src/hooks/category-skill-reminder/index.test.ts
+	modified:   src/hooks/category-skill-reminder/index.ts
+	modified:   src/hooks/claude-code-hooks/AGENTS.md
+	new file:   src/hooks/claude-code-hooks/claude-code-hooks-hook.ts
+	modified:   src/hooks/claude-code-hooks/config.ts
+	new file:   src/hooks/claude-code-hooks/dispatch-hook.ts
+	new file:   src/hooks/claude-code-hooks/execute-http-hook.test.ts
+	new file:   src/hooks/claude-code-hooks/execute-http-hook.ts
+	new file:   src/hooks/claude-code-hooks/handlers/chat-message-handler.ts
+	new file:   src/hooks/claude-code-hooks/handlers/pre-compact-handler.ts
+	new file:   src/hooks/claude-code-hooks/handlers/session-event-handler.ts
+	new file:   src/hooks/claude-code-hooks/handlers/tool-execute-after-handler.ts
+	new file:   src/hooks/claude-code-hooks/handlers/tool-execute-before-handler.ts
+	modified:   src/hooks/claude-code-hooks/index.ts
+	modified:   src/hooks/claude-code-hooks/post-tool-use.ts
+	modified:   src/hooks/claude-code-hooks/pre-compact.ts
+	modified:   src/hooks/claude-code-hooks/pre-tool-use.ts
+	new file:   src/hooks/claude-code-hooks/session-hook-state.ts
+	new file:   src/hooks/claude-code-hooks/stop.test.ts
+	modified:   src/hooks/claude-code-hooks/stop.ts
+	modified:   src/hooks/claude-code-hooks/tool-input-cache.ts
+	new file:   src/hooks/claude-code-hooks/transcript.test.ts
+	modified:   src/hooks/claude-code-hooks/transcript.ts
+	modified:   src/hooks/claude-code-hooks/types.ts
+	new file:   src/hooks/claude-code-hooks/user-prompt-submit.test.ts
+	modified:   src/hooks/claude-code-hooks/user-prompt-submit.ts
+	new file:   src/hooks/comment-checker/cli-runner.ts
+	modified:   src/hooks/comment-checker/cli.test.ts
+	modified:   src/hooks/comment-checker/cli.ts
+	new file:   src/hooks/comment-checker/hook.apply-patch.test.ts
+	new file:   src/hooks/comment-checker/hook.ts
+	modified:   src/hooks/comment-checker/index.ts
+	new file:   src/hooks/comment-checker/pending-calls.test.ts
+	new file:   src/hooks/comment-checker/pending-calls.ts
+	new file:   src/hooks/compaction-context-injector/hook.ts
+	new file:   src/hooks/compaction-todo-preserver/hook.ts
+	new file:   src/hooks/compaction-todo-preserver/index.test.ts
+	new file:   src/hooks/compaction-todo-preserver/index.ts
+	new file:   src/hooks/context-window-monitor.test.ts
+	modified:   src/hooks/context-window-monitor.ts
+	new file:   src/hooks/delegate-task-retry/guidance.ts
+	new file:   src/hooks/delegate-task-retry/hook.ts
+	modified:   src/hooks/delegate-task-retry/index.test.ts
+	modified:   src/hooks/delegate-task-retry/index.ts
+	new file:   src/hooks/delegate-task-retry/patterns.ts
+	modified:   src/hooks/directory-agents-injector/constants.ts
+	new file:   src/hooks/directory-agents-injector/finder.ts
+	new file:   src/hooks/directory-agents-injector/hook.ts
+	modified:   src/hooks/directory-agents-injector/index.ts
+	new file:   src/hooks/directory-agents-injector/injector.test.ts
+	new file:   src/hooks/directory-agents-injector/injector.ts
+	modified:   src/hooks/directory-readme-injector/constants.ts
+	new file:   src/hooks/directory-readme-injector/finder.ts
+	new file:   src/hooks/directory-readme-injector/hook.ts
+	modified:   src/hooks/directory-readme-injector/index.ts
+	new file:   src/hooks/directory-readme-injector/injector.test.ts
+	new file:   src/hooks/directory-readme-injector/injector.ts
+	new file:   src/hooks/edit-error-recovery/hook.ts
+	modified:   src/hooks/edit-error-recovery/index.test.ts
+	modified:   src/hooks/edit-error-recovery/index.ts
+	modified:   src/hooks/empty-task-response-detector.ts
+	new file:   src/hooks/hashline-edit-diff-enhancer/hook.ts
+	new file:   src/hooks/hashline-read-enhancer/hook.ts
+	new file:   src/hooks/hashline-read-enhancer/index.test.ts
+	new file:   src/hooks/hashline-read-enhancer/index.ts
+	modified:   src/hooks/interactive-bash-session/constants.ts
+	new file:   src/hooks/interactive-bash-session/hook.ts
+	new file:   src/hooks/interactive-bash-session/interactive-bash-session-tracker.ts
+	new file:   src/hooks/interactive-bash-session/parser.ts
+	new file:   src/hooks/interactive-bash-session/state-manager.ts
+	new file:   src/hooks/interactive-bash-session/tmux-command-parser.ts
+	new file:   src/hooks/json-error-recovery/hook.ts
+	new file:   src/hooks/json-error-recovery/index.test.ts
+	new file:   src/hooks/json-error-recovery/index.ts
+	new file:   src/hooks/keyword-detector/AGENTS.md
+	new file:   src/hooks/keyword-detector/hook.ts
+	modified:   src/hooks/keyword-detector/index.test.ts
+	modified:   src/hooks/keyword-detector/ultrawork/default.ts
+	new file:   src/hooks/keyword-detector/ultrawork/gemini.ts
+	modified:   src/hooks/keyword-detector/ultrawork/gpt5.2.ts
+	modified:   src/hooks/keyword-detector/ultrawork/index.ts
+	modified:   src/hooks/keyword-detector/ultrawork/planner.ts
+	renamed:    src/hooks/keyword-detector/ultrawork/utils.ts -> src/hooks/keyword-detector/ultrawork/source-detector.ts
+	new file:   src/hooks/model-fallback/hook.test.ts
+	new file:   src/hooks/model-fallback/hook.ts
+	new file:   src/hooks/no-hephaestus-non-gpt/hook.ts
+	new file:   src/hooks/no-hephaestus-non-gpt/index.test.ts
+	new file:   src/hooks/no-hephaestus-non-gpt/index.ts
+	new file:   src/hooks/no-sisyphus-gpt/hook.ts
+	new file:   src/hooks/no-sisyphus-gpt/index.test.ts
+	new file:   src/hooks/no-sisyphus-gpt/index.ts
+	modified:   src/hooks/non-interactive-env/index.test.ts
+	modified:   src/hooks/non-interactive-env/index.ts
+	new file:   src/hooks/non-interactive-env/non-interactive-env-hook.ts
+	modified:   src/hooks/preemptive-compaction.test.ts
+	modified:   src/hooks/preemptive-compaction.ts
+	new file:   src/hooks/prometheus-md-only/agent-matcher.ts
+	new file:   src/hooks/prometheus-md-only/agent-resolution.ts
+	new file:   src/hooks/prometheus-md-only/hook.ts
+	modified:   src/hooks/prometheus-md-only/index.test.ts
+	new file:   src/hooks/prometheus-md-only/path-policy.ts
+	new file:   src/hooks/question-label-truncator/hook.ts
+	modified:   src/hooks/question-label-truncator/index.ts
+	new file:   src/hooks/ralph-loop/AGENTS.md
+	new file:   src/hooks/ralph-loop/command-arguments.ts
+	new file:   src/hooks/ralph-loop/completion-promise-detector.test.ts
+	new file:   src/hooks/ralph-loop/completion-promise-detector.ts
+	new file:   src/hooks/ralph-loop/continuation-prompt-builder.ts
+	new file:   src/hooks/ralph-loop/continuation-prompt-injector.ts
+	new file:   src/hooks/ralph-loop/iteration-continuation.ts
+	new file:   src/hooks/ralph-loop/loop-session-recovery.ts
+	new file:   src/hooks/ralph-loop/loop-state-controller.ts
+	new file:   src/hooks/ralph-loop/message-storage-directory.ts
+	new file:   src/hooks/ralph-loop/ralph-loop-event-handler.ts
+	new file:   src/hooks/ralph-loop/ralph-loop-hook.ts
+	new file:   src/hooks/ralph-loop/reset-strategy-race-condition.test.ts
+	new file:   src/hooks/ralph-loop/session-reset-strategy.ts
+	modified:   src/hooks/ralph-loop/storage.ts
+	modified:   src/hooks/ralph-loop/types.ts
+	new file:   src/hooks/ralph-loop/with-timeout.ts
+	new file:   src/hooks/read-image-resizer/hook.test.ts
+	new file:   src/hooks/read-image-resizer/hook.ts
+	new file:   src/hooks/read-image-resizer/image-dimensions.test.ts
+	new file:   src/hooks/read-image-resizer/image-dimensions.ts
+	new file:   src/hooks/read-image-resizer/image-resizer.test.ts
+	new file:   src/hooks/read-image-resizer/image-resizer.ts
+	new file:   src/hooks/read-image-resizer/index.ts
+	new file:   src/hooks/read-image-resizer/types.ts
+	new file:   src/hooks/rules-injector/AGENTS.md
+	new file:   src/hooks/rules-injector/cache.ts
+	modified:   src/hooks/rules-injector/constants.ts
+	modified:   src/hooks/rules-injector/finder.ts
+	new file:   src/hooks/rules-injector/hook.ts
+	new file:   src/hooks/rules-injector/injector.test.ts
+	new file:   src/hooks/rules-injector/injector.ts
+	new file:   src/hooks/rules-injector/project-root-finder.ts
+	new file:   src/hooks/rules-injector/rule-distance.ts
+	new file:   src/hooks/rules-injector/rule-file-finder.ts
+	new file:   src/hooks/rules-injector/rule-file-scanner.ts
+	new file:   src/hooks/runtime-fallback/agent-resolver.ts
+	new file:   src/hooks/runtime-fallback/auto-retry.ts
+	new file:   src/hooks/runtime-fallback/chat-message-handler.ts
+	new file:   src/hooks/runtime-fallback/constants.ts
+	new file:   src/hooks/runtime-fallback/error-classifier.ts
+	new file:   src/hooks/runtime-fallback/event-handler.ts
+	new file:   src/hooks/runtime-fallback/fallback-models.ts
+	new file:   src/hooks/runtime-fallback/fallback-state.ts
+	new file:   src/hooks/runtime-fallback/hook.ts
+	new file:   src/hooks/runtime-fallback/index.test.ts
+	new file:   src/hooks/runtime-fallback/index.ts
+	new file:   src/hooks/runtime-fallback/message-update-handler.ts
+	new file:   src/hooks/runtime-fallback/types.ts
+	new file:   src/hooks/session-notification-formatting.ts
+	new file:   src/hooks/session-notification-input-needed.test.ts
+	new file:   src/hooks/session-notification-scheduler.ts
+	new file:   src/hooks/session-notification-sender.ts
+	modified:   src/hooks/session-notification-utils.ts
+	modified:   src/hooks/session-notification.test.ts
+	modified:   src/hooks/session-notification.ts
+	new file:   src/hooks/session-recovery/AGENTS.md
+	modified:   src/hooks/session-recovery/constants.ts
+	new file:   src/hooks/session-recovery/detect-error-type.test.ts
+	new file:   src/hooks/session-recovery/detect-error-type.ts
+	new file:   src/hooks/session-recovery/hook.ts
+	modified:   src/hooks/session-recovery/index.test.ts
+	modified:   src/hooks/session-recovery/index.ts
+	new file:   src/hooks/session-recovery/recover-empty-content-message-sdk.test.ts
+	new file:   src/hooks/session-recovery/recover-empty-content-message-sdk.ts
+	new file:   src/hooks/session-recovery/recover-thinking-block-order.ts
+	new file:   src/hooks/session-recovery/recover-thinking-disabled-violation.ts
+	new file:   src/hooks/session-recovery/recover-tool-result-missing.ts
+	new file:   src/hooks/session-recovery/recover-unavailable-tool.ts
+	new file:   src/hooks/session-recovery/resume.test.ts
+	new file:   src/hooks/session-recovery/resume.ts
+	modified:   src/hooks/session-recovery/storage.ts
+	new file:   src/hooks/session-recovery/storage/empty-messages.ts
+	new file:   src/hooks/session-recovery/storage/empty-text.ts
+	new file:   src/hooks/session-recovery/storage/message-dir.ts
+	new file:   src/hooks/session-recovery/storage/messages-reader.ts
+	new file:   src/hooks/session-recovery/storage/orphan-thinking-search.ts
+	new file:   src/hooks/session-recovery/storage/part-content.ts
+	new file:   src/hooks/session-recovery/storage/part-id.ts
+	new file:   src/hooks/session-recovery/storage/parts-reader.ts
+	new file:   src/hooks/session-recovery/storage/readers-from-sdk.test.ts
+	new file:   src/hooks/session-recovery/storage/text-part-injector.ts
+	new file:   src/hooks/session-recovery/storage/thinking-block-search.ts
+	new file:   src/hooks/session-recovery/storage/thinking-prepend.ts
+	new file:   src/hooks/session-recovery/storage/thinking-strip.ts
+	modified:   src/hooks/session-recovery/types.ts
+	new file:   src/hooks/session-todo-status.ts
+	new file:   src/hooks/shared/compaction-model-resolver.ts
+	new file:   src/hooks/sisyphus-junior-notepad/hook.ts
+	modified:   src/hooks/sisyphus-junior-notepad/index.ts
+	modified:   src/hooks/start-work/index.test.ts
+	new file:   src/hooks/start-work/parse-user-request.test.ts
+	new file:   src/hooks/start-work/parse-user-request.ts
+	new file:   src/hooks/start-work/start-work-hook.ts
+	new file:   src/hooks/start-work/worktree-detector.test.ts
+	new file:   src/hooks/start-work/worktree-detector.ts
+	new file:   src/hooks/stop-continuation-guard/hook.ts
+	modified:   src/hooks/stop-continuation-guard/index.test.ts
+	modified:   src/hooks/stop-continuation-guard/index.ts
+	deleted:    src/hooks/subagent-question-blocker/index.test.ts
+	deleted:    src/hooks/subagent-question-blocker/index.ts
+	new file:   src/hooks/task-reminder/hook.ts
+	modified:   src/hooks/task-reminder/index.ts
+	new file:   src/hooks/task-resume-info/hook.ts
+	new file:   src/hooks/task-resume-info/index.test.ts
+	modified:   src/hooks/task-resume-info/index.ts
+	modified:   src/hooks/tasks-todowrite-disabler/constants.ts
+	new file:   src/hooks/tasks-todowrite-disabler/hook.ts
+	modified:   src/hooks/tasks-todowrite-disabler/index.ts
+	new file:   src/hooks/think-mode/hook.ts
+	modified:   src/hooks/think-mode/index.test.ts
+	modified:   src/hooks/think-mode/index.ts
+	modified:   src/hooks/think-mode/switcher.test.ts
+	modified:   src/hooks/think-mode/switcher.ts
+	modified:   src/hooks/think-mode/types.ts
+	new file:   src/hooks/thinking-block-validator/hook.ts
+	modified:   src/hooks/thinking-block-validator/index.ts
+	deleted:    src/hooks/todo-continuation-enforcer.ts
+	new file:   src/hooks/todo-continuation-enforcer/AGENTS.md
+	new file:   src/hooks/todo-continuation-enforcer/abort-detection.ts
+	new file:   src/hooks/todo-continuation-enforcer/constants.ts
+	new file:   src/hooks/todo-continuation-enforcer/continuation-injection.test.ts
+	new file:   src/hooks/todo-continuation-enforcer/continuation-injection.ts
+	new file:   src/hooks/todo-continuation-enforcer/countdown.ts
+	new file:   src/hooks/todo-continuation-enforcer/handler.ts
+	new file:   src/hooks/todo-continuation-enforcer/idle-event.ts
+	new file:   src/hooks/todo-continuation-enforcer/index.ts
+	new file:   src/hooks/todo-continuation-enforcer/message-directory.ts
+	new file:   src/hooks/todo-continuation-enforcer/non-idle-events.ts
+	new file:   src/hooks/todo-continuation-enforcer/pending-question-detection.test.ts
+	new file:   src/hooks/todo-continuation-enforcer/pending-question-detection.ts
+	new file:   src/hooks/todo-continuation-enforcer/session-state.ts
+	renamed:    src/hooks/todo-continuation-enforcer.test.ts -> src/hooks/todo-continuation-enforcer/todo-continuation-enforcer.test.ts
+	new file:   src/hooks/todo-continuation-enforcer/todo.ts
+	new file:   src/hooks/todo-continuation-enforcer/types.ts
+	modified:   src/hooks/tool-output-truncator.ts
+	modified:   src/hooks/unstable-agent-babysitter/index.test.ts
+	modified:   src/hooks/unstable-agent-babysitter/index.ts
+	new file:   src/hooks/unstable-agent-babysitter/task-message-analyzer.ts
+	new file:   src/hooks/unstable-agent-babysitter/unstable-agent-babysitter-hook.ts
+	new file:   src/hooks/write-existing-file-guard/hook.ts
+	modified:   src/hooks/write-existing-file-guard/index.test.ts
+	modified:   src/hooks/write-existing-file-guard/index.ts
+	new file:   src/index.compaction-model-agnostic.static.test.ts
+	modified:   src/index.test.ts
+	modified:   src/index.ts
+	modified:   src/mcp/AGENTS.md
+	modified:   src/mcp/websearch.test.ts
+	modified:   src/mcp/websearch.ts
+	modified:   src/plugin-config.test.ts
+	modified:   src/plugin-config.ts
+	new file:   src/plugin-handlers/AGENTS.md
+	new file:   src/plugin-handlers/agent-config-handler.ts
+	new file:   src/plugin-handlers/agent-key-remapper.test.ts
+	new file:   src/plugin-handlers/agent-key-remapper.ts
+	new file:   src/plugin-handlers/agent-priority-order.ts
+	new file:   src/plugin-handlers/category-config-resolver.ts
+	new file:   src/plugin-handlers/command-config-handler.ts
+	new file:   src/plugin-handlers/config-handler-formatter.test.ts
+	modified:   src/plugin-handlers/config-handler.test.ts
+	modified:   src/plugin-handlers/index.ts
+	new file:   src/plugin-handlers/mcp-config-handler.test.ts
+	new file:   src/plugin-handlers/mcp-config-handler.ts
+	new file:   src/plugin-handlers/plan-model-inheritance.test.ts
+	new file:   src/plugin-handlers/plan-model-inheritance.ts
+	new file:   src/plugin-handlers/plugin-components-loader.ts
+	new file:   src/plugin-handlers/prometheus-agent-config-builder.ts
+	new file:   src/plugin-handlers/provider-config-handler.ts
+	new file:   src/plugin-handlers/tool-config-handler.test.ts
+	new file:   src/plugin-handlers/tool-config-handler.ts
+	new file:   src/plugin-interface.ts
+	new file:   src/plugin/AGENTS.md
+	new file:   src/plugin/available-categories.ts
+	new file:   src/plugin/chat-headers.test.ts
+	new file:   src/plugin/chat-headers.ts
+	new file:   src/plugin/chat-message.test.ts
+	new file:   src/plugin/chat-message.ts
+	new file:   src/plugin/chat-params.test.ts
+	new file:   src/plugin/chat-params.ts
+	new file:   src/plugin/event.model-fallback.test.ts
+	new file:   src/plugin/event.test.ts
+	new file:   src/plugin/event.ts
+	new file:   src/plugin/hooks/create-continuation-hooks.ts
+	new file:   src/plugin/hooks/create-core-hooks.ts
+	new file:   src/plugin/hooks/create-session-hooks.ts
+	new file:   src/plugin/hooks/create-skill-hooks.ts
+	new file:   src/plugin/hooks/create-tool-guard-hooks.ts
+	new file:   src/plugin/hooks/create-transform-hooks.ts
+	new file:   src/plugin/messages-transform.ts
+	new file:   src/plugin/recent-synthetic-idles.test.ts
+	new file:   src/plugin/recent-synthetic-idles.ts
+	new file:   src/plugin/session-agent-resolver.test.ts
+	new file:   src/plugin/session-agent-resolver.ts
+	new file:   src/plugin/session-status-normalizer.test.ts
+	new file:   src/plugin/session-status-normalizer.ts
+	new file:   src/plugin/skill-context.ts
+	new file:   src/plugin/system-transform.ts
+	new file:   src/plugin/tool-execute-after.ts
+	new file:   src/plugin/tool-execute-before-session-notification.test.ts
+	new file:   src/plugin/tool-execute-before.test.ts
+	new file:   src/plugin/tool-execute-before.ts
+	new file:   src/plugin/tool-registry.ts
+	new file:   src/plugin/types.ts
+	new file:   src/plugin/ultrawork-db-model-override.test.ts
+	new file:   src/plugin/ultrawork-db-model-override.ts
+	new file:   src/plugin/ultrawork-model-override.test.ts
+	new file:   src/plugin/ultrawork-model-override.ts
+	new file:   src/plugin/unstable-agent-babysitter.ts
+	modified:   src/shared/AGENTS.md
+	modified:   src/shared/agent-config-integration.test.ts
+	modified:   src/shared/agent-display-names.test.ts
+	modified:   src/shared/agent-display-names.ts
+	modified:   src/shared/agent-tool-restrictions.ts
+	modified:   src/shared/agent-variant.test.ts
+	modified:   src/shared/agent-variant.ts
+	modified:   src/shared/command-executor.ts
+	new file:   src/shared/command-executor/embedded-commands.ts
+	new file:   src/shared/command-executor/execute-command.ts
+	new file:   src/shared/command-executor/execute-hook-command.ts
+	new file:   src/shared/command-executor/home-directory.ts
+	new file:   src/shared/command-executor/resolve-commands-in-text.ts
+	new file:   src/shared/command-executor/shell-path.ts
+	new file:   src/shared/connected-providers-cache.test.ts
+	modified:   src/shared/connected-providers-cache.ts
+	new file:   src/shared/disabled-tools.ts
+	new file:   src/shared/dynamic-truncator.test.ts
+	modified:   src/shared/dynamic-truncator.ts
+	new file:   src/shared/fallback-model-availability.ts
+	new file:   src/shared/file-utils.test.ts
+	modified:   src/shared/file-utils.ts
+	new file:   src/shared/git-worktree/collect-git-diff-stats.test.ts
+	new file:   src/shared/git-worktree/collect-git-diff-stats.ts
+	new file:   src/shared/git-worktree/format-file-changes.ts
+	new file:   src/shared/git-worktree/git-worktree.test.ts
+	new file:   src/shared/git-worktree/index.ts
+	new file:   src/shared/git-worktree/parse-diff-numstat.ts
+	new file:   src/shared/git-worktree/parse-status-porcelain-line.test.ts
+	new file:   src/shared/git-worktree/parse-status-porcelain-line.ts
+	new file:   src/shared/git-worktree/parse-status-porcelain.ts
+	new file:   src/shared/git-worktree/types.ts
+	modified:   src/shared/index.ts
+	new file:   src/shared/internal-initiator-marker.ts
+	new file:   src/shared/merge-categories.test.ts
+	new file:   src/shared/merge-categories.ts
+	modified:   src/shared/migration.test.ts
+	modified:   src/shared/migration.ts
+	new file:   src/shared/migration/agent-category.ts
+	new file:   src/shared/migration/agent-names.ts
+	new file:   src/shared/migration/config-migration.ts
+	new file:   src/shared/migration/hook-names.ts
+	new file:   src/shared/migration/model-versions.ts
+	modified:   src/shared/model-availability.test.ts
+	modified:   src/shared/model-availability.ts
+	new file:   src/shared/model-error-classifier.test.ts
+	new file:   src/shared/model-error-classifier.ts
+	new file:   src/shared/model-format-normalizer.test.ts
+	new file:   src/shared/model-format-normalizer.ts
+	new file:   src/shared/model-normalization.test.ts
+	new file:   src/shared/model-normalization.ts
+	modified:   src/shared/model-requirements.test.ts
+	modified:   src/shared/model-requirements.ts
+	new file:   src/shared/model-resolution-pipeline.test.ts
+	modified:   src/shared/model-resolution-pipeline.ts
+	new file:   src/shared/model-resolution-types.ts
+	modified:   src/shared/model-resolver.test.ts
+	modified:   src/shared/model-resolver.ts
+	modified:   src/shared/model-suggestion-retry.test.ts
+	modified:   src/shared/model-suggestion-retry.ts
+	new file:   src/shared/normalize-sdk-response.test.ts
+	new file:   src/shared/normalize-sdk-response.ts
+	new file:   src/shared/opencode-config-dir-types.ts
+	modified:   src/shared/opencode-config-dir.ts
+	new file:   src/shared/opencode-http-api.test.ts
+	new file:   src/shared/opencode-http-api.ts
+	new file:   src/shared/opencode-message-dir.test.ts
+	new file:   src/shared/opencode-message-dir.ts
+	modified:   src/shared/opencode-server-auth.test.ts
+	modified:   src/shared/opencode-server-auth.ts
+	new file:   src/shared/opencode-storage-detection.test.ts
+	new file:   src/shared/opencode-storage-detection.ts
+	new file:   src/shared/opencode-storage-paths.ts
+	modified:   src/shared/opencode-version.ts
+	new file:   src/shared/pattern-matcher.test.ts
+	modified:   src/shared/pattern-matcher.ts
+	modified:   src/shared/permission-compat.test.ts
+	modified:   src/shared/permission-compat.ts
+	new file:   src/shared/plugin-command-discovery.test.ts
+	new file:   src/shared/plugin-command-discovery.ts
+	new file:   src/shared/prompt-timeout-context.ts
+	new file:   src/shared/prompt-tools.test.ts
+	new file:   src/shared/prompt-tools.ts
+	new file:   src/shared/provider-model-id-transform.ts
+	new file:   src/shared/record-type-guard.ts
+	new file:   src/shared/safe-create-hook.test.ts
+	new file:   src/shared/safe-create-hook.ts
+	new file:   src/shared/session-category-registry.ts
+	new file:   src/shared/session-directory-resolver.test.ts
+	new file:   src/shared/session-directory-resolver.ts
+	new file:   src/shared/session-model-state.test.ts
+	new file:   src/shared/session-model-state.ts
+	new file:   src/shared/session-tools-store.test.ts
+	new file:   src/shared/session-tools-store.ts
+	modified:   src/shared/session-utils.ts
+	new file:   src/shared/skill-path-resolver.test.ts
+	new file:   src/shared/skill-path-resolver.ts
+	new file:   src/shared/spawn-with-windows-hide.ts
+	modified:   src/shared/tmux/tmux-utils.ts
+	new file:   src/shared/tmux/tmux-utils/environment.ts
+	new file:   src/shared/tmux/tmux-utils/layout.test.ts
+	new file:   src/shared/tmux/tmux-utils/layout.ts
+	new file:   src/shared/tmux/tmux-utils/pane-close.ts
+	new file:   src/shared/tmux/tmux-utils/pane-dimensions.ts
+	new file:   src/shared/tmux/tmux-utils/pane-replace.ts
+	new file:   src/shared/tmux/tmux-utils/pane-spawn.ts
+	new file:   src/shared/tmux/tmux-utils/server-health.ts
+	new file:   src/shared/tool-name.test.ts
+	modified:   src/shared/tool-name.ts
+	new file:   src/shared/truncate-description.test.ts
+	new file:   src/shared/truncate-description.ts
+	modified:   src/tools/AGENTS.md
+	new file:   src/tools/ast-grep/cli-binary-path-resolution.ts
+	modified:   src/tools/ast-grep/cli.ts
+	modified:   src/tools/ast-grep/constants.ts
+	new file:   src/tools/ast-grep/environment-check.ts
+	modified:   src/tools/ast-grep/index.ts
+	new file:   src/tools/ast-grep/language-support.ts
+	new file:   src/tools/ast-grep/process-output-timeout.ts
+	renamed:    src/tools/ast-grep/utils.ts -> src/tools/ast-grep/result-formatter.ts
+	new file:   src/tools/ast-grep/sg-cli-path.ts
+	new file:   src/tools/ast-grep/sg-compact-json-output.ts
+	modified:   src/tools/ast-grep/tools.ts
+	new file:   src/tools/background-task/AGENTS.md
+	new file:   src/tools/background-task/clients.ts
+	modified:   src/tools/background-task/constants.ts
+	new file:   src/tools/background-task/create-background-cancel.ts
+	new file:   src/tools/background-task/create-background-output.blocking.test.ts
+	new file:   src/tools/background-task/create-background-output.ts
+	new file:   src/tools/background-task/create-background-task.test.ts
+	new file:   src/tools/background-task/create-background-task.ts
+	new file:   src/tools/background-task/delay.ts
+	new file:   src/tools/background-task/full-session-format.ts
+	modified:   src/tools/background-task/index.ts
+	new file:   src/tools/background-task/message-dir.ts
+	new file:   src/tools/background-task/session-messages.ts
+	new file:   src/tools/background-task/task-result-format.ts
+	new file:   src/tools/background-task/task-status-format.ts
+	new file:   src/tools/background-task/time-format.ts
+	modified:   src/tools/background-task/tools.test.ts
+	new file:   src/tools/background-task/truncate-text.ts
+	modified:   src/tools/background-task/types.ts
+	new file:   src/tools/call-omo-agent/AGENTS.md
+	new file:   src/tools/call-omo-agent/background-agent-executor.test.ts
+	new file:   src/tools/call-omo-agent/background-agent-executor.ts
+	new file:   src/tools/call-omo-agent/background-executor.test.ts
+	new file:   src/tools/call-omo-agent/background-executor.ts
+	new file:   src/tools/call-omo-agent/completion-poller.ts
+	modified:   src/tools/call-omo-agent/constants.ts
+	new file:   src/tools/call-omo-agent/message-dir.ts
+	new file:   src/tools/call-omo-agent/message-processor.ts
+	new file:   src/tools/call-omo-agent/message-storage-directory.ts
+	new file:   src/tools/call-omo-agent/session-creator.test.ts
+	new file:   src/tools/call-omo-agent/session-creator.ts
+	new file:   src/tools/call-omo-agent/subagent-session-creator.test.ts
+	new file:   src/tools/call-omo-agent/subagent-session-creator.ts
+	new file:   src/tools/call-omo-agent/sync-executor.test.ts
+	new file:   src/tools/call-omo-agent/sync-executor.ts
+	new file:   src/tools/call-omo-agent/tool-context-with-metadata.ts
+	new file:   src/tools/call-omo-agent/tools.test.ts
+	modified:   src/tools/call-omo-agent/tools.ts
+	modified:   src/tools/call-omo-agent/types.ts
+	new file:   src/tools/delegate-task/AGENTS.md
+	new file:   src/tools/delegate-task/available-models.ts
+	new file:   src/tools/delegate-task/background-continuation.test.ts
+	new file:   src/tools/delegate-task/background-continuation.ts
+	new file:   src/tools/delegate-task/background-task.test.ts
+	new file:   src/tools/delegate-task/background-task.ts
+	modified:   src/tools/delegate-task/categories.ts
+	new file:   src/tools/delegate-task/category-resolver.test.ts
+	new file:   src/tools/delegate-task/category-resolver.ts
+	new file:   src/tools/delegate-task/error-formatting.ts
+	new file:   src/tools/delegate-task/executor-types.ts
+	deleted:    src/tools/delegate-task/helpers.ts
+	new file:   src/tools/delegate-task/metadata-await.test.ts
+	new file:   src/tools/delegate-task/metadata-model-unification.test.ts
+	new file:   src/tools/delegate-task/model-selection.ts
+	new file:   src/tools/delegate-task/model-string-parser.ts
+	new file:   src/tools/delegate-task/parent-context-resolver.ts
+	modified:   src/tools/delegate-task/prompt-builder.ts
+	new file:   src/tools/delegate-task/sisyphus-junior-agent.ts
+	new file:   src/tools/delegate-task/skill-resolver.ts
+	new file:   src/tools/delegate-task/subagent-resolver.test.ts
+	new file:   src/tools/delegate-task/subagent-resolver.ts
+	new file:   src/tools/delegate-task/sync-continuation-deps.ts
+	new file:   src/tools/delegate-task/sync-continuation.test.ts
+	new file:   src/tools/delegate-task/sync-continuation.ts
+	new file:   src/tools/delegate-task/sync-poll-timeout.test.ts
+	new file:   src/tools/delegate-task/sync-prompt-sender.test.ts
+	new file:   src/tools/delegate-task/sync-prompt-sender.ts
+	new file:   src/tools/delegate-task/sync-result-fetcher.test.ts
+	new file:   src/tools/delegate-task/sync-result-fetcher.ts
+	new file:   src/tools/delegate-task/sync-session-creator.ts
+	new file:   src/tools/delegate-task/sync-session-poller.test.ts
+	new file:   src/tools/delegate-task/sync-session-poller.ts
+	new file:   src/tools/delegate-task/sync-task-deps.ts
+	new file:   src/tools/delegate-task/sync-task.test.ts
+	new file:   src/tools/delegate-task/sync-task.ts
+	new file:   src/tools/delegate-task/time-formatter.ts
+	new file:   src/tools/delegate-task/timing.test.ts
+	modified:   src/tools/delegate-task/timing.ts
+	new file:   src/tools/delegate-task/token-limiter.test.ts
+	new file:   src/tools/delegate-task/token-limiter.ts
+	modified:   src/tools/delegate-task/tools.ts
+	modified:   src/tools/delegate-task/types.ts
+	new file:   src/tools/delegate-task/unstable-agent-task.test.ts
+	new file:   src/tools/delegate-task/unstable-agent-task.ts
+	new file:   src/tools/delegate-task/unstable-agent-timeout.test.ts
+	modified:   src/tools/glob/cli.ts
+	modified:   src/tools/glob/constants.ts
+	modified:   src/tools/glob/index.ts
+	renamed:    src/tools/glob/utils.ts -> src/tools/glob/result-formatter.ts
+	modified:   src/tools/glob/tools.ts
+	modified:   src/tools/glob/types.ts
+	modified:   src/tools/grep/cli.ts
+	modified:   src/tools/grep/constants.ts
+	modified:   src/tools/grep/index.ts
+	new file:   src/tools/grep/result-formatter.test.ts
+	renamed:    src/tools/grep/utils.ts -> src/tools/grep/result-formatter.ts
+	modified:   src/tools/grep/tools.ts
+	modified:   src/tools/grep/types.ts
+	new file:   src/tools/hashline-edit/AGENTS.md
+	new file:   src/tools/hashline-edit/autocorrect-replacement-lines.ts
+	new file:   src/tools/hashline-edit/constants.ts
+	new file:   src/tools/hashline-edit/diff-utils.test.ts
+	new file:   src/tools/hashline-edit/diff-utils.ts
+	new file:   src/tools/hashline-edit/edit-deduplication.ts
+	new file:   src/tools/hashline-edit/edit-operation-primitives.ts
+	new file:   src/tools/hashline-edit/edit-operations.test.ts
+	new file:   src/tools/hashline-edit/edit-operations.ts
+	new file:   src/tools/hashline-edit/edit-ordering.ts
+	new file:   src/tools/hashline-edit/edit-text-normalization.ts
+	new file:   src/tools/hashline-edit/file-text-canonicalization.ts
+	new file:   src/tools/hashline-edit/hash-computation.test.ts
+	new file:   src/tools/hashline-edit/hash-computation.ts
+	new file:   src/tools/hashline-edit/hashline-chunk-formatter.ts
+	new file:   src/tools/hashline-edit/hashline-edit-diff.ts
+	new file:   src/tools/hashline-edit/hashline-edit-executor.ts
+	new file:   src/tools/hashline-edit/index.ts
+	new file:   src/tools/hashline-edit/normalize-edits.test.ts
+	new file:   src/tools/hashline-edit/normalize-edits.ts
+	new file:   src/tools/hashline-edit/tool-description.ts
+	new file:   src/tools/hashline-edit/tools.test.ts
+	new file:   src/tools/hashline-edit/tools.ts
+	new file:   src/tools/hashline-edit/types.ts
+	new file:   src/tools/hashline-edit/validation.test.ts
+	new file:   src/tools/hashline-edit/validation.ts
+	modified:   src/tools/index.ts
+	modified:   src/tools/interactive-bash/index.ts
+	renamed:    src/tools/interactive-bash/utils.ts -> src/tools/interactive-bash/tmux-path-resolver.ts
+	modified:   src/tools/interactive-bash/tools.ts
+	new file:   src/tools/look-at/assistant-message-extractor.ts
+	new file:   src/tools/look-at/image-converter.test.ts
+	new file:   src/tools/look-at/image-converter.ts
+	new file:   src/tools/look-at/look-at-arguments.ts
+	new file:   src/tools/look-at/mime-type-inference.test.ts
+	new file:   src/tools/look-at/mime-type-inference.ts
+	new file:   src/tools/look-at/multimodal-agent-metadata.ts
+	new file:   src/tools/look-at/session-poller.test.ts
+	new file:   src/tools/look-at/session-poller.ts
+	modified:   src/tools/look-at/tools.test.ts
+	modified:   src/tools/look-at/tools.ts
+	new file:   src/tools/lsp/AGENTS.md
+	modified:   src/tools/lsp/client.test.ts
+	modified:   src/tools/lsp/client.ts
+	modified:   src/tools/lsp/config.ts
+	new file:   src/tools/lsp/diagnostics-tool.ts
+	new file:   src/tools/lsp/find-references-tool.ts
+	new file:   src/tools/lsp/goto-definition-tool.ts
+	modified:   src/tools/lsp/index.ts
+	new file:   src/tools/lsp/language-config.ts
+	new file:   src/tools/lsp/language-mappings.ts
+	new file:   src/tools/lsp/lsp-client-connection.ts
+	new file:   src/tools/lsp/lsp-client-transport.ts
+	new file:   src/tools/lsp/lsp-client-wrapper.ts
+	new file:   src/tools/lsp/lsp-client.ts
+	new file:   src/tools/lsp/lsp-formatters.ts
+	new file:   src/tools/lsp/lsp-manager-process-cleanup.ts
+	new file:   src/tools/lsp/lsp-manager-temp-directory-cleanup.ts
+	new file:   src/tools/lsp/lsp-process.test.ts
+	new file:   src/tools/lsp/lsp-process.ts
+	new file:   src/tools/lsp/lsp-server.ts
+	new file:   src/tools/lsp/rename-tools.ts
+	new file:   src/tools/lsp/server-config-loader.test.ts
+	new file:   src/tools/lsp/server-config-loader.ts
+	new file:   src/tools/lsp/server-definitions.ts
+	new file:   src/tools/lsp/server-installation.ts
+	new file:   src/tools/lsp/server-resolution.ts
+	new file:   src/tools/lsp/symbols-tool.ts
+	modified:   src/tools/lsp/tools.ts
+	modified:   src/tools/lsp/utils.test.ts
+	deleted:    src/tools/lsp/utils.ts
+	new file:   src/tools/lsp/workspace-edit.ts
+	modified:   src/tools/session-manager/constants.ts
+	modified:   src/tools/session-manager/index.ts
+	renamed:    src/tools/session-manager/utils.ts -> src/tools/session-manager/session-formatter.ts
+	modified:   src/tools/session-manager/storage.test.ts
+	modified:   src/tools/session-manager/storage.ts
+	modified:   src/tools/session-manager/tools.test.ts
+	modified:   src/tools/session-manager/tools.ts
+	modified:   src/tools/session-manager/types.ts
+	modified:   src/tools/session-manager/utils.test.ts
+	new file:   src/tools/shared/semaphore.ts
+	new file:   src/tools/skill-mcp/builtin-mcp-hint.test.ts
+	modified:   src/tools/skill-mcp/constants.ts
+	modified:   src/tools/skill-mcp/tools.ts
+	modified:   src/tools/skill/constants.ts
+	modified:   src/tools/skill/tools.test.ts
+	modified:   src/tools/skill/tools.ts
+	modified:   src/tools/skill/types.ts
+	new file:   src/tools/slashcommand/command-discovery.test.ts
+	new file:   src/tools/slashcommand/command-discovery.ts
+	new file:   src/tools/slashcommand/command-output-formatter.test.ts
+	new file:   src/tools/slashcommand/command-output-formatter.ts
+	new file:   src/tools/slashcommand/index.test.ts
+	modified:   src/tools/slashcommand/index.ts
+	modified:   src/tools/slashcommand/types.ts
+	modified:   src/tools/task/task-get.ts
+	modified:   src/tools/task/task-list.ts
+	modified:   src/tools/task/task-update.ts
+	deleted:    src/tools/task/task.test.ts
+	deleted:    src/tools/task/task.ts
+	modified:   src/tools/task/todo-sync.test.ts
+	modified:   src/tools/task/todo-sync.ts
+
+Unmerged paths:
+  (use "git add/rm <file>..." as appropriate to mark resolution)
+	both modified:   src/agents/sisyphus.ts
+	deleted by them: src/agents/utils.ts
+	both modified:   src/features/background-agent/manager.ts
+	both modified:   src/features/boulder-state/storage.ts
+	both modified:   src/features/boulder-state/types.ts
+	both added:      src/features/builtin-commands/commands.test.ts
+	both modified:   src/features/builtin-commands/commands.ts
+	both modified:   src/features/builtin-commands/templates/start-work.ts
+	both modified:   src/features/builtin-commands/types.ts
+	both modified:   src/features/builtin-skills/skills.test.ts
+	both modified:   src/features/builtin-skills/skills.ts
+	both modified:   src/features/context-injector/collector.test.ts
+	both modified:   src/features/context-injector/collector.ts
+	both modified:   src/features/opencode-skill-loader/async-loader.ts
+	both modified:   src/features/opencode-skill-loader/loader.ts
+	both modified:   src/features/opencode-skill-loader/skill-content.ts
+	both modified:   src/hooks/anthropic-context-window-limit-recovery/index.ts
+	both modified:   src/hooks/atlas/index.ts
+	both modified:   src/hooks/auto-slash-command/executor.ts
+	both modified:   src/hooks/compaction-context-injector/index.test.ts
+	both modified:   src/hooks/compaction-context-injector/index.ts
+	both modified:   src/hooks/index.ts
+	both modified:   src/hooks/interactive-bash-session/index.ts
+	both modified:   src/hooks/keyword-detector/index.ts
+	both modified:   src/hooks/prometheus-md-only/constants.ts
+	both modified:   src/hooks/prometheus-md-only/index.ts
+	both modified:   src/hooks/ralph-loop/index.test.ts
+	both modified:   src/hooks/ralph-loop/index.ts
+	both modified:   src/hooks/rules-injector/index.ts
+	both modified:   src/hooks/start-work/index.ts
+	both modified:   src/plugin-handlers/config-handler.ts
+	both modified:   src/tools/background-task/tools.ts
+	both modified:   src/tools/delegate-task/constants.ts
+	both modified:   src/tools/delegate-task/executor.ts
+	both modified:   src/tools/delegate-task/tools.test.ts
+	both modified:   src/tools/lsp/constants.ts
+	deleted by them: src/tools/slashcommand/tools.test.ts
+	deleted by them: src/tools/slashcommand/tools.ts
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	src/cli/doctor/index.ts.ours
+

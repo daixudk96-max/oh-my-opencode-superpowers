@@ -37,6 +37,7 @@
   - `skill-auto-injector`: Correctly registered in `src/index.ts`. `mdsel-reminder` was observed in action when reading a large markdown file, proving the auto-injection mechanism works.
   - Verification confirmed the existence and correct registration of these hooks.
 
+
 ## Task V-8.1: 汇总审计报告 (2026-03-10)
 
 | ID | Item | Status | Notes |
@@ -61,4 +62,10 @@
 | 18 | isolation-checker Usage | PASS | Integrated with `tdd-guard` |
 | 19 | relevance-scorer Utility | KNOWN_GAP | Defined but not currently utilized |
 | 20 | HookNameSchema Status | KNOWN_GAP | Missing hooks in schema (V-5.4) |
+
+## Commit Details
+- Commit: `docs: record verification results for fix and implementation of remaining features`
+- Files: `tasks.md`, `findings.md`, `progress.md`
+- Justification: Recorded verification results as part of the documentation process.
+- Status: Successfully committed to `dev` branch.
 

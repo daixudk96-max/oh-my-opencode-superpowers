@@ -113,6 +113,11 @@ describe("CommitSizeChecker", () => {
       expect(isCommit).toBe(true)
     })
 
+    it("should detect git commit with environment variables prefix", () => {
+      const isCommit = checker.isCommitCommand("export CI=true DEBIAN_FRONTEND=noninteractive; git commit -m 'test'")
+      expect(isCommit).toBe(true)
+    })
+
     it("should not match git add", () => {
       const isCommit = checker.isCommitCommand("git add .")
       expect(isCommit).toBe(false)

@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Adding tasks-md-creation-guard to hook schema"
 import { z } from "zod"
 
 export const HookNameSchema = z.enum([
@@ -47,9 +48,15 @@ export const HookNameSchema = z.enum([
   "tasks-todowrite-disabler",
   "runtime-fallback",
   "write-existing-file-guard",
+  // TDD-EXEMPT: reason="Adding tasks-md-creation-guard to hook schema"
+  "tasks-md-creation-guard",
   "anthropic-effort",
   "hashline-read-enhancer",
   "read-image-resizer",
+  // TDD-EXEMPT: Schema update verified by src/config/schema.test.ts
+  "plan-reorganizer",
+  "plan-update-reminder",
+  "plan-attention-refresher",
 ])
 
 export type HookName = z.infer<typeof HookNameSchema>

@@ -46,5 +46,7 @@ export function createToolExecuteAfterHandler(args: {
     await hooks.readImageResizer?.["tool.execute.after"]?.(input, output)
     await hooks.hashlineReadEnhancer?.["tool.execute.after"]?.(input, output)
     await hooks.jsonErrorRecovery?.["tool.execute.after"]?.(input, output)
+    // TDD-EXEMPT: reason="Integrating tasks-md-creation-guard into tool execution flow"
+    await hooks.tasksMdCreationGuard?.["tool.execute.after"]?.(input, output)
   }
 }

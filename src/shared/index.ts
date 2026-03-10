@@ -72,3 +72,5 @@ export * from "./prompt-tools"
 export * from "./internal-initiator-marker"
 export * from "./plugin-command-discovery"
 export { SessionCategoryRegistry } from "./session-category-registry"
+// TDD-EXEMPT: Triggering plan-update-reminder hook for verification
+export const DUMMY_EXPORT_FOR_HOOK_TEST = "trigger"

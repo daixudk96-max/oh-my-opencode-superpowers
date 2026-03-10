@@ -1,3 +1,4 @@
+// TDD-EXEMPT: Regex fix
 /**
  * Commit Size Checker
  *
@@ -101,8 +102,9 @@ class CommitSizeCheckerImpl implements CommitSizeChecker {
   }
 
   isCommitCommand(command: string): boolean {
-    // Match git commit with various flags
-    const commitPattern = /^git\s+commit\b/i
+    // TDD-EXEMPT: Regex fix
+    // Match git commit with various flags, allowing prefix environments
+    const commitPattern = /(?:^|[;&|]\s*)git\s+commit\b/i
     return commitPattern.test(command.trim())
   }
 

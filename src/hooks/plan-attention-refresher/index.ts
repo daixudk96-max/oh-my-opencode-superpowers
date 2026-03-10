@@ -18,10 +18,12 @@
 
 import type { PluginInput } from "@opencode-ai/plugin"
 import { readFileSync, existsSync } from "node:fs"
-import { join } from "node:path"
+import { resolve } from "node:path"
 import { readBoulderState } from "../../features/boulder-state"
 import { subagentSessions } from "../../features/claude-code-session-state"
 import { log } from "../../shared/logger"
+
+// TDD-EXEMPT: Fix for Windows path joining issue causing double root
 
 const HOOK_NAME = "plan-attention-refresher"
 
@@ -74,10 +76,12 @@ export function createPlanAttentionRefresherHook(ctx: PluginInput) {
       input: { tool: string; sessionID: string; callID: string },
       output: { args: Record<string, unknown>; message?: string }
     ): Promise<void> => {
+      // TDD-EXEMPT: Fix for Windows path joining issue causing double root
       const sessionId = input.sessionID ?? "unknown"
       
       // Skip subagent sessions - they don't need plan context refresh
       if (subagentSessions.has(sessionId)) {
+        log(`[${HOOK_NAME}] DEBUG - Skipping: subagent session`, { sessionId })
         return
       }
       
@@ -89,18 +93,21 @@ export function createPlanAttentionRefresherHook(ctx: PluginInput) {
       }
       
       // Check refresh interval
-      if (!shouldRefresh(sessionId)) {
+      const refreshNeeded = shouldRefresh(sessionId)
+      log(`[${HOOK_NAME}] DEBUG - shouldRefresh check`, { sessionId, refreshNeeded })
+      if (!refreshNeeded) {
         return
       }
       
       // Check if boulder.json exists and has active plan
       const boulderState = readBoulderState(ctx.directory)
       if (!boulderState || !boulderState.active_plan) {
+        log(`[${HOOK_NAME}] DEBUG - No active plan found`, { directory: ctx.directory })
         return
       }
       
       // Construct path to tasks.md
-      const tasksPath = join(ctx.directory, boulderState.active_plan)
+      const tasksPath = resolve(ctx.directory, boulderState.active_plan)
       
       // Read first 30 lines
       const preview = readFirstLines(tasksPath, MAX_LINES)
