@@ -1,4 +1,6 @@
 import type { PluginInput } from "@opencode-ai/plugin"
+import { createBoulderGatingWrapper } from "../../downstream/patches/boulder-gating-wrapper"
+import { createContinuationMaxRetriesWrapper } from "../../downstream/patches/continuation-max-retries-wrapper"
 import { createAtlasEventHandler } from "./event-handler"
 import { createToolExecuteAfterHandler } from "./tool-execute-after"
 import { createToolExecuteBeforeHandler } from "./tool-execute-before"
@@ -18,8 +20,18 @@ export function createAtlasHook(ctx: PluginInput, options?: AtlasHookOptions) {
     return state
   }
 
+  const upstreamEventHandler = createAtlasEventHandler({ ctx, options, sessions, getState })
+  const boulderGatingHandler = createBoulderGatingWrapper({
+    ctx,
+    handler: upstreamEventHandler,
+  })
+  const wrappedEventHandler = createContinuationMaxRetriesWrapper({
+    handler: boulderGatingHandler,
+    getState,
+  })
+
   return {
-    handler: createAtlasEventHandler({ ctx, options, sessions, getState }),
+    handler: wrappedEventHandler,
     "tool.execute.before": createToolExecuteBeforeHandler({ ctx, pendingFilePaths }),
     "tool.execute.after": createToolExecuteAfterHandler({ ctx, pendingFilePaths, autoCommit }),
   }

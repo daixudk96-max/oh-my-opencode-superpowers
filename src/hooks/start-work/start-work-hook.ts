@@ -15,6 +15,8 @@ import { updateSessionAgent } from "../../features/claude-code-session-state"
 import { detectWorktreePath } from "./worktree-detector"
 import { parseUserRequest } from "./parse-user-request"
 
+type StartWorkExecutionMode = "sequential" | "parallel"
+
 export const HOOK_NAME = "start-work" as const
 
 interface StartWorkHookInput {
@@ -62,6 +64,30 @@ function resolveWorktreeContext(
   }
 }
 
+function selectExecutionMode(options: {
+  explicitExecutionMode: StartWorkExecutionMode | null
+  existingExecutionMode?: StartWorkExecutionMode
+  remainingTasks: number
+}): StartWorkExecutionMode {
+  if (options.explicitExecutionMode) {
+    return options.explicitExecutionMode
+  }
+
+  if (options.existingExecutionMode) {
+    return options.existingExecutionMode
+  }
+
+  return options.remainingTasks > 5 ? "parallel" : "sequential"
+}
+
+function buildExecutionModeBlock(mode: StartWorkExecutionMode): string {
+  if (mode === "parallel") {
+    return "\n**Execution Mode**: Wave-Parallel (`skill(\"wave-parallel-execution\")`)"
+  }
+
+  return "\n**Execution Mode**: Sequential (`skill(\"executing-plans\")`)"
+}
+
 export function createStartWorkHook(ctx: PluginInput) {
   return {
     "chat.message": async (input: StartWorkHookInput, output: StartWorkHookOutput): Promise<void> => {
@@ -82,7 +108,11 @@ export function createStartWorkHook(ctx: PluginInput) {
       const sessionId = input.sessionID
       const timestamp = new Date().toISOString()
 
-      const { planName: explicitPlanName, explicitWorktreePath } = parseUserRequest(promptText)
+      const {
+        planName: explicitPlanName,
+        explicitWorktreePath,
+        explicitExecutionMode,
+      } = parseUserRequest(promptText)
       const { worktreePath, block: worktreeBlock } = resolveWorktreeContext(explicitWorktreePath)
 
       let contextInfo = ""
@@ -104,7 +134,17 @@ The requested plan "${getPlanName(matchedPlan)}" has been completed.
 All ${progress.total} tasks are done. Create a new plan with: /plan "your task"`
           } else {
             if (existingState) clearBoulderState(ctx.directory)
-            const newState = createBoulderState(matchedPlan, sessionId, "atlas", worktreePath)
+            const remainingTasks = Math.max(progress.total - progress.completed, 0)
+            const selectedMode = selectExecutionMode({
+              explicitExecutionMode,
+              remainingTasks,
+            })
+            const executionModeBlock = buildExecutionModeBlock(selectedMode)
+
+            const newState = {
+              ...createBoulderState(matchedPlan, sessionId, "atlas", worktreePath),
+              execution_mode: selectedMode,
+            }
             writeBoulderState(ctx.directory, newState)
 
             contextInfo = `
@@ -116,6 +156,7 @@ All ${progress.total} tasks are done. Create a new plan with: /plan "your task"`
 **Session ID**: ${sessionId}
 **Started**: ${timestamp}
 ${worktreeBlock}
+${executionModeBlock}
 
 boulder.json has been created. Read the plan and begin execution.`
           }
@@ -150,7 +191,14 @@ No incomplete plans available. Create a new plan with: /plan "your task"`
         const progress = getPlanProgress(existingState.active_plan)
 
         if (!progress.isComplete) {
+          const remainingTasks = Math.max(progress.total - progress.completed, 0)
+          const selectedMode = selectExecutionMode({
+            explicitExecutionMode,
+            existingExecutionMode: existingState.execution_mode,
+            remainingTasks,
+          })
           const effectiveWorktree = worktreePath ?? existingState.worktree_path
+          const executionModeBlock = buildExecutionModeBlock(selectedMode)
 
           if (worktreePath !== undefined) {
             const updatedSessions = existingState.session_ids.includes(sessionId)
@@ -159,10 +207,17 @@ No incomplete plans available. Create a new plan with: /plan "your task"`
             writeBoulderState(ctx.directory, {
               ...existingState,
               worktree_path: worktreePath,
+              execution_mode: selectedMode,
               session_ids: updatedSessions,
             })
           } else {
-            appendSessionId(ctx.directory, sessionId)
+            const updatedState = appendSessionId(ctx.directory, sessionId)
+            if (updatedState && updatedState.execution_mode !== selectedMode) {
+              writeBoulderState(ctx.directory, {
+                ...updatedState,
+                execution_mode: selectedMode,
+              })
+            }
           }
 
           const worktreeDisplay = effectiveWorktree ? `\n**Worktree**: ${effectiveWorktree}` : worktreeBlock
@@ -177,6 +232,7 @@ No incomplete plans available. Create a new plan with: /plan "your task"`
 **Sessions**: ${existingState.session_ids.length + 1} (current session appended)
 **Started**: ${existingState.started_at}
 ${worktreeDisplay}
+${executionModeBlock}
 
 The current session (${sessionId}) has been added to session_ids.
 Read the plan file and continue from the first unchecked task.`
@@ -211,7 +267,17 @@ All ${plans.length} plan(s) are complete. Create a new plan with: /plan "your ta
         } else if (incompletePlans.length === 1) {
           const planPath = incompletePlans[0]
           const progress = getPlanProgress(planPath)
-          const newState = createBoulderState(planPath, sessionId, "atlas", worktreePath)
+          const remainingTasks = Math.max(progress.total - progress.completed, 0)
+          const selectedMode = selectExecutionMode({
+            explicitExecutionMode,
+            remainingTasks,
+          })
+          const executionModeBlock = buildExecutionModeBlock(selectedMode)
+
+          const newState = {
+            ...createBoulderState(planPath, sessionId, "atlas", worktreePath),
+            execution_mode: selectedMode,
+          }
           writeBoulderState(ctx.directory, newState)
 
           contextInfo += `
@@ -224,6 +290,7 @@ All ${plans.length} plan(s) are complete. Create a new plan with: /plan "your ta
 **Session ID**: ${sessionId}
 **Started**: ${timestamp}
 ${worktreeBlock}
+${executionModeBlock}
 
 boulder.json has been created. Read the plan and begin execution.`
         } else {

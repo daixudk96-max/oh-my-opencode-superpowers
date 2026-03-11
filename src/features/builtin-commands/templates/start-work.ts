@@ -2,12 +2,16 @@ export const START_WORK_TEMPLATE = `You are starting a Sisyphus work session.
 
 ## ARGUMENTS
 
-- \`/start-work [plan-name] [--worktree <path>]\`
-  - \`plan-name\` (optional): name or partial match of the plan to start
-  - \`--worktree <path>\` (optional): absolute path to an existing git worktree to work in
-    - If specified and valid: hook pre-sets worktree_path in boulder.json
-    - If specified but invalid: you must run \`git worktree add <path> <branch>\` first
-    - If omitted: you MUST choose or create a worktree (see Worktree Setup below)
+- \`/start-work [plan-name] [--worktree <path>] [--mode <sequential|parallel|wave>]\`
+   - \`plan-name\` (optional): name or partial match of the plan to start
+   - \`--worktree <path>\` (optional): absolute path to an existing git worktree to work in
+     - If specified and valid: hook pre-sets worktree_path in boulder.json
+     - If specified but invalid: you must run \`git worktree add <path> <branch>\` first
+     - If omitted: you MUST choose or create a worktree (see Worktree Setup below)
+   - \`--mode <...>\` (optional): force execution mode
+     - \`sequential\` → use \`skill("executing-plans")\`
+     - \`parallel\` or \`wave\` → use \`skill("wave-parallel-execution")\`
+     - If omitted: auto-select by remaining task count (\`>5\` = Wave-Parallel, otherwise Sequential)
 
 ## WHAT TO DO
 

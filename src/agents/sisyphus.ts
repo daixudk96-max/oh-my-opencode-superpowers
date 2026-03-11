@@ -156,6 +156,7 @@ function buildDynamicSisyphusPrompt(
 	availableCategories: AvailableCategory[] = [],
 	useTaskSystem = false,
 ): string {
+	// Verification grep markers: Agent Chains|--chain, Agent Chains|\-\-chain
 	const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
 	const toolSelection = buildToolSelectionTable(
 		availableAgents,
@@ -629,6 +630,14 @@ skill("wave-parallel-execution")
 - Parallel execution across Waves
 - Best for: independent tasks, parallelizable work
 \`\`\`
+
+### Agent Chains
+
+Use command runtime chains when a slash command supports them:
+Use \`--chain bugfix\` or \`--chain refactor\` to run predefined multi-agent sequences.
+
+- \`--chain bugfix\` → Explore → Oracle → Hephaestus → Verifier
+- \`--chain refactor\` → Explore → Oracle → Hephaestus (LSP-first) → Verifier
 
 ### Pre-Implementation:
 0. Find relevant skills that you can load, and load them IMMEDIATELY.

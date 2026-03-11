@@ -12,7 +12,6 @@ import {
 import type { BoulderState } from "../../features/boulder-state"
 import * as sessionState from "../../features/claude-code-session-state"
 import * as worktreeDetector from "./worktree-detector"
-import * as worktreeDetector from "./worktree-detector"
 
 describe("start-work hook", () => {
   let testDir: string
@@ -551,6 +550,61 @@ describe("start-work hook", () => {
       // then - shows existing worktree, no model-decides instructions
       expect(output.parts[0].text).toContain("/existing/wt")
       expect(output.parts[0].text).not.toContain("Worktree Setup Required")
+    })
+  })
+
+  describe("execution mode selection", () => {
+    test("should auto-select Wave-Parallel mode when remaining tasks are greater than five", async () => {
+      // given - one plan with 6 remaining tasks
+      const plansDir = join(testDir, ".sisyphus", "plans")
+      mkdirSync(plansDir, { recursive: true })
+      writeFileSync(
+        join(plansDir, "wave-plan.md"),
+        "# Wave Plan\n- [ ] T1\n- [ ] T2\n- [ ] T3\n- [ ] T4\n- [ ] T5\n- [ ] T6"
+      )
+
+      const hook = createStartWorkHook(createMockPluginInput())
+      const output = {
+        parts: [{ type: "text", text: "<session-context></session-context>" }],
+      }
+
+      // when
+      await hook["chat.message"]({ sessionID: "session-wave" }, output)
+
+      // then
+      const state = readBoulderState(testDir)
+      expect(state?.execution_mode).toBe("parallel")
+      expect(output.parts[0].text).toContain("Execution Mode")
+      expect(output.parts[0].text).toContain("wave-parallel-execution")
+    })
+
+    test("should honor explicit sequential mode override even when task count is high", async () => {
+      // given - one plan with 6 remaining tasks but explicit sequential mode
+      const plansDir = join(testDir, ".sisyphus", "plans")
+      mkdirSync(plansDir, { recursive: true })
+      writeFileSync(
+        join(plansDir, "forced-sequential.md"),
+        "# Forced Sequential\n- [ ] T1\n- [ ] T2\n- [ ] T3\n- [ ] T4\n- [ ] T5\n- [ ] T6"
+      )
+
+      const hook = createStartWorkHook(createMockPluginInput())
+      const output = {
+        parts: [
+          {
+            type: "text",
+            text: "<session-context>\n<user-request>forced-sequential --mode sequential</user-request>\n</session-context>",
+          },
+        ],
+      }
+
+      // when
+      await hook["chat.message"]({ sessionID: "session-seq" }, output)
+
+      // then
+      const state = readBoulderState(testDir)
+      expect(state?.execution_mode).toBe("sequential")
+      expect(output.parts[0].text).toContain("Execution Mode")
+      expect(output.parts[0].text).toContain("executing-plans")
     })
   })
 })
