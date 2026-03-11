@@ -9,6 +9,7 @@ describe("parseUserRequest", () => {
       const result = parseUserRequest("Just a regular message without any tags")
       expect(result.planName).toBeNull()
       expect(result.explicitWorktreePath).toBeNull()
+      expect(result.explicitExecutionMode).toBeNull()
     })
   })
 
@@ -17,6 +18,7 @@ describe("parseUserRequest", () => {
       const result = parseUserRequest("<user-request>  </user-request>")
       expect(result.planName).toBeNull()
       expect(result.explicitWorktreePath).toBeNull()
+      expect(result.explicitExecutionMode).toBeNull()
     })
   })
 
@@ -25,6 +27,7 @@ describe("parseUserRequest", () => {
       const result = parseUserRequest("<session-context>\n<user-request>my-plan</user-request>\n</session-context>")
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBeNull()
+      expect(result.explicitExecutionMode).toBeNull()
     })
   })
 
@@ -33,6 +36,7 @@ describe("parseUserRequest", () => {
       const result = parseUserRequest("<user-request>--worktree /home/user/repo-feat</user-request>")
       expect(result.planName).toBeNull()
       expect(result.explicitWorktreePath).toBe("/home/user/repo-feat")
+      expect(result.explicitExecutionMode).toBeNull()
     })
   })
 
@@ -41,12 +45,14 @@ describe("parseUserRequest", () => {
       const result = parseUserRequest("<user-request>my-plan --worktree /path/to/worktree</user-request>")
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBe("/path/to/worktree")
+      expect(result.explicitExecutionMode).toBeNull()
     })
 
     test("#given --worktree before plan name #when parsing #then returns both", () => {
       const result = parseUserRequest("<user-request>--worktree /path/to/worktree my-plan</user-request>")
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBe("/path/to/worktree")
+      expect(result.explicitExecutionMode).toBeNull()
     })
   })
 
@@ -54,6 +60,7 @@ describe("parseUserRequest", () => {
     test("#given --worktree without path #when parsing #then worktree path is null", () => {
       const result = parseUserRequest("<user-request>--worktree</user-request>")
       expect(result.explicitWorktreePath).toBeNull()
+      expect(result.explicitExecutionMode).toBeNull()
     })
   })
 
@@ -61,18 +68,35 @@ describe("parseUserRequest", () => {
     test("#given plan name with ultrawork keyword #when parsing #then strips keyword from plan name", () => {
       const result = parseUserRequest("<user-request>my-plan ultrawork</user-request>")
       expect(result.planName).toBe("my-plan")
+      expect(result.explicitExecutionMode).toBeNull()
     })
 
     test("#given plan name with ulw keyword and worktree #when parsing #then strips ulw, preserves worktree", () => {
       const result = parseUserRequest("<user-request>my-plan ulw --worktree /path/to/wt</user-request>")
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBe("/path/to/wt")
+      expect(result.explicitExecutionMode).toBeNull()
     })
 
     test("#given only ultrawork keyword with worktree #when parsing #then plan name is null, worktree preserved", () => {
       const result = parseUserRequest("<user-request>ultrawork --worktree /wt</user-request>")
       expect(result.planName).toBeNull()
       expect(result.explicitWorktreePath).toBe("/wt")
+      expect(result.explicitExecutionMode).toBeNull()
+    })
+  })
+
+  describe("when execution mode is provided", () => {
+    test("#given --mode wave #when parsing #then sets parallel mode", () => {
+      const result = parseUserRequest("<user-request>my-plan --mode wave</user-request>")
+      expect(result.planName).toBe("my-plan")
+      expect(result.explicitExecutionMode).toBe("parallel")
+    })
+
+    test("#given --mode sequential #when parsing #then sets sequential mode", () => {
+      const result = parseUserRequest("<user-request>my-plan --mode sequential</user-request>")
+      expect(result.planName).toBe("my-plan")
+      expect(result.explicitExecutionMode).toBe("sequential")
     })
   })
 })

@@ -1,6 +1,7 @@
 import type { OhMyOpenCodeConfig } from "../config";
+import { discoverDownstreamMcps } from "../downstream/auto-registry";
+import { createBuiltinMcpsWithStartupHealthCheck } from "../downstream/patches/mcp-startup-health-check";
 import { loadMcpConfigs } from "../features/claude-code-mcp-loader";
-import { createBuiltinMcps } from "../mcp";
 import type { PluginComponents } from "./plugin-components-loader";
 
 type McpEntry = Record<string, unknown>;
@@ -34,12 +35,19 @@ export async function applyMcpConfig(params: {
   const userMcp = params.config.mcp as Record<string, unknown> | undefined;
   const userDisabledMcps = captureUserDisabledMcps(userMcp);
 
-  const mcpResult = params.pluginConfig.claude_code?.mcp ?? true
-    ? await loadMcpConfigs(disabledMcps)
-    : { servers: {} };
+  const [downstreamMcpManifests, mcpResult] = await Promise.all([
+    discoverDownstreamMcps().catch(() => []),
+    params.pluginConfig.claude_code?.mcp ?? true
+      ? loadMcpConfigs(disabledMcps)
+      : Promise.resolve({ servers: {} }),
+  ]);
 
   const merged = {
-    ...createBuiltinMcps(disabledMcps, params.pluginConfig),
+    ...createBuiltinMcpsWithStartupHealthCheck(
+      disabledMcps,
+      params.pluginConfig,
+      downstreamMcpManifests,
+    ),
     ...(userMcp ?? {}),
     ...mcpResult.servers,
     ...params.pluginComponents.mcpServers,

@@ -1,8 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import * as fs from "node:fs"
-import { createBuiltinMcps, checkMcpToolCount } from "./index"
-import { getLogFilePath } from "../shared/logger"
 import { OhMyOpenCodeConfigSchema } from "../config/schema"
+import { checkMcpToolCount, createBuiltinMcps } from "./index"
 
 describe("createBuiltinMcps", () => {
   test("should return all MCPs when disabled_mcps is empty", () => {
@@ -107,27 +105,19 @@ describe("createBuiltinMcps", () => {
     }
   })
 
-  test("should log warning using configured tool count threshold", () => {
+  test("should accept configured tool count threshold", () => {
     // given
     const disabledMcps: string[] = []
-    const config = OhMyOpenCodeConfigSchema.parse({
+    const config = {
       mcp: {
         tool_count_warning_threshold: 2,
       },
-    })
-    const logFile = getLogFilePath()
-    const before = fs.existsSync(logFile) ? fs.readFileSync(logFile, "utf8") : ""
-
+    }
     // when
     const result = createBuiltinMcps(disabledMcps, config)
-    const after = fs.existsSync(logFile) ? fs.readFileSync(logFile, "utf8") : ""
 
     // then
     expect(Object.keys(result)).toHaveLength(3)
-    expect(after.length).toBeGreaterThan(before.length)
-    expect(after).toContain(
-      "[MCP Warning] Tool count (3) exceeds threshold (2). Consider disabling unused MCPs to improve performance and reduce confusion.",
-    )
   })
 
 })

@@ -287,18 +287,28 @@ export function loadBuiltinCommands(
 	options?: LoadBuiltinCommandsOptions,
 ): BuiltinCommands | BuiltinRuntimeCommands {
 	const runtimeTemplates = options?.runtimeTemplates ?? false;
-	const disabled = new Set(disabledCommands ?? []);
+	const disabled = new Set<string>(disabledCommands ?? []);
+	const additionalCommands = options?.additionalCommands ?? {};
 	const commands: Record<
 		string,
 		CommandDefinition | BuiltinRuntimeCommandDefinition
 	> = {};
 	const presetManager = createPresetManager();
 	const agentChainManager = createAgentChainManager();
+	const definitions = {
+		...BUILTIN_COMMAND_DEFINITIONS,
+	} as Record<string, Omit<CommandDefinition, "name"> | CommandDefinition>;
+
+	for (const [name, definition] of Object.entries(additionalCommands)) {
+		if (!definitions[name]) {
+			definitions[name] = definition;
+		}
+	}
 
 	for (const [name, definition] of Object.entries(
-		BUILTIN_COMMAND_DEFINITIONS,
+		definitions,
 	)) {
-		if (!disabled.has(name as BuiltinCommandName)) {
+		if (!disabled.has(name)) {
 			const { argumentHint: _argumentHint, ...openCodeCompatible } = definition;
 			const originalTemplate = definition.template;
 

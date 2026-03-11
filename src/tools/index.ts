@@ -31,6 +31,7 @@ import {
 
 import type { PluginInput, ToolDefinition } from "@opencode-ai/plugin"
 import type { BackgroundManager } from "../features/background-agent"
+import type { ToolManifest } from "../downstream/types"
 
 type OpencodeClient = PluginInput["client"]
 
@@ -54,11 +55,26 @@ export function createBackgroundTools(manager: BackgroundManager, client: Openco
   }
 }
 
-export const builtinTools: Record<string, ToolDefinition> = {
-  lsp_goto_definition,
-  lsp_find_references,
-  lsp_symbols,
-  lsp_diagnostics,
-  lsp_prepare_rename,
-  lsp_rename,
+export function createBuiltinTools(options: { additionalTools?: ToolManifest[] } = {}): Record<string, ToolDefinition> {
+  const tools: Record<string, ToolDefinition> = {
+    lsp_goto_definition,
+    lsp_find_references,
+    lsp_symbols,
+    lsp_diagnostics,
+    lsp_prepare_rename,
+    lsp_rename,
+  }
+
+  for (const manifest of options.additionalTools ?? []) {
+    if (tools[manifest.name]) continue
+    if (manifest.definition) {
+      tools[manifest.name] = manifest.definition
+      continue
+    }
+    tools[manifest.name] = manifest.factory()
+  }
+
+  return tools
 }
+
+export const builtinTools: Record<string, ToolDefinition> = createBuiltinTools()

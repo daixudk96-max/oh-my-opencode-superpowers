@@ -9,13 +9,14 @@ import type { HookName } from "./config";
 import { createHooks } from "./create-hooks";
 import { createManagers } from "./create-managers";
 import { createTools } from "./create-tools";
+import { bootstrapDownstreamHooks } from "./downstream/runtime-hook-executor";
+import { createCommitSizeCheckerWrapper } from "./downstream/patches/commit-size-checker-wrapper";
 import { contextCollector } from "./features/context-injector";
 import { createSessionScorer } from "./features/session-scorer";
 import {
 	createAgentSkillReminderHook,
 	createBehaviorAnchorHook,
 	createCodebaseAssessmentHook,
-	createCommitSizeChecker,
 	createFinalAuditHook,
 	createInstinctLearnerHook,
 	createInstinctTriggerHook,
@@ -39,7 +40,6 @@ import {
 	createSkillAutoInjectorHook,
 	createSkillAutoTriggerHook,
 	createSubagentVerificationHook,
-	createTasksMdCreationGuardHook,
 	createTddGuardHook,
 	createVerbosityControllerHook,
 } from "./hooks";
@@ -67,6 +67,23 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 	startTmuxCheck();
 
 	const pluginConfig = loadPluginConfig(ctx.directory, ctx);
+	const downstreamHooks = await bootstrapDownstreamHooks({
+		ctx,
+		skipManifestNames: new Set([
+			"agent-skill-reminder",
+			"tdd-guard",
+			"plan-reorganizer",
+			"plan-update-reminder",
+			"plan-attention-refresher",
+			"subagent-verification",
+			"codebase-assessment",
+			"lsp-diagnostics-enforcer",
+			"phase-flow-enforcer",
+			"mdsel-reminder",
+			"behavior-anchor",
+			"planning-flow-guide",
+		]),
+	});
 	await repairMisbucketedSessionMetadata({
 		directory: ctx.directory,
 	})
@@ -83,22 +100,28 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 
 	const detector = createContextDetector();
 	const projectContext = detector.detect(ctx.directory);
-	const disabledHooks = new Set<HookName>();
+	const disabledHooks = new Set<string>();
 	const disabledHookConfigs = (
 		pluginConfig as {
-			disabled_hooks?: Array<HookName | { name: HookName; when?: HookCondition }>;
+			disabled_hooks?: Array<string | { name: string; when?: HookCondition }>;
 		}
 	).disabled_hooks;
 
 	for (const hookConfig of disabledHookConfigs ?? []) {
 		if (typeof hookConfig === "string") {
-			disabledHooks.add(hookConfig);
+			const hookName = downstreamHooks.parseHookName(hookConfig);
+			if (hookName) {
+				disabledHooks.add(hookName);
+			}
 			continue;
 		}
 
 		const condition = hookConfig.when;
 		if (!condition || detector.matchesCondition(projectContext, condition)) {
-			disabledHooks.add(hookConfig.name);
+			const hookName = downstreamHooks.parseHookName(hookConfig.name);
+			if (hookName) {
+				disabledHooks.add(hookName);
+			}
 		}
 	}
 
@@ -232,7 +255,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 	// TDD-EXEMPT: reason="Moving tasks-md-creation-guard to modular flow"
 	const commitSizeChecker = isHookEnabledLoose("commit-size-checker")
 
-		? createCommitSizeChecker()
+		? createCommitSizeCheckerWrapper()
 		: null;
 	const planningFlowGuide = isHookEnabledLoose("planning-flow-guide")
 		? createPlanningFlowGuideHook(ctx)
@@ -287,6 +310,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 				input as never,
 				output as never,
 			);
+			await downstreamHooks.runChatMessage(input as never, output as never);
 		},
 
 		event: async (input) => {
@@ -349,6 +373,8 @@ ${report}`);
 						});
 					});
 			}
+
+			await downstreamHooks.runEvent(input as never);
 		},
 
 		"tool.execute.before": async (input, output) => {
@@ -408,6 +434,7 @@ ${report}`);
 				input as never,
 				output as never,
 			);
+			await downstreamHooks.runToolExecuteBefore(input as never, output as never);
 
 			const blockedOutput = output as { blocked?: boolean; message?: string };
 			if (blockedOutput.blocked) {
@@ -473,6 +500,7 @@ ${report}`);
 				input as never,
 				output as never,
 			);
+			await downstreamHooks.runToolExecuteAfter(input as never, output as never);
 		},
 
 		"experimental.session.compacting": async (
@@ -487,6 +515,7 @@ ${report}`);
 			if (hooks.compactionContextInjector) {
 				output.context.push(hooks.compactionContextInjector(_input.sessionID));
 			}
+			await downstreamHooks.runExperimentalSessionCompacting(_input, output);
 		},
 	};
 };
