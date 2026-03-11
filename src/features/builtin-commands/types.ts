@@ -36,6 +36,7 @@ export interface BuiltinCommandConfig {
 
 export interface LoadBuiltinCommandsOptions {
   runtimeTemplates?: boolean
+  additionalCommands?: Record<string, Omit<CommandDefinition, "name"> | CommandDefinition>
 }
 
 export type BuiltinCommands = Record<string, CommandDefinition>

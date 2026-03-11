@@ -1,26 +1,20 @@
-import { createWebsearchConfig } from "./websearch"
+import type { OhMyOpenCodeConfig } from "../config/schema"
+import type { McpManifest } from "../downstream/types"
+import type { McpServerConfig } from "../features/claude-code-mcp-loader/types"
+import { log } from "../shared/logger"
 import { context7 } from "./context7"
 import { grep_app } from "./grep-app"
-import type { OhMyOpenCodeConfig } from "../config/schema"
-import { log } from "../shared/logger"
-import { resolveMcpTemplates, type McpTemplateConfig } from "./templates"
-import { createLazyMcpRegistry } from "./lazy-loader"
 import { createMcpHealthChecker } from "./health-checker"
+import { createLazyMcpRegistry } from "./lazy-loader"
 import { createPostHookTrigger } from "./post-hook-trigger"
+import { type McpTemplateConfig, resolveMcpTemplates } from "./templates"
+import { createWebsearchConfig } from "./websearch"
 
-export { McpNameSchema, type McpName } from "./types"
-export { resolveMcpTemplates } from "./templates"
-export { createLazyMcpRegistry } from "./lazy-loader"
 export { createMcpHealthChecker } from "./health-checker"
+export { createLazyMcpRegistry } from "./lazy-loader"
 export { createPostHookTrigger } from "./post-hook-trigger"
-
-type RemoteMcpConfig = {
-  type: "remote"
-  url: string
-  enabled: boolean
-  headers?: Record<string, string>
-  oauth?: false
-}
+export { resolveMcpTemplates } from "./templates"
+export { type McpName, McpNameSchema } from "./types"
 
 type McpConfig = {
   templates?: Record<string, McpTemplateConfig | string>
@@ -53,9 +47,13 @@ export function checkMcpToolCount(
   return { warned: false }
 }
 
-export function createBuiltinMcps(disabledMcps: string[] = [], config?: OhMyOpenCodeConfig) {
-  const mcps: Record<string, RemoteMcpConfig> = {}
-  const mcpConfig = (config as (OhMyOpenCodeConfig & { mcp?: McpConfig }) | undefined)?.mcp
+export function createBuiltinMcps(
+  disabledMcps: string[] = [],
+  config?: OhMyOpenCodeConfig & { mcp?: McpConfig },
+  additionalMcps: McpManifest[] = []
+) {
+  const mcps: Record<string, McpServerConfig> = {}
+  const mcpConfig = config?.mcp
 
   if (!disabledMcps.includes("websearch")) {
     mcps.websearch = createWebsearchConfig(config?.websearch)
@@ -77,6 +75,12 @@ export function createBuiltinMcps(disabledMcps: string[] = [], config?: OhMyOpen
         mcps[name] = mcpConfig
       }
     }
+  }
+
+  for (const manifest of additionalMcps) {
+    if (disabledMcps.includes(manifest.name)) continue
+    if (mcps[manifest.name]) continue
+    mcps[manifest.name] = manifest.configFactory(config)
   }
 
   const toolCount = Object.keys(mcps).length

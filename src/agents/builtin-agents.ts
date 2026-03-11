@@ -26,6 +26,7 @@ import { maybeCreateSisyphusConfig } from "./builtin-agents/sisyphus-agent"
 import { maybeCreateHephaestusConfig } from "./builtin-agents/hephaestus-agent"
 import { maybeCreateAtlasConfig } from "./builtin-agents/atlas-agent"
 import { buildCustomAgentMetadata, parseRegisteredAgentSummaries } from "./custom-agent-summaries"
+import { discoverDownstreamAgents } from "../downstream/auto-registry"
 
 type AgentSource = AgentFactory | AgentConfig
 
@@ -86,6 +87,7 @@ export async function createBuiltinAgents(
   const availableModels = await fetchAvailableModels(undefined, {
     connectedProviders: mergedConnectedProviders.length > 0 ? mergedConnectedProviders : undefined,
   })
+  const downstreamAgentManifests = await discoverDownstreamAgents().catch(() => [])
   const isFirstRunNoCache =
     availableModels.size === 0 && mergedConnectedProviders.length === 0
 
@@ -100,10 +102,26 @@ export async function createBuiltinAgents(
 
   const availableSkills = buildAvailableSkills(discoveredSkills, browserProvider, disabledSkills)
 
+  const mergedAgentSources: Record<string, AgentSource> = { ...agentSources }
+  const mergedAgentMetadata = {
+    ...agentMetadata,
+  } as Partial<Record<BuiltinAgentName, AgentPromptMetadata>> & Record<string, AgentPromptMetadata>
+
+  for (const manifest of downstreamAgentManifests) {
+    const normalizedName = manifest.name.trim()
+    if (!normalizedName) continue
+    if (normalizedName in mergedAgentSources) continue
+
+    mergedAgentSources[normalizedName] = manifest.factory as unknown as AgentSource
+    if (manifest.metadata) {
+      mergedAgentMetadata[normalizedName] = manifest.metadata as AgentPromptMetadata
+    }
+  }
+
   // Collect general agents first (for availableAgents), but don't add to result yet
   const { pendingAgentConfigs, availableAgents } = collectPendingBuiltinAgents({
-    agentSources,
-    agentMetadata,
+    agentSources: mergedAgentSources,
+    agentMetadata: mergedAgentMetadata,
     disabledAgents,
     agentOverrides,
     directory,
@@ -118,7 +136,7 @@ export async function createBuiltinAgents(
   })
 
   const registeredAgents = parseRegisteredAgentSummaries(customAgentSummaries)
-  const builtinAgentNames = new Set(Object.keys(agentSources).map((name) => name.toLowerCase()))
+  const builtinAgentNames = new Set(Object.keys(mergedAgentSources).map((name) => name.toLowerCase()))
   const disabledAgentNames = new Set(disabledAgents.map((name) => name.toLowerCase()))
 
   for (const agent of registeredAgents) {
