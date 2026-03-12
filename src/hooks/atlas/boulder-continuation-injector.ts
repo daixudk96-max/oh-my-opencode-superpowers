@@ -48,6 +48,17 @@ export async function injectBoulderContinuation(input: {
   try {
     log(`[${HOOK_NAME}] Injecting boulder continuation`, { sessionID, planName, remaining })
 
+    await ctx.client.tui
+      .showToast({
+        body: {
+          title: "Boulder Continuation",
+          message: `Resuming "${planName}"... (${remaining} tasks remaining)`,
+          variant: "warning" as const,
+          duration: 3000,
+        },
+      })
+      .catch(() => {})
+
     const promptContext = await resolveRecentPromptContextForSession(ctx, sessionID)
     const inheritedTools = resolveInheritedPromptTools(sessionID, promptContext.tools)
 
