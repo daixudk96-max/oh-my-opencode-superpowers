@@ -82,6 +82,10 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 			"mdsel-reminder",
 			"behavior-anchor",
 			"planning-flow-guide",
+			"instinct-trigger",
+			"instinct-learner",
+			"mdsel-enforcer",
+			"tasks-md-creation-guard",
 		]),
 	});
 	await repairMisbucketedSessionMetadata({
