@@ -65,7 +65,7 @@ Session Final: 汇总审计
 ### Task V-1.1: Secret Scanner Bash 拦截 — 正向触发（含 secret + 重定向） <!-- Mode: 2 -->
 
 **Trigger**: `tool.execute.before` — Bash 工具执行前 secret-scanner hook 自动检查
-**Do**: 执行 Bash 命令 `echo "AKIAIOSFODNN7EXAMPLE" > /tmp/secret-test-output.txt`
+**Do**: 执行 Bash 命令 `echo "AKIA...EXAMPLE" > /tmp/secret-test-output.txt`
 
 **Expected**:
 - [ ] Bash 工具被 hook 阻止，返回含 `[Secret Scanner]` 的错误消息
