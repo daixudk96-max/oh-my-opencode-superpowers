@@ -1,4 +1,5 @@
-// TDD-EXEMPT: Regex fix
+import { execSync } from "node:child_process"
+
 /**
  * Commit Size Checker
  *
@@ -28,6 +29,7 @@ export interface CommitCheckResult {
  * Default file count threshold
  */
 const DEFAULT_THRESHOLD = 3
+const COMMIT_BLOCK_THRESHOLD = 10
 
 /**
  * Commit Size Checker interface
@@ -42,7 +44,14 @@ export interface CommitSizeChecker {
   /** Check if command is a git commit */
   isCommitCommand(command: string): boolean
   /** Tool execute before hook */
-  "tool.execute.before"?(input: any, output: any): Promise<void> | void
+  "tool.execute.before"?(
+    input: { tool?: string },
+    output: {
+      args?: { command?: string; cwd?: string }
+      blocked?: boolean
+      message?: string
+    }
+  ): Promise<void> | void
 }
 
 /**
@@ -108,15 +117,43 @@ class CommitSizeCheckerImpl implements CommitSizeChecker {
     return commitPattern.test(command.trim())
   }
 
+  private getStagedFiles(cwd: string): string[] {
+    try {
+      const output = execSync("git diff --cached --name-only", {
+        cwd,
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      })
+      return output
+        .split(/\r?\n/)
+        .map((file) => file.trim())
+        .filter((file) => file.length > 0)
+    } catch {
+      return []
+    }
+  }
+
   // Add the hook interface method
-  "tool.execute.before"(input: any, output: any): void {
+  "tool.execute.before"(
+    input: { tool?: string },
+    output: {
+      args?: { command?: string; cwd?: string }
+      blocked?: boolean
+      message?: string
+    }
+  ): void {
     if (input.tool !== "bash") return
-    const args = output.args as { command?: string }
+    const args = output.args ?? {}
     if (!args.command || !this.isCommitCommand(args.command)) return
 
-    // Extract files - this is a simple mock for the task
-    // In a real implementation we would use git status or similar
-    const files = ["file1", "file2", "file3", "file4"] 
+    const files = this.getStagedFiles(args.cwd ?? process.cwd())
+
+    if (files.length > COMMIT_BLOCK_THRESHOLD) {
+      output.blocked = true
+      output.message = `Commit blocked: ${files.length} files staged (threshold: ${COMMIT_BLOCK_THRESHOLD}). Split your commit.`
+      return
+    }
+
     const result = this.check({ files })
 
     if (result.shouldWarn) {

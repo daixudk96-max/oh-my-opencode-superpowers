@@ -2,8 +2,8 @@
  * Secret Scanner Hook Tests
  */
 
-import { describe, test, expect } from "bun:test"
-import { scanContent, createSecretScannerHook } from "./index"
+import { describe, expect, test } from "bun:test"
+import { createSecretScannerHook, scanContent } from "./index"
 import { DEFAULT_SECRET_SCANNER_CONFIG } from "./patterns"
 
 describe("Secret Scanner Hook", () => {
@@ -262,6 +262,71 @@ MIIEpAIBAAKCAQEA...
         args: {
           filePath: "src/config.ts",
           newString: `const key = "AKIAIOSFODNN7EXAMPLE"`,
+        },
+      }
+
+      // #when - hook is called
+      await hook["tool.execute.before"](input, output)
+
+      // #then - should not block
+      expect(output.blocked).toBeUndefined()
+    })
+
+    test("should block bash command with secret and redirection", async () => {
+      // #given - hook and bash command with secret redirect
+      const ctx = { cwd: "/test" }
+      const hook = createSecretScannerHook(ctx)
+      const input = { tool: "bash", sessionID: "test", callID: "1" }
+      const output: {
+        args: Record<string, unknown>
+        blocked?: boolean
+        message?: string
+      } = {
+        args: {
+          command: 'echo "AKIAIOSFODNN7EXAMPLE" > /tmp/key.txt',
+        },
+      }
+
+      // #when - hook is called
+      await hook["tool.execute.before"](input, output)
+
+      // #then - should block
+      expect(output.blocked).toBe(true)
+      expect(output.message).toContain("Secret Scanner")
+    })
+
+    test("should not block bash command with redirection but no secret", async () => {
+      // #given - hook and safe bash command with redirect
+      const ctx = { cwd: "/test" }
+      const hook = createSecretScannerHook(ctx)
+      const input = { tool: "bash", sessionID: "test", callID: "1" }
+      const output: {
+        args: Record<string, unknown>
+        blocked?: boolean
+      } = {
+        args: {
+          command: 'echo "hello" > /tmp/test.txt',
+        },
+      }
+
+      // #when - hook is called
+      await hook["tool.execute.before"](input, output)
+
+      // #then - should not block
+      expect(output.blocked).toBeUndefined()
+    })
+
+    test("should not block bash command without redirection", async () => {
+      // #given - hook and bash command without redirect
+      const ctx = { cwd: "/test" }
+      const hook = createSecretScannerHook(ctx)
+      const input = { tool: "bash", sessionID: "test", callID: "1" }
+      const output: {
+        args: Record<string, unknown>
+        blocked?: boolean
+      } = {
+        args: {
+          command: "git push origin main",
         },
       }
 

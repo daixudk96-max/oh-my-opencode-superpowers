@@ -5,8 +5,8 @@
  * before it's written to disk. Blocks or warns based on configuration.
  */
 
-import type { SecretScannerConfig, ScanResult, SecretMatch } from "./types"
-import { DEFAULT_SECRET_SCANNER_CONFIG, SECRET_PATTERNS, SAFE_PATTERNS } from "./patterns"
+import { DEFAULT_SECRET_SCANNER_CONFIG, SAFE_PATTERNS, SECRET_PATTERNS } from "./patterns"
+import type { ScanResult, SecretMatch, SecretScannerConfig } from "./types"
 
 /**
  * Check if a path matches any whitelist pattern
@@ -17,7 +17,7 @@ function isWhitelisted(filePath: string, whitelistPatterns: string[]): boolean {
   for (const pattern of whitelistPatterns) {
     // Simple glob matching for common patterns
     // Escape special regex chars except * and ?
-    let regexPattern = pattern
+    const regexPattern = pattern
       .replace(/[.+^${}()|[\]\\]/g, "\\$&")
       .replace(/\*\*/g, "<<<GLOBSTAR>>>")
       .replace(/\*/g, "[^/]*")
@@ -54,6 +54,10 @@ function redactSecret(text: string): string {
     return "*".repeat(text.length)
   }
   return text.slice(0, 2) + "*".repeat(text.length - 4) + text.slice(-2)
+}
+
+function hasBashRedirectionOperator(command: string): boolean {
+  return /(?:^|\s)(?:>>|2>|>)(?:\s|$)/.test(command)
 }
 
 /**
@@ -107,9 +111,6 @@ export function scanContent(
 
   let message: string | undefined
   if (hasSecrets) {
-    const criticalCount = matches.filter(m => m.pattern.severity === "critical").length
-    const highCount = matches.filter(m => m.pattern.severity === "high").length
-    
     message = `[Secret Scanner] Detected ${matches.length} potential secret(s) in ${filePath}:\n`
     message += matches
       .slice(0, 5) // Show max 5 matches
@@ -167,14 +168,34 @@ export function createSecretScannerHook(
         message?: string
       }
     ): Promise<void> => {
-      // Only intercept Edit and Write tools
+      // Only intercept Edit, Write, and Bash tools
       const toolLower = input.tool.toLowerCase()
-      if (toolLower !== "edit" && toolLower !== "write") {
+      if (toolLower !== "edit" && toolLower !== "write" && toolLower !== "bash") {
         return
       }
 
       // Check if hook is enabled
       if (!config.enabled) {
+        return
+      }
+
+      if (toolLower === "bash") {
+        const command = output.args.command as string | undefined
+        if (!command || !hasBashRedirectionOperator(command)) {
+          return
+        }
+
+        const result = scanContent(command, "[bash command]", config)
+        if (!result.hasSecrets) {
+          return
+        }
+
+        if (ctx.log) {
+          ctx.log(result.message || "[Secret Scanner] Found potential secret in bash redirection command")
+        }
+
+        output.blocked = true
+        output.message = result.message
         return
       }
 
@@ -204,4 +225,4 @@ export function createSecretScannerHook(
 }
 
 export { DEFAULT_SECRET_SCANNER_CONFIG } from "./patterns"
-export type { SecretScannerConfig, ScanResult, SecretMatch } from "./types"
+export type { ScanResult, SecretMatch, SecretScannerConfig } from "./types"
