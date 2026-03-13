@@ -82,6 +82,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 			"mdsel-reminder",
 			"behavior-anchor",
 			"planning-flow-guide",
+			"secret-scanner",
 			"instinct-trigger",
 			"instinct-learner",
 			"mdsel-enforcer",

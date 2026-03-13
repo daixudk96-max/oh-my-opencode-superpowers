@@ -295,6 +295,58 @@ MIIEpAIBAAKCAQEA...
       expect(output.message).toContain("Secret Scanner")
     })
 
+    test("should block bash command with secret and redirection without spacing", async () => {
+      // #given - hook and bash command with secret redirect (no spacing)
+      const ctx = { cwd: "/test" }
+      const hook = createSecretScannerHook(ctx)
+      const input = { tool: "bash", sessionID: "test", callID: "1" }
+      const output: {
+        args: Record<string, unknown>
+        blocked?: boolean
+        message?: string
+      } = {
+        args: {
+          command: 'echo "AKIAIOSFODNN7EXAMPLE" >/tmp/key.txt',
+        },
+      }
+
+      // #when - hook is called
+      await hook["tool.execute.before"](input, output)
+
+      // #then - should block
+      expect(output.blocked).toBe(true)
+      expect(output.message).toContain("Secret Scanner")
+    })
+
+    test("should log bash command checks and block reason when logger exists", async () => {
+      // #given - hook with logger and bash command with secret redirect
+      const logs: string[] = []
+      const ctx = {
+        cwd: "/test",
+        log: (message: string) => {
+          logs.push(message)
+        },
+      }
+      const hook = createSecretScannerHook(ctx)
+      const input = { tool: "bash", sessionID: "test", callID: "1" }
+      const output: {
+        args: Record<string, unknown>
+        blocked?: boolean
+      } = {
+        args: {
+          command: 'echo "AKIAIOSFODNN7EXAMPLE" >/tmp/key.txt',
+        },
+      }
+
+      // #when - hook is called
+      await hook["tool.execute.before"](input, output)
+
+      // #then - should log check and block
+      expect(output.blocked).toBe(true)
+      expect(logs.some(message => message.includes("Checking bash command for redirected secrets"))).toBe(true)
+      expect(logs.some(message => message.includes("Blocking bash command due to detected secret in redirected output"))).toBe(true)
+    })
+
     test("should not block bash command with redirection but no secret", async () => {
       // #given - hook and safe bash command with redirect
       const ctx = { cwd: "/test" }

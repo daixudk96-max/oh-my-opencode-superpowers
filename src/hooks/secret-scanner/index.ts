@@ -57,7 +57,7 @@ function redactSecret(text: string): string {
 }
 
 function hasBashRedirectionOperator(command: string): boolean {
-  return /(?:^|\s)(?:>>|2>|>)(?:\s|$)/.test(command)
+  return /(?:^|\s)(?:>>|2>|>)\s*\S+/.test(command)
 }
 
 /**
@@ -181,7 +181,15 @@ export function createSecretScannerHook(
 
       if (toolLower === "bash") {
         const command = output.args.command as string | undefined
-        if (!command || !hasBashRedirectionOperator(command)) {
+        if (!command) {
+          return
+        }
+
+        if (ctx.log) {
+          ctx.log(`[Secret Scanner] Checking bash command for redirected secrets: ${command}`)
+        }
+
+        if (!hasBashRedirectionOperator(command)) {
           return
         }
 
@@ -192,6 +200,7 @@ export function createSecretScannerHook(
 
         if (ctx.log) {
           ctx.log(result.message || "[Secret Scanner] Found potential secret in bash redirection command")
+          ctx.log("[Secret Scanner] Blocking bash command due to detected secret in redirected output")
         }
 
         output.blocked = true
@@ -216,6 +225,9 @@ export function createSecretScannerHook(
         }
 
         if (result.shouldBlock) {
+          if (ctx.log) {
+            ctx.log(`[Secret Scanner] Blocking ${toolLower} for ${filePath} due to detected secret(s)`)
+          }
           output.blocked = true
           output.message = result.message
         }

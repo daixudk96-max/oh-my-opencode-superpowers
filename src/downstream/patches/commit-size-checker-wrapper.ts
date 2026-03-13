@@ -3,33 +3,39 @@ import type { CommitSizeChecker } from "../../hooks/pre-tool-use/commit-size-che
 
 type ToolExecuteBeforeInput = { tool?: string }
 type ToolExecuteBeforeOutput = {
-  args?: { command?: string }
+  args?: { command?: string; cwd?: string }
   blocked?: boolean
   message?: string
 }
-
-const DEFAULT_WRAPPER_FILE_SAMPLE = ["file-1", "file-2", "file-3", "file-4"]
 
 /**
  * Pattern C wrapper: preserve upstream checker behavior and add warning emission.
  */
 export function createCommitSizeCheckerWrapper(): CommitSizeChecker {
   const checker = createCommitSizeChecker()
+  const originalHook = checker["tool.execute.before"]?.bind(checker)
 
-  return {
-    ...checker,
-    "tool.execute.before": (input: ToolExecuteBeforeInput, output: ToolExecuteBeforeOutput): void => {
-      checker["tool.execute.before"]?.(input, output)
+  checker["tool.execute.before"] = (input: ToolExecuteBeforeInput, output: ToolExecuteBeforeOutput): void => {
+    originalHook?.(input, output)
 
-      if (input.tool !== "bash") return
-      const command = output.args?.command
-      if (!command || !checker.isCommitCommand(command)) return
+    // originalHook now handles staged file detection and blocking.
+    // Only run wrapper fallback if originalHook didn't already block.
+    if (output.blocked) return
 
-      const result = checker.check({ files: DEFAULT_WRAPPER_FILE_SAMPLE })
-      if (!result.shouldWarn || !result.message) return
+    if (input.tool !== "bash") return
+    const command = output.args?.command
+    if (!command || !checker.isCommitCommand(command)) return
 
-      const prefix = output.message && output.message.length > 0 ? "\n\n" : ""
-      output.message = `${output.message ?? ""}${prefix}${result.message}`
-    },
+    const files = checker.getStagedFiles(output.args?.cwd ?? process.cwd())
+    const result = checker.check({ files })
+    if (!result.shouldWarn) return
+
+    output.blocked = true
+    if (!result.message) return
+
+    const prefix = output.message && output.message.length > 0 ? "\n\n" : ""
+    output.message = `${output.message ?? ""}${prefix}${result.message}`
   }
+
+  return checker
 }

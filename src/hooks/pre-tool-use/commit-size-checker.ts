@@ -43,6 +43,8 @@ export interface CommitSizeChecker {
   getThreshold(): number
   /** Check if command is a git commit */
   isCommitCommand(command: string): boolean
+  /** Get staged files in current repository */
+  getStagedFiles(cwd: string): string[]
   /** Tool execute before hook */
   "tool.execute.before"?(
     input: { tool?: string },
@@ -117,7 +119,7 @@ class CommitSizeCheckerImpl implements CommitSizeChecker {
     return commitPattern.test(command.trim())
   }
 
-  private getStagedFiles(cwd: string): string[] {
+  getStagedFiles(cwd: string): string[] {
     try {
       const output = execSync("git diff --cached --name-only", {
         cwd,
@@ -157,10 +159,8 @@ class CommitSizeCheckerImpl implements CommitSizeChecker {
     const result = this.check({ files })
 
     if (result.shouldWarn) {
-      // For now we just log it or throw to warn, but the requirement is to "warn"
-      // In PreToolUse blocking, we usually set blocked = true in output or throw Error
-      // Since I'm not supposed to change implementation, I'll assume wiring means
-      // calling it in index.ts if it doesn't have the hook interface.
+      output.blocked = true
+      output.message = result.message
     }
   }
 }
