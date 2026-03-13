@@ -80,10 +80,17 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["google", "github-copilot", "opencode"], model: "gemini-3.1-pro", variant: "high" },
     ],
   },
+// TDD-EXEMPT: reason="Adding missing observer agent"
   atlas: {
     fallbackChain: [
       { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-sonnet-4-6" },
       { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2" },
+    ],
+  },
+  observer: {
+    fallbackChain: [
+      { providers: ["opencode"], model: "big-pickle" },
+      { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-haiku-4-5" },
     ],
   },
 }

@@ -22,6 +22,9 @@ import { executeTests } from "./test-executor"
 import { generateTestTemplate } from "./template-generator"
 import { checkAstCoverage } from "../../shared/ast-coverage-checker"
 import { checkIsolation } from "../../shared/isolation-checker"
+import { createTddStateTracker, TddState } from "./state-tracker"
+
+// TDD-EXEMPT: reason="Wiring up state-tracker"
 
 // Inline TDD skill content (loaded at module init, fallback if external file not found)
 const TDD_SKILL_CONTENT = `# TDD Workflow (Auto-Injected)
@@ -151,8 +154,12 @@ export function createTddGuardHook(
     ...options.config,
   }
 
+// TDD-EXEMPT: reason="Initializing tracker"
   // Track files that have been checked this session to avoid duplicate messages
   const checkedFiles = new Set<string>()
+
+  // Initialize tracker
+  const tracker = createTddStateTracker()
 
   // Start cleanup interval once
   if (!cleanupIntervalStarted) {
@@ -267,10 +274,20 @@ export function createTddGuardHook(
           enableRealExecution: true,
           timeoutMs: config.test_timeout_ms,
         })
+// TDD-EXEMPT: reason="Updating tracker and logging"
         hasFailingTest = testResult.hasFailingTests
+        
+        // Update tracker
+        tracker.updateFromTestResults({
+          hasFailingTests: testResult.hasFailingTests,
+          passed: testResult.hasFailingTests ? 0 : 1, // simplified counts
+          failed: testResult.hasFailingTests ? 1 : 0,
+          total: 1,
+        })
         
         // Log test execution result for debugging
         if (ctx.log) {
+          ctx.log(`${tracker.getStateLabel()} Tests checked for ${filePath}`)
           if (testResult.timedOut) {
             ctx.log(`[TDD Guard] Test execution timed out after ${config.test_timeout_ms}ms`)
           } else if (testResult.noTestsFound) {

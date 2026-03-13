@@ -48,6 +48,7 @@ export const HookNameSchema = z.enum([
 	"tasks-todowrite-disabler",
 	"runtime-fallback",
 	"write-existing-file-guard",
+	"secret-scanner",
 	// TDD-EXEMPT: reason="Adding tasks-md-creation-guard to hook schema"
 	"tasks-md-creation-guard",
 	"anthropic-effort",

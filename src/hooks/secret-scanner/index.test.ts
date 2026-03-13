@@ -283,7 +283,7 @@ MIIEpAIBAAKCAQEA...
         message?: string
       } = {
         args: {
-          command: 'echo "AKIAIOSFODNN7EXAMPLE" > /tmp/key.txt',
+          command: 'echo "AKIAIOSFODNN7EXAMPLE" > /tmp/secret-test-output.txt',
         },
       }
 

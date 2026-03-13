@@ -177,7 +177,7 @@ src/features/boulder-state/ (计划级元数据)
 
 ## Session 4: start-work-hardening 验证
 
-### Task V-4.1: start-work hook 结构验证 <!-- Mode: 2 -->
+### Task V-4.1: start-work hook 结构验证 [x]
 
 **Trigger**: 静态检查
 **Do**:
@@ -189,36 +189,36 @@ src/features/boulder-state/ (计划级元数据)
 3. 确认 start-work hook 注册到生命周期
 
 **Expected**:
-- [ ] 执行模式选择逻辑存在（至少有 Sequential 和 Wave 两个选项）
-- [ ] plan worktree 创建调用了 worktree-manager 或等价逻辑
-- [ ] hook 注册到 chat.message 或类似生命周期（响应 /start-work 命令）
+- [x] 执行模式选择逻辑存在（至少有 Sequential 和 Wave 两个选项） -- **FAIL (缺失)**
+- [x] plan worktree 创建调用了 worktree-manager 或等价逻辑 -- **PASS (引导式)**
+- [x] hook 注册到 chat.message 或类似生命周期（响应 /start-work 命令） -- **PASS**
 
 **Pass**: start-work hook 包含模式选择和 worktree 创建
 **Fail**: 增强缺失或未注册
 
 ---
 
-### Task V-4.1-record: 记录 start-work hook 结构验证结果
+### Task V-4.1-record: 记录 start-work hook 结构验证结果 [x]
 将 V-4.1 结果追加到 findings 和 progress。
 
 ---
 
-### Task V-4.2: start-work — 单元测试 <!-- Mode: bun test -->
+### Task V-4.2: start-work — 单元测试 [x] <!-- Mode: bun test -->
 
 **Trigger**: N/A
 **Do**: 运行 `bun test src/hooks/start-work/` (包括 index.test.ts, runtime-context.test.ts)
 
 **Expected**:
-- [ ] 全部测试 PASS
-- [ ] 覆盖执行模式选择逻辑
-- [ ] 覆盖 boulder-state 集成
+- [x] 全部测试 PASS
+- [x] 覆盖执行模式选择逻辑 -- **FAIL (功能缺失，无相关测试)**
+- [x] 覆盖 boulder-state 集成 -- **PASS**
 
 **Pass**: 全部通过
 **Fail**: 任何测试失败
 
 ---
 
-### Task V-4.2-record: 记录 start-work 单元测试结果
+### Task V-4.2-record: 记录 start-work 单元测试结果 [x]
 将 V-4.2 结果追加到 findings 和 progress。
 
 ---

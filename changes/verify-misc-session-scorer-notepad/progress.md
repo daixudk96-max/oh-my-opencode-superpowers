@@ -8,7 +8,7 @@
 | Session 0 | 前置检查 | V-0.1 | completed | 注册状态已确认 |
 | Session 1 | session-scorer | V-1.1 ~ V-1.3 | completed | 单元测试 + 评分公式 + event 注册全部验证通过 |
 | Session 2 | sisyphus-junior-notepad | V-2.1 ~ V-2.2 | completed | 单元测试 + 指令内容验证通过 |
-| Session 2 | sisyphus-junior-notepad | V-2.3 ~ V-2.4 | pending | 条件链路 + 反向触发 |
+| Session 2 | sisyphus-junior-notepad | V-2.3 ~ V-2.4 | completed | 条件链路 + 反向触发验证通过 |
 
 ## Execution Log
 
@@ -18,6 +18,8 @@
 - [2026-03-10] Task V-1.3: PASS — 验证 `session.stop` 事件注册及评分输出逻辑。
 - [2026-03-10] Task V-2.1: PASS — 运行 `sisyphus-junior-notepad` 单元测试并通过 (4/4)。
 - [2026-03-10] Task V-2.2: PASS — 验证 NOTEPAD_DIRECTIVE 内容，包含 findings/progress 追加指令及 tasks.md 只读声明。确认 SYSTEM_DIRECTIVE_PREFIX 唯一性。
+- [2026-03-11] Task V-2.3: PASS — 静态检查确认 hook 条件链路 (tool/orchestrator/prefix) 完整且 args 修改安全。
+- [2026-03-11] Task V-2.4: PASS — 验证非 Atlas 调用不触发注入，条件过滤逻辑正确。
 
 ## Reboot Check
 

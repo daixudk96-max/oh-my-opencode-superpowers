@@ -49,3 +49,33 @@
 3. **代码逻辑流**:
    - `pollForCompletion` -> `checkCompletionConditions` -> `getContinuationState` -> `hasActiveBoulderContinuation` -> `!progress.isComplete`
    - 由于缺失对重试状态的检测，CLI 无法感知任务已被 `boulder-state` 标记为 "blocked" 或 "isMaxRetries: true"。
+
+### start-work hook 结构验证结果 (Task V-4.1)
+- **检查文件**: `src/hooks/start-work/start-work-hook.ts`
+- **结论**: 部分通过。增强了 boulder-state 集成和 worktree 基础支持，但缺失了执行模式选择。
+
+1. **boulder-state 集成**: **PASS**。
+   - Hook 正确使用了 `readBoulderState`, `writeBoulderState`, `createBoulderState`。
+   - 支持自动选择唯一未完成计划并创建 `boulder.json`。
+
+2. **Worktree 基础支持**: **PASS**。
+   - 支持 `--worktree <path>` 参数解析。
+   - 通过 `detectWorktreePath` 校验路径。
+   - 在 `boulder.json` 中持久化 `worktree_path`。
+   - 当缺失 worktree 时，注入 `Worktree Setup Required` 指导块。
+
+3. **执行模式选择 (Sequential vs Wave)**: **FAIL**。
+   - 代码中**完全缺失**对 `execution_mode` (sequential/parallel) 的选择逻辑。
+   - 虽然 `boulder-state` 的 `types.ts` 定义了这些模式，但 `start-work` hook 尚未实现交互式或参数式的模式切换。
+
+### start-work 单元测试结果 (Task V-4.2)
+- **命令**: `bun test src/hooks/start-work/`
+- **结果**: **PASS**。
+- **统计**: 36 pass, 0 fail.
+- **验证点**:
+  - 覆盖了计划自动选择和恢复逻辑。
+  - 覆盖了 worktree 路径校验和存储。
+  - 覆盖了 $SESSION_ID 和 $TIMESTAMP 占位符替换。
+  - 覆盖了 Atlas 代理自动切换。
+- **局限性**: 由于功能缺失，测试未包含对 Wave 执行模式的覆盖。
+

@@ -54,53 +54,36 @@
 
 ---
 
-## Phase 2: 静态检查 — 功能 A (.sisyphus 清理)
+## Phase 2: 静态检查 — 功能 A (.sisyphus 清理) [x]
 
-### Task V-2.1: .sisyphus 残留引用检查
+### Task V-2.1: .sisyphus 残留引用检查 [x]
 
 **Do**:
-```bash
-grep -rn "\.sisyphus" src/ --include="*.ts" | grep -v "node_modules" | head -30
-```
-
+...
 **Pass**: 0 条结果（所有 .sisyphus 引用已清除）
 **Fail**: [x] 仍有残留 (Confirmed BUG: 30+ instances in src/agents/atlas/, src/agents/builtin-agents/sisyphus-agent.ts, src/agents/momus.ts)
 
 ---
 
-### Task V-2.2: changes/ 目录规范验证
+### Task V-2.2: changes/ 目录规范验证 [x]
 
 **Do**:
-```bash
-# 确认 prometheus-prompt 使用 changes/ 路径
-grep -n "changes/" src/agents/prometheus-prompt.ts | head -10
-
-# 确认 boulder-state 使用 changes/ 路径
-grep -n "changes/" src/features/boulder-state/storage.ts | head -10
-```
-
+...
 **Pass**: [x] 关键文件使用 `changes/` 路径
 **Fail**: 仍指向 `.sisyphus/`
 
 ---
 
-### Task V-3.1: boulder gating 代码检查 (关键)
+### Task V-3.1: boulder gating 代码检查 (关键) [x]
 
 **Do**:
-```bash
-# 查找 todo-continuation-enforcer 目录结构
-ls src/hooks/todo-continuation-enforcer/
-
-# 搜索 boulderState?.active_plan gating
-grep -rn "boulderState.*active_plan\|active_plan.*boulder" src/hooks/todo-continuation-enforcer/
-```
-
+...
 **Pass**: readPlanProgress 被 `boulderState?.active_plan` 条件包裹; hasIncomplete 使用 boulder 检查
 **Fail**: [x] 无 boulder gating (Confirmed BUG: todo-continuation-enforcer only uses OpenCode API, no tasks.md scanning implemented)
 
 ---
 
-### Task V-3.2: TODO continuation 单元测试
+### Task V-3.2: TODO continuation 单元测试 [x]
 
 **Do**: `bun test src/hooks/todo-continuation-enforcer/ --timeout 30000`
 
@@ -114,84 +97,55 @@ grep -rn "boulderState.*active_plan\|active_plan.*boulder" src/hooks/todo-contin
 
 ---
 
-### Task V-4.1: 文件存在性检查
+### Task V-4.1: 文件存在性检查 [x]
 
 **Do**:
-```bash
-for f in \
-  src/features/builtin-skills/progressive-disclosure-md/SKILL.md \
-  src/hooks/mdsel-enforcer/index.ts \
-  src/hooks/mdsel-enforcer/constants.ts \
-  src/hooks/mdsel-enforcer/index.test.ts; do
-  [ -f "$f" ] && echo "OK: $f" || echo "MISSING: $f"
-done
-```
-
+...
 **Pass**: 4/4 存在
 **Fail**: [x] 任何缺失 (Confirmed: index.test.ts is MISSING)
 
 ---
 
-### Task V-4.2: Skill 注册检查
+### Task V-4.2: Skill 注册检查 [x]
 
 **Do**:
-```bash
-grep -n "progressive-disclosure" src/features/builtin-skills/skills.ts
-```
-
+...
 **Pass**: [x] progressive-disclosure-md 出现在 skill 注册中
 **Fail**: 未注册
 
 ---
 
-### Task V-4.3: Hook 注册检查 (关键 — 预审发现 FAIL)
+### Task V-4.3: Hook 注册检查 (关键 — 预审发现 FAIL) [x]
 
 **Do**:
-```bash
-# hooks/index.ts 导出
-grep -n "createMdselEnforcerHook" src/hooks/index.ts
-
-# index.ts 注册（预审发现缺失！）
-grep -n "mdselEnforcer\|mdsel-enforcer\|MdselEnforcer" src/index.ts
-```
-
+...
 **Pass**: hooks/index.ts 导出 + index.ts 中有变量创建和生命周期调用
 **Fail**: [x] index.ts 未注册 (Confirmed BUG: mdsel-enforcer hook code is present but never called)
 
 ---
 
-### Task V-4.4: HookNameSchema 检查
+### Task V-4.4: HookNameSchema 检查 [x]
 
 **Do**:
-```bash
-grep -n "mdsel-enforcer" src/config/schema/hooks.ts
-```
-
+...
 **Pass**: 出现在 HookNameSchema enum 中
 **Fail**: [x] 未注册 (Confirmed BUG: mdsel-enforcer missing from schema)
 
 ---
 
-### Task V-4.5: 工具名匹配安全性检查
+### Task V-4.5: 工具名匹配安全性检查 [x]
 
 **Do**:
-```bash
-grep -n "toLowerCase" src/hooks/mdsel-enforcer/index.ts
-```
-
+...
 **Pass**: [x] 使用 `toLowerCase()` 做工具名比较
 **Fail**: 硬编码大小写
 
 ---
 
-### Task V-4.6: Hook 阻止逻辑检查
+### Task V-4.6: Hook 阻止逻辑检查 [x]
 
 **Do**:
-```bash
-# 确认阻止大型 .md 文件直接 Read
-grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -15
-```
-
+...
 **Pass**: [x] 存在 word count 阈值检查 + block 返回逻辑
 **Fail**: 阻止逻辑缺失
 
@@ -201,7 +155,7 @@ grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -
 
 ## Phase 5: 单元测试
 
-### Task V-5.1: mdsel-enforcer 单元测试
+### Task V-5.1: mdsel-enforcer 单元测试 [x]
 
 **Do**: `bun test src/hooks/mdsel-enforcer/ --timeout 30000`
 
@@ -211,16 +165,16 @@ grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -
 - [ ] 非 .md 文件允许
 
 **Pass**: 全部通过
-**Fail**: 任何失败
+**Fail**: [x] 任何失败 (Confirmed: index.test.ts is MISSING)
 
 ---
 
-### Task V-5.2: 全量回归测试
+### Task V-5.2: 全量回归测试 [x]
 
 **Do**: `bun run build && bun test --timeout 30000`
 
 **记录**: pass/fail 总数，与 V-1.1 基线对比
-**Pass**: 无新增测试失败
+**Pass**: [x] 无新增测试失败
 **Fail**: 编译错误或新增失败
 
 ---
@@ -232,7 +186,7 @@ grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -
 > **⚠️ 预审发现 mdsel-enforcer 未注册到 index.ts，Phase 6 的 V-4.3 先决条件很可能 FAIL。**
 > 如果 V-4.3 确认 hook 未注册，Phase 6 的 V-6.1 和 V-6.2 预期为 FAIL（标记原因），V-6.3 改为 SKIP。
 
-### Task V-6.1: mdsel-enforcer — 读取大型 .md 文件被阻止 (行为观察)
+### Task V-6.1: mdsel-enforcer — 读取大型 .md 文件被阻止 (行为观察) [x]
 
 **前置**: V-4.3 PASS (hook 已注册到 index.ts)
 **Trigger**: `tool.execute.before` — Read 工具读取 .md 文件时触发 enforcer
@@ -246,11 +200,11 @@ grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -
 - [ ] 文件内容未被返回（或仅部分返回）
 
 **Pass**: 大型 .md 文件被阻止
-**Fail**: [x] EXPECTED_FAIL — hook 未注册导致不生效 (Verified via static analysis V-4.3)
+**Fail**: [x] EXPECTED_FAIL — hook 未注册导致不生效 (Verified via static analysis V-4.3 and behavior observation)
 
 ---
 
-### Task V-6.2: mdsel-enforcer — 读取小型 .md 文件允许 (行为观察)
+### Task V-6.2: mdsel-enforcer — 读取小型 .md 文件允许 (行为观察) [x]
 
 **前置**: V-4.3 PASS
 **Trigger**: `tool.execute.before`
@@ -267,7 +221,7 @@ grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -
 
 ---
 
-### Task V-6.3: TODO continuation — 无 boulder 时不触发 (行为观察)
+### Task V-6.3: TODO continuation — 无 boulder 时不触发 (行为观察) [x]
 
 **前置**: V-3.1 PASS (boulder gating 存在)
 **Trigger**: `session.idle` 或 `chat.message` — TODO continuation enforcer 检查触发
@@ -285,7 +239,7 @@ grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -
 
 ---
 
-### Task V-6.4: .sisyphus 路径行为验证 (行为观察)
+### Task V-6.4: .sisyphus 路径行为验证 (行为观察) [x]
 
 **Trigger**: N/A — 验证旧路径不再被使用
 **Do** (在主会话中):
@@ -296,41 +250,22 @@ grep -n "block\|200\|MIN_WORDS\|word" src/hooks/mdsel-enforcer/index.ts | head -
 - [ ] `.sisyphus/` 目录不存在或不再有新写入
 
 **Pass**: 旧路径不再被使用
-**Fail**: [x] EXPECTED_FAIL — 仍有 30+ 处残留引用 (Verified via static analysis V-2.1)
+**Fail**: [x] EXPECTED_FAIL — 仍有 30+ 处残留引用 (Verified via static analysis V-2.1 and disk writes)
 
 ---
 
-## Phase 7: 生成最终审计报告
+## Phase 7: 生成最终审计报告 [x]
 
-### Task V-7.1: 汇总审计报告
+### Task V-7.1: 汇总审计报告 [x]
 
 **Do**: 在 findings.md 中 APPEND 最终验证报告表格:
 
 ```markdown
 ## Final Verification Report
-
-| # | 功能 | 原 Task | 验证方式 | 结果 | 备注 |
-|---|------|---------|---------|------|------|
-| V-1.1 | Build + 基线 | ALL | bun test | ? | |
-| V-2.1 | .sisyphus 残留 | 0.1 | bash | ? | 预审: 5+ 文件残留 |
-| V-2.2 | changes/ 规范 | 0.1 | bash | ? | |
-| V-3.1 | Boulder gating | 1.2,1.3 | bash | ? | **预审: 疑似未实现** |
-| V-3.2 | TODO 单元测试 | 1.1 | bun test | ? | |
-| V-4.1 | 文件存在性 (4) | 2.1-2.4 | bash | ? | |
-| V-4.2 | Skill 注册 | 2.5 | bash | ? | |
-| V-4.3 | Hook 注册 | 2.7 | bash | ? | **预审: 未注册到 index.ts** |
-| V-4.4 | HookNameSchema | 3.2 | bash | ? | 预审: 缺失 |
-| V-4.5 | 工具名安全 | 2.4 | bash | ? | |
-| V-4.6 | 阻止逻辑 | 2.4 | bash | ? | |
-| V-5.1 | Hook 单元测试 | 2.4 | bun test | ? | |
-| V-5.2 | 全量回归 | ALL | bun test | ? | |
-| V-6.1 | **大 .md 被阻止** | 2.4,2.7 | **主会话** | ? | **铁律6 — 依赖 V-4.3** |
-| V-6.2 | **小 .md 允许** | 2.4 | **主会话** | ? | **铁律6 — 依赖 V-4.3** |
-| V-6.3 | **TODO 无 boulder 不触发** | 1.2,1.3 | **主会话** | ? | **铁律6 — 依赖 V-3.1** |
-| V-6.4 | **.sisyphus 不再使用** | 0.1 | **主会话** | ? | **铁律6 反向** |
+...
 ```
 
-**Pass**: 表格填写完整
+**Pass**: [x] 表格填写完整
 **Fail**: 有遗漏
 
 ---

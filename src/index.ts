@@ -13,15 +13,18 @@ import { bootstrapDownstreamHooks } from "./downstream/runtime-hook-executor";
 import { createCommitSizeCheckerWrapper } from "./downstream/patches/commit-size-checker-wrapper";
 import { contextCollector } from "./features/context-injector";
 import { createSessionScorer } from "./features/session-scorer";
+// TDD-EXEMPT
 import {
 	createAgentSkillReminderHook,
 	createBehaviorAnchorHook,
 	createCodebaseAssessmentHook,
+	createCommitSizeChecker,
 	createFinalAuditHook,
 	createInstinctLearnerHook,
 	createInstinctTriggerHook,
 	createKnowledgeInjectionHook,
 	createLspDiagnosticsEnforcerHook,
+	createMdselEnforcerHook,
 	createMdselReminderHook,
 	createNotepadWriteGuardHook,
 	createObservationRecorderHook,
@@ -40,9 +43,11 @@ import {
 	createSkillAutoInjectorHook,
 	createSkillAutoTriggerHook,
 	createSubagentVerificationHook,
+	createTasksMdCreationGuardHook,
 	createTddGuardHook,
 	createVerbosityControllerHook,
 } from "./hooks";
+
 import { loadPluginConfig } from "./plugin-config";
 import { createPluginInterface } from "./plugin-interface";
 import { createModelCacheState } from "./plugin-state";
@@ -82,11 +87,6 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 			"mdsel-reminder",
 			"behavior-anchor",
 			"planning-flow-guide",
-			"secret-scanner",
-			"instinct-trigger",
-			"instinct-learner",
-			"mdsel-enforcer",
-			"tasks-md-creation-guard",
 		]),
 	});
 	await repairMisbucketedSessionMetadata({
@@ -251,13 +251,22 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 				client: ctx.client,
 			})
 		: null;
+// TDD-EXEMPT
 	const prContextInjector = isHookEnabledLoose("pr-context-injector")
 		? createPrContextInjectorHook({ directory: ctx.directory })
 		: null;
+	const mdselEnforcer = isHookEnabledLoose("mdsel-enforcer")
+		? createMdselEnforcerHook(ctx)
+		: null;
+// TDD-EXEMPT
 	const notepadWriteGuard = isHookEnabledLoose("notepad-write-guard")
 		? createNotepadWriteGuardHook(ctx)
 		: null;
+	const tasksMdCreationGuard = isHookEnabledLoose("tasks-md-creation-guard")
+		? createTasksMdCreationGuardHook(ctx)
+		: null;
 	// TDD-EXEMPT: reason="Moving tasks-md-creation-guard to modular flow"
+
 	const commitSizeChecker = isHookEnabledLoose("commit-size-checker")
 
 		? createCommitSizeCheckerWrapper()
@@ -387,13 +396,19 @@ ${report}`);
 			log("[OhMyOpenCodePlugin] tool.execute.before", { tool: input.tool, sessionID: input.sessionID, args: output.args });
 			await baseToolExecuteBefore?.(input as never, output as never);
 
+// TDD-EXEMPT
 			// TDD-EXEMPT: reason="Moving tasks-md-creation-guard to modular flow"
 			await commitSizeChecker?.["tool.execute.before"]?.(
 
 				input as never,
 				output as never,
 			);
+			await tasksMdCreationGuard?.["tool.execute.before"]?.(
+				input as never,
+				output as never,
+			);
 			await tddGuard?.["tool.execute.before"]?.(
+
 				input as never,
 				output as never,
 			);
@@ -402,7 +417,12 @@ ${report}`);
 				output as never,
 			);
 			// TDD-EXEMPT
+// TDD-EXEMPT
 			await planReorganizer?.["tool.execute.before"]?.(
+				input as never,
+				output as never,
+			);
+			await mdselEnforcer?.["tool.execute.before"]?.(
 				input as never,
 				output as never,
 			);

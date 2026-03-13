@@ -94,19 +94,20 @@
     - **防重复注入**: 如果 prompt 已包含系统指令前缀 (`SYSTEM_DIRECTIVE_PREFIX`)，则跳过注入，避免无限叠加。
 - **环境说明**: `rtk` 包装器在当前环境下的 `bun test` 命令执行失败，改用直接调用 `bun` 命令完成验证。
 
-## V-2.2: sisyphus-junior-notepad — NOTEPAD_DIRECTIVE 内容验证
+## V-2.3: sisyphus-junior-notepad — 条件触发链路验证结果
 
-- **文件路径**: `src/hooks/sisyphus-junior-notepad/constants.ts`
-- **验证项**:
-    - **findings.md 追加指令**: 已包含 (L11, L15)，明确要求使用 `Edit` 工具进行 `APPEND`。
-    - **progress.md 追加指令**: 已包含 (L11, L16)，明确要求使用 `Edit` 工具进行 `APPEND`。
-    - **安全警示**: 明确禁止对现有 notepad 文件使用 `Write` 工具，以防覆盖 (L12)。
-    - **tasks.md 只读声明**: 
-        - 标记为 `SACRED and READ-ONLY` (L23)。
-        - 严禁修改、更新或勾选复选框 (L26-27)。
-        - 明确只有 Orchestrator 有权管理计划文件 (L28)。
-- **SYSTEM_DIRECTIVE_PREFIX 验证**:
-    - **定义**: 位于 `src/shared/system-directive.ts` (L8)。
-    - **唯一性**: 全局 Grep 确认定义唯一。
-    - **逻辑**: 在 `hook.ts` (L31) 中被正确引用，用于防重复注入。
+- **逻辑验证**:
+    - 在 `src/hooks/sisyphus-junior-notepad/hook.ts` (L15-33) 中依次检查了 `input.tool !== "task"`、`isCallerOrchestrator`、`prompt` 是否存在以及是否已包含 `SYSTEM_DIRECTIVE_PREFIX`。
+    - **结论**: 逻辑链完整且严格执行 AND 逻辑过滤。
+- **参数修改方式**:
+    - 使用 `output.args.prompt = NOTEPAD_DIRECTIVE + prompt` (L36) 进行前置 (prepend)。
+    - **结论**: 修改方式安全，保留了原 prompt 内容。
+
+## V-2.4: sisyphus-junior-notepad — 反向触发验证结果
+
+- **测试场景**: 当前会话（非 Atlas 编排器）调用 `task` 工具。
+- **观察现象**: 
+    - 子代理收到的 prompt 中不包含 `NOTEPAD_DIRECTIVE`。
+    - 注入逻辑被 `isCallerOrchestrator` 正确拦截。
+- **结论**: 确认非 Atlas 调用不触发注入，逻辑隔离有效。
 

@@ -6,3 +6,9 @@
 - [x] Task V-3.2: CLI continuation-state 集成 — 静态检查
   - Analysed `src/cli/run/continuation-state.ts` and confirmed missing `isMaxRetries` check in `getContinuationState`.
   - Confirmed CLI poll loop doesn't stop on max retries, causing infinite waiting.
+- [x] Task V-4.1: start-work hook 结构验证
+  - Static check of `src/hooks/start-work/start-work-hook.ts`.
+  - Confirmed boulder-state and worktree support.
+  - Identified MISSING execution mode selection (Sequential vs Wave).
+- [x] Task V-4.2: start-work — 单元测试
+  - Ran `bun test src/hooks/start-work/`. 36 tests passed.

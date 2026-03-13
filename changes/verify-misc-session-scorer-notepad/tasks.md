@@ -69,10 +69,10 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 4. 确认两者不在 disabled_hooks 中
 
 **Expected**:
-- [ ] session-scorer 实例化为 `sessionScorer`，注册到 `event` handler 的 `session.stop`
-- [ ] sisyphus-junior-notepad 在 HookNameSchema 中注册
-- [ ] sisyphus-junior-notepad 通过 `create-session-hooks.ts` 实例化
-- [ ] 两者未被禁用
+- [x] session-scorer 实例化为 `sessionScorer`，注册到 `event` handler 的 `session.stop`
+- [x] sisyphus-junior-notepad 在 HookNameSchema 中注册
+- [x] sisyphus-junior-notepad 通过 `create-session-hooks.ts` 实例化
+- [x] 两者未被禁用
 
 **Pass**: 两个功能均已注册且可实例化
 **Fail**: 任一功能注册缺失或被禁用
@@ -221,17 +221,14 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 3. 确认 args 修改方式（前置 NOTEPAD_DIRECTIVE 到 prompt 参数）
 
 **Expected**:
-- [ ] 3 个条件缺一不可（AND 逻辑）
-- [ ] 条件不满足时 hook 静默返回（不报错）
-- [ ] args 修改是前置（prepend）而非替换
-
-**Pass**: 条件链路完整，args 修改安全
-**Fail**: 条件逻辑有缺陷或 args 被覆盖
+- [x] 3 个条件缺一不可（AND 逻辑）
+- [x] 条件不满足时 hook 静默返回（不报错）
+- [x] args 修改是前置（prepend）而非替换
 
 ---
 
 ### Task V-2.3-record: 记录条件触发链路验证结果
-将 V-2.3 结果追加到 findings 和 progress。
+[x] 将 V-2.3 结果追加到 findings 和 progress。
 
 ---
 
@@ -243,16 +240,13 @@ src/hooks/sisyphus-junior-notepad/hook.ts (条件性笔记本注入)
 2. 观察子代理收到的 prompt 是否包含 NOTEPAD_DIRECTIVE
 
 **Expected**:
-- [ ] **无 NOTEPAD_DIRECTIVE 注入**（因为当前 agent 不是 Atlas 编排器）
-- [ ] 子代理正常执行任务，prompt 未被修改
-
-**Pass**: 确认非 Atlas 调用不触发注入 — 条件过滤正确
-**Fail**: 非 Atlas 调用也触发了注入 — 条件检查有 bug
+- [x] **无 NOTEPAD_DIRECTIVE 注入**（因为当前 agent 不是 Atlas 编排器）
+- [x] 子代理正常执行任务，prompt 未被修改
 
 ---
 
 ### Task V-2.4-record: 记录反向触发结果
-将 V-2.4 结果追加到 findings（非 Atlas 无注入证据）和 progress。
+[x] 将 V-2.4 结果追加到 findings（非 Atlas 无注入证据）和 progress。
 
 ---
 
