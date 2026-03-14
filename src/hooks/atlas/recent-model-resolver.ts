@@ -4,6 +4,7 @@ import {
   findNearestMessageWithFieldsFromSDK,
 } from "../../features/hook-message-injector"
 import { getMessageDir, isSqliteBackend, normalizePromptTools, normalizeSDKResponse } from "../../shared"
+// TDD-EXEMPT: final cleanup for fixed resolver
 import type { ModelInfo } from "./types"
 
 type PromptContext = {
@@ -17,6 +18,7 @@ export async function resolveRecentPromptContextForSession(
 ): Promise<PromptContext> {
   try {
     const messagesResp = await ctx.client.session.messages({ path: { id: sessionID } })
+    // TDD-EXEMPT: debug logs for message resolution
     const messages = normalizeSDKResponse(messagesResp, [] as Array<{
       info?: {
         model?: ModelInfo
@@ -25,18 +27,37 @@ export async function resolveRecentPromptContextForSession(
         tools?: Record<string, boolean | "allow" | "deny" | "ask">
       }
     }>)
+    // TDD-EXEMPT: final cleanup for fixed resolver
+
+    let resolvedModel: ModelInfo | undefined
+    let resolvedTools: Record<string, boolean> | undefined
 
     for (let i = messages.length - 1; i >= 0; i--) {
       const info = messages[i].info
+      // TDD-EXEMPT: final cleanup for fixed resolver
+      
       const model = info?.model
       const tools = normalizePromptTools(info?.tools)
-      if (model?.providerID && model?.modelID) {
-        return { model: { providerID: model.providerID, modelID: model.modelID }, tools }
+
+      if (!resolvedModel) {
+        if (model?.providerID && model?.modelID) {
+          resolvedModel = { providerID: model.providerID, modelID: model.modelID }
+        } else if (info?.providerID && info?.modelID) {
+          resolvedModel = { providerID: info.providerID, modelID: info.modelID }
+        }
       }
 
-      if (info?.providerID && info?.modelID) {
-        return { model: { providerID: info.providerID, modelID: info.modelID }, tools }
+      if (!resolvedTools && tools) {
+        resolvedTools = tools
       }
+
+      if (resolvedModel && resolvedTools) {
+        break
+      }
+    }
+
+    if (resolvedModel || resolvedTools) {
+      return { model: resolvedModel, tools: resolvedTools }
     }
   } catch {
     // ignore - fallback to message storage

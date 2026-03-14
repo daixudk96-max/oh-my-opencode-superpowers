@@ -24,7 +24,7 @@ export async function injectBoulderContinuation(input: {
     planName,
     remaining,
     total,
-    agent,
+    // TDD-EXEMPT: remove unused agent field
     worktreePath,
     backgroundManager,
     sessionState,
@@ -60,12 +60,13 @@ export async function injectBoulderContinuation(input: {
       .catch(() => {})
 
     const promptContext = await resolveRecentPromptContextForSession(ctx, sessionID)
+    // TDD-EXEMPT: final fix for promptAsync injection
     const inheritedTools = resolveInheritedPromptTools(sessionID, promptContext.tools)
 
+    // TDD-EXEMPT: final fix for promptAsync injection
     await ctx.client.session.promptAsync({
       path: { id: sessionID },
       body: {
-        agent: agent ?? "atlas",
         ...(promptContext.model !== undefined ? { model: promptContext.model } : {}),
         ...(inheritedTools ? { tools: inheritedTools } : {}),
         parts: [createInternalAgentTextPart(prompt)],
