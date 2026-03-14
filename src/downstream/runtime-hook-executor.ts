@@ -1,7 +1,10 @@
 import type { PluginInput } from "@opencode-ai/plugin"
+import type { OhMyOpenCodeConfig } from "../config/schema/oh-my-opencode-config"
+import type { BackgroundManager } from "../features/background-agent"
 import { log } from "../shared"
 import { discoverDownstreamHooks } from "./auto-registry"
 import { extendHookNameSchema } from "./schema-extensions"
+import type { HookFactoryContext } from "./types"
 
 type SupportedLifecycle =
   | "chat.message"
@@ -72,18 +75,34 @@ export interface DownstreamHookBootstrapResult {
 export async function bootstrapDownstreamHooks(params: {
   ctx: PluginInput
   disabledHooks?: Set<string>
+  backgroundManager?: BackgroundManager
+  pluginConfig?: OhMyOpenCodeConfig
 }): Promise<DownstreamHookBootstrapResult> {
   const manifests = await discoverDownstreamHooks().catch(() => [])
   const parserSchema = extendHookNameSchema(manifests.map((manifest) => manifest.name))
   const disabledHooks = params.disabledHooks ?? new Set<string>()
   const handlers = createEmptyLifecycleHandlers()
 
-  const hookFactoryContext = {
+  const hookFactoryContext: HookFactoryContext = {
     ...params.ctx,
     cwd: params.ctx.directory,
+    backgroundManager: params.backgroundManager,
+    pluginConfig: params.pluginConfig,
   }
 
+  const EXTERNALLY_MANAGED_HOOKS = new Set([
+    "background-notification",
+    "background-compaction",
+    "unstable-agent-babysitter",
+    "atlas"
+  ])
+
   for (const manifest of manifests) {
+    if (EXTERNALLY_MANAGED_HOOKS.has(manifest.name)) {
+      log("[downstream-hooks] skipping externally managed hook", { hookName: manifest.name })
+      continue
+    }
+
     if (!manifest.alwaysEnabled && disabledHooks.has(manifest.name)) continue
 
     try {

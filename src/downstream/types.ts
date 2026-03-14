@@ -7,6 +7,15 @@ import type { CommandDefinition } from "../features/claude-code-command-loader/t
 import type { McpServerConfig } from "../features/claude-code-mcp-loader/types"
 import type { PluginInstance as Hooks } from "../plugin/types"
 
+import type { PluginInput } from "@opencode-ai/plugin"
+import type { BackgroundManager } from "../features/background-agent"
+
+export interface HookFactoryContext extends PluginInput {
+  cwd: string
+  backgroundManager?: BackgroundManager
+  pluginConfig?: OhMyOpenCodeConfig
+}
+
 export type HookLifecycle = keyof Hooks
 
 export type HookFactory = (...args: never[]) => Partial<Record<HookLifecycle, unknown>>
