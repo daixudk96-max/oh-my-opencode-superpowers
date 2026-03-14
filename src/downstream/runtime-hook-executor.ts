@@ -31,7 +31,18 @@ function createEmptyLifecycleHandlers(): LifecycleHandlers {
   }
 }
 
-async function runHandlers(handlers: HookHandler[], input: unknown, output?: unknown): Promise<void> {
+function getBlockedError(output: unknown): Error | null {
+  const blockedOutput = output as { blocked?: boolean; message?: string }
+  if (blockedOutput.blocked !== true) return null
+  return new Error(blockedOutput.message ?? "Operation blocked by hook")
+}
+
+async function runHandlers(
+  handlers: HookHandler[],
+  input: unknown,
+  output?: unknown,
+  options?: { throwOnBlocked?: boolean },
+): Promise<void> {
   for (const handler of handlers) {
     if (typeof handler !== "function") continue
     try {
@@ -40,6 +51,11 @@ async function runHandlers(handlers: HookHandler[], input: unknown, output?: unk
       log("[downstream-hooks] lifecycle handler failed", {
         error: error instanceof Error ? error.message : String(error),
       })
+    }
+
+    if (options?.throwOnBlocked) {
+      const blockedError = getBlockedError(output)
+      if (blockedError) throw blockedError
     }
   }
 }
@@ -55,11 +71,11 @@ export interface DownstreamHookBootstrapResult {
 
 export async function bootstrapDownstreamHooks(params: {
   ctx: PluginInput
-  skipManifestNames?: Set<string>
+  disabledHooks?: Set<string>
 }): Promise<DownstreamHookBootstrapResult> {
   const manifests = await discoverDownstreamHooks().catch(() => [])
   const parserSchema = extendHookNameSchema(manifests.map((manifest) => manifest.name))
-  const skipManifestNames = params.skipManifestNames ?? new Set<string>()
+  const disabledHooks = params.disabledHooks ?? new Set<string>()
   const handlers = createEmptyLifecycleHandlers()
 
   const hookFactoryContext = {
@@ -68,7 +84,7 @@ export async function bootstrapDownstreamHooks(params: {
   }
 
   for (const manifest of manifests) {
-    if (skipManifestNames.has(manifest.name)) continue
+    if (!manifest.alwaysEnabled && disabledHooks.has(manifest.name)) continue
 
     try {
       const instance = manifest.factory(hookFactoryContext as never) as Record<string, HookHandler>
@@ -96,7 +112,9 @@ export async function bootstrapDownstreamHooks(params: {
       return runHandlers(handlers.event, input)
     },
     runToolExecuteBefore(input: unknown, output: unknown): Promise<void> {
-      return runHandlers(handlers["tool.execute.before"], input, output)
+      return runHandlers(handlers["tool.execute.before"], input, output, {
+        throwOnBlocked: true,
+      })
     },
     runToolExecuteAfter(input: unknown, output: unknown): Promise<void> {
       return runHandlers(handlers["tool.execute.after"], input, output)

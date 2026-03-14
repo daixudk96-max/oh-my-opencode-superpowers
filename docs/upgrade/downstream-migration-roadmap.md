@@ -2,7 +2,7 @@
 
 > 从 auto-registry 基础设施建好到全部功能融合完成的完整步骤。
 > 创建时间: 2026-03-11
-> 最后更新: 2026-03-12 (Task 4.1 sync)
+> 最后更新: 2026-03-14 (② verified, ④ verified, next: ③)
 
 ---
 
@@ -276,13 +276,13 @@
 ```
 ① fix-boulder-and-continuation (✅ 全部验证通过)
   ↓
-② migrate-downstream-hooks              ← 28 个 hook manifest
+② migrate-downstream-hooks (✅ 13 manifests + 4 双重执行修复, 验证通过)
   ↓
-③ migrate-downstream-skills-cmds        ← 9 skills + 6 commands + 3 agents
+③ migrate-downstream-skills-cmds (✅ 已完成 — 18 manifests 均已存在且上游已接入)
   ↓
-④ fix-remaining-fail-partial            ← MCP/Commit/relevance/start-work 等
+④ fix-remaining-fail-partial (✅ F8/F9/F12/P1 全部验证通过)
   ↓
-⑤ reform-upstream-registrations         ← 7 个上游文件各加 1 行 + 清理旧注册
+⑤ reform-upstream-registrations         ← 🔜 NEXT: 清理 index.ts 手动接线 + 修复 17 个双重执行
   ↓
 ⑥ verify-and-cleanup                    ← 全量验证 + .sisyphus 清理 + skill 更新
 ```
@@ -339,10 +339,13 @@
 
 ---
 
-## ② migrate-downstream-hooks
+## ② migrate-downstream-hooks (✅ 已完成)
 
 **changes 目录**: `changes/migrate-downstream-hooks/`
-**对应未验证新功能**: 所有 Hook 类型 B 类功能
+**验证目录**: `changes/verify-migrate-downstream-hooks/`
+**代码状态**: 13 个 manifest 创建完成，4 个双重执行 bug 修复
+**验证状态**: tsc 通过, 42 个 manifest 发现, skipManifestNames 16 项 ✅
+**合并 commit**: `f32c9c31 feat(registry): add 13 hook manifests and fix 4 double-run hooks`
 
 ### 需要写 manifest 的 28 个 Hook
 
@@ -385,9 +388,19 @@
 
 ---
 
-## ③ migrate-downstream-skills-cmds
+## ③ migrate-downstream-skills-cmds (✅ 已完成)
 
-**changes 目录**: `changes/migrate-downstream-skills-cmds/`
+**changes 目录**: N/A（在 Step 1 auto-registry 期间已完成）
+**代码状态**: 18 个 manifest 均已存在且上游已接入
+**验证状态**: tsc 通过, discover 函数已接入 ✅
+
+### 已有 manifest 确认
+
+| 类型 | 数量 | 上游接入点 |
+|------|:----:|-----------|
+| Skills | 9 | `src/plugin/skill-context.ts` → `discoverDownstreamSkills()` |
+| Commands | 6 | `src/plugin-handlers/command-config-handler.ts` → `discoverDownstreamCommands()` |
+| Agents | 3 | `src/agents/builtin-agents.ts` → `discoverDownstreamAgents()` |
 
 ### 9 个 Skill
 
@@ -422,10 +435,14 @@
 
 ---
 
-## ④ fix-remaining-fail-partial
+## ④ fix-remaining-fail-partial (✅ 已完成 + 已验证)
 
 **changes 目录**: `changes/fix-remaining-fail-partial/`
+**验证目录**: `changes/verify-fix-remaining-fail-partial/`
 **涉及 FAIL**: F8, F9, F11, F12 + PARTIAL P1
+**代码状态**: 5 项修复全部完成
+**验证状态**: 全部 PASS ✅
+**合并 commits**: `28e87c99`, `8d15eb8e`
 
 | FAIL# | 功能 | 修复方式 |
 |:-----:|------|----------|
@@ -437,21 +454,34 @@
 
 ---
 
-## ⑤ reform-upstream-registrations
+## ⑤ reform-upstream-registrations ← 🔜 NEXT
 
 **changes 目录**: `changes/reform-upstream-registrations/`
 
-### 7 个上游文件改造
+### 当前问题
 
-| 上游文件 | 加的 1 行 | 操作 |
-|---------|-----------|------|
-| `src/index.ts` | `await registerDownstreamHooks(ctx, plugin)` | + 1 行，删旧注册 |
-| `src/features/builtin-skills/skills.ts` | `skills.push(...(await discoverDownstreamSkills()))` | + 1 行，删旧注册 |
-| `src/features/builtin-commands/commands.ts` | `Object.assign(defs, await discoverDownstreamCommands())` | + 1 行，删旧注册 |
-| `src/agents/builtin-agents.ts` | `Object.assign(sources, await discoverDownstreamAgents())` | + 1 行，删旧注册 |
-| `src/tools/index.ts` | `tools.push(...(await discoverDownstreamTools()))` | + 1 行 |
-| `src/mcp/index.ts` | `Object.assign(mcps, await discoverDownstreamMcps())` | + 1 行 |
-| `src/config/schema/hooks.ts` | `createHookNameSchema(discoveredNames)` | 运行时扩展，修复 F10 |
+`src/index.ts` 中仍有 ~30 个 hook 通过手动实例化注册，与 auto-registry manifest 并存。
+其中 17 个 hook 同时被手动接线 AND manifest 发现，导致**双重执行**。
+
+### 上游接入点状态（7 个全部已接入）
+
+| 上游文件 | 接入方式 | 状态 |
+|---------|-----------|:----:|
+| `src/index.ts` | `bootstrapDownstreamHooks()` | ✅ |
+| `src/plugin/skill-context.ts` | `discoverDownstreamSkills()` | ✅ |
+| `src/plugin-handlers/command-config-handler.ts` | `discoverDownstreamCommands()` | ✅ |
+| `src/agents/builtin-agents.ts` | `discoverDownstreamAgents()` | ✅ |
+| `src/create-tools.ts` | `discoverDownstreamTools()` | ✅ |
+| `src/plugin-handlers/mcp-config-handler.ts` | `discoverDownstreamMcps()` | ✅ |
+| `src/downstream/runtime-hook-executor.ts` | `extendHookNameSchema()` | ✅ |
+
+### 需要清理的手动接线（index.ts）
+
+目标: 删除 ~30 个手动 hook 实例化 + 删除 skipManifestNames + 让所有 hook 通过 auto-registry 加载。
+
+特殊处理:
+- `session-scorer` / `final-audit`: 有非标生命周期（session.stop），需确认 manifest 支持
+- `commitSizeChecker`: 使用 wrapper pattern，需确认 manifest 兼容
 
 ### 完成标志
 

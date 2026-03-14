@@ -203,3 +203,23 @@ describe("look_at tool conditional registration", () => {
     })
   })
 })
+
+describe("src/index.ts cleanup", () => {
+  it("should not contain any Task 3.8 cleanup comments", () => {
+    const fs = require("fs")
+    const path = require("path")
+    const filePath = path.resolve(process.cwd(), "src/index.ts")
+    const content = fs.readFileSync(filePath, "utf-8")
+    
+    expect(content).not.toContain("Task 3.8 cleanup")
+  })
+
+  it("should not contain any TDD-EXEMPT comments mentioning Task 3.8", () => {
+    const fs = require("fs")
+    const path = require("path")
+    const filePath = path.resolve(process.cwd(), "src/index.ts")
+    const content = fs.readFileSync(filePath, "utf-8")
+    
+    expect(content).not.toMatch(/\/\/ TDD-EXEMPT: Task 3.8/)
+  })
+})

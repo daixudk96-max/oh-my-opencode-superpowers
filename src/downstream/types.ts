@@ -16,6 +16,7 @@ export interface HookManifest {
   lifecycle: HookLifecycle[]
   factory: HookFactory
   dependencies?: string[]
+  alwaysEnabled?: boolean
 }
 
 export interface SkillManifest {
