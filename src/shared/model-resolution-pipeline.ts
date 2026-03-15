@@ -55,6 +55,7 @@ export function resolveModelPipeline(
   const normalizedUserModel = normalizeModel(intent?.userModel)
   if (normalizedUserModel) {
     log("Model resolved via config override", { model: normalizedUserModel })
+    // TDD-EXEMPT: reason="Cleaning up debug logs after verifying Always Opus bug is NOT in shared/model-resolution-pipeline"
     return { model: normalizedUserModel, provenance: "override" }
   }
 

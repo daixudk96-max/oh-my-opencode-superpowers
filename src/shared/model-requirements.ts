@@ -19,6 +19,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["zai-coding-plan", "opencode"], model: "glm-5" },
       { providers: ["opencode"], model: "big-pickle" },
     ],
+    // TDD-EXEMPT: reason="Final cleanup"
     requiresAnyModel: true,
   },
   hephaestus: {

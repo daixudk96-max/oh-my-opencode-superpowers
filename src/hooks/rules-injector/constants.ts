@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 import { join } from "node:path";
 import { OPENCODE_STORAGE } from "../../shared";
 export const RULES_INJECTOR_STORAGE = join(OPENCODE_STORAGE, "rules-injector");
@@ -16,6 +17,7 @@ export const PROJECT_RULE_SUBDIRS: [string, string][] = [
   [".cursor", "rules"],
   [".claude", "rules"],
   [".sisyphus", "rules"],
+  ["changes", "rules"],
 ];
 
 export const PROJECT_RULE_FILES: string[] = [

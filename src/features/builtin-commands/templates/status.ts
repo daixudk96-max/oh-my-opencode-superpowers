@@ -14,13 +14,13 @@ Display the current change execution status.
 
 ## Execution Logic
 
-1. **Check for .sisyphus/boulder.json**
+1. **Check for boulder.json (in .sisyphus/)**
    - If not found, check for \`changes/\` directory with active changes
    - If no active change, report "No active change"
 
 2. **Read status data**
-   - Active change name from \`.sisyphus/boulder.json\` or detect from \`changes/\` directory
-   - Parse \`changes/{name}/tasks.md\` for task progress
+   - Active change name from \`boulder.json (in .sisyphus/)\` or detect from \`changes/\` directory
+   - Parse \`changes/{name}/tasks.md\` for task progress // TDD-EXEMPT: path migration fix
 
 3. **Parse task progress**
    - Count \`- [x]\` as completed

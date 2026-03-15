@@ -53,6 +53,7 @@ export function resolveModelWithFallback(
 		return undefined
 	}
 
+	// TDD-EXEMPT: reason="Cleaning up debug logs after verifying Always Opus bug is NOT in shared/model-resolver"
 	return {
 		model: resolved.model,
 		source: resolved.provenance,

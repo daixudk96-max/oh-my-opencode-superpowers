@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 import { relative, resolve, isAbsolute } from "node:path"
 
 import { ALLOWED_EXTENSIONS } from "./constants"
@@ -5,11 +6,11 @@ import { ALLOWED_EXTENSIONS } from "./constants"
 /**
  * Cross-platform path validator for Prometheus file writes.
  * Uses path.resolve/relative instead of string matching to handle:
- * - Windows backslashes (e.g., .sisyphus\\plans\\x.md)
- * - Mixed separators (e.g., .sisyphus\\plans/x.md)
+ * - Windows backslashes (e.g., changes/tasks.md)
+ * - Mixed separators (e.g., changes/x.md)
  * - Case-insensitive directory/extension matching
  * - Workspace confinement (blocks paths outside root or via traversal)
- * - Nested project paths (e.g., parent/.sisyphus/... when ctx.directory is parent)
+ * - Nested project paths (e.g., parent/changes/... when ctx.directory is parent)
  */
 export function isAllowedFile(filePath: string, workspaceRoot: string): boolean {
   // 1. Resolve to absolute path
@@ -23,9 +24,9 @@ export function isAllowedFile(filePath: string, workspaceRoot: string): boolean 
     return false
   }
 
-  // 4. Check if .sisyphus/ or .sisyphus\ exists anywhere in the path (case-insensitive)
-  // This handles both direct paths (.sisyphus/x.md) and nested paths (project/.sisyphus/x.md)
-  if (!/\.sisyphus[/\\]/i.test(rel)) {
+  // 4. Check if changes/ or changes\ exists anywhere in the path (case-insensitive)
+  // This handles both direct paths (changes/x.md) and nested paths (project/changes/x.md)
+  if (!/changes[/\\]/i.test(rel)) {
     return false
   }
 

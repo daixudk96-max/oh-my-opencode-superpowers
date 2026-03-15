@@ -17,15 +17,12 @@ describe("MOMUS_SYSTEM_PROMPT policy requirements", () => {
     expect(prompt).toMatch(/<system-reminder>|system-reminder/)
   })
 
-  test("should extract paths containing .sisyphus/plans/ and ending in .md", () => {
+  test("should NOT contain legacy .sisyphus/plans/ paths", () => {
     // given
     const prompt = MOMUS_SYSTEM_PROMPT
 
     // when / #then
-    expect(prompt).toContain(".sisyphus/plans/")
-    expect(prompt).toContain(".md")
-    // New extraction policy should be mentioned
-    expect(prompt.toLowerCase()).toMatch(/extract|search|find path/)
+    expect(prompt).not.toContain(".sisyphus/plans/")
   })
 
   test("should NOT teach that 'Please review' is INVALID (conversational wrapper allowed)", () => {
@@ -34,7 +31,7 @@ describe("MOMUS_SYSTEM_PROMPT policy requirements", () => {
 
     // when / #then
     // In RED phase, this will FAIL because current prompt explicitly lists this as INVALID
-    const invalidExample = "Please review .sisyphus/plans/plan.md"
+    const invalidExample = "Please review changes/my-plan/tasks.md"
     const rejectionTeaching = new RegExp(
       `reject.*${escapeRegExp(invalidExample)}`,
       "i",

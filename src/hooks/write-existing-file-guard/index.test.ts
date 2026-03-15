@@ -245,13 +245,21 @@ describe("createWriteExistingFileGuardHook", () => {
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 
-  test("#given existing file under .sisyphus #when write executes #then always allows", async () => {
-    const existingFile = createFile(".sisyphus/plans/plan.txt")
+  test("#given existing file under .sisyphus or changes/ #when write executes #then always allows", async () => {
+    const sisyphusFile = createFile(".sisyphus/plans/plan.txt")
+    const changesFile = createFile("changes/feature/tasks.md")
 
     await expect(
       invoke({
         tool: "write",
-        outputArgs: { filePath: existingFile, content: "new plan" },
+        outputArgs: { filePath: sisyphusFile, content: "new plan" },
+      })
+    ).resolves.toBeDefined()
+
+    await expect(
+      invoke({
+        tool: "write",
+        outputArgs: { filePath: changesFile, content: "new tasks" },
       })
     ).resolves.toBeDefined()
   })

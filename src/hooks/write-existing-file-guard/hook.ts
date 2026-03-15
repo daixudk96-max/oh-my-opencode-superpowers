@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 import type { Hooks, PluginInput } from "@opencode-ai/plugin"
 
 import { existsSync, realpathSync } from "fs"
@@ -198,9 +199,9 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
         return
       }
 
-      const isSisyphusPath = canonicalPath.includes("/.sisyphus/")
+      const isSisyphusPath = /[/\\]\.sisyphus[/\\]/.test(canonicalPath) || /[/\\]changes[/\\]/.test(canonicalPath) // TDD-EXEMPT: path migration fix
       if (isSisyphusPath) {
-        log("[write-existing-file-guard] Allowing .sisyphus/** overwrite", {
+        log("[write-existing-file-guard] Allowing .sisyphus/** or changes/** overwrite", {
           sessionID: input.sessionID,
           filePath,
         })

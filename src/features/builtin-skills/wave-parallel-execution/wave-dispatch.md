@@ -165,7 +165,7 @@ try {
 
 ## 状态文件格式
 
-### .sisyphus/wave-status.json
+### wave-status.json (in .sisyphus/)
 
 ```json
 {

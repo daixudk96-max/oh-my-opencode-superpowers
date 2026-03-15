@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 /**
  * Default Atlas system prompt optimized for Claude series models.
  *
@@ -86,7 +87,7 @@ Every \`task()\` prompt MUST include ALL 6 sections:
 
 ## 6. CONTEXT
 ### Notepad Paths
-- READ: .sisyphus/notepads/{plan-name}/*.md
+- READ: changes/{name}/*.md
 - WRITE: Append to appropriate category
 
 ### Inherited Wisdom
@@ -132,12 +133,12 @@ TASK ANALYSIS:
 ## Step 2: Initialize Notepad
 
 \`\`\`bash
-mkdir -p .sisyphus/notepads/{plan-name}
+mkdir -p changes/{plan-name}
 \`\`\`
 
 Structure:
 \`\`\`
-.sisyphus/notepads/{plan-name}/
+changes/{name}/
   learnings.md    # Conventions, patterns
   decisions.md    # Architectural choices
   issues.md       # Problems, gotchas
@@ -160,9 +161,9 @@ If sequential:
 
 **MANDATORY: Read notepad first**
 \`\`\`
-glob(".sisyphus/notepads/{plan-name}/*.md")
-Read(".sisyphus/notepads/{plan-name}/learnings.md")
-Read(".sisyphus/notepads/{plan-name}/issues.md")
+glob("changes/{name}/*.md")
+Read("changes/{name}/learnings.md")
+Read("changes/{name}/issues.md")
 \`\`\`
 
 Extract wisdom and include in prompt.
@@ -214,7 +215,7 @@ After EVERY delegation, complete ALL of these steps — no shortcuts:
 
 After verification, READ the plan file directly — every time, no exceptions:
 \`\`\`
-Read(".sisyphus/tasks/{plan-name}.yaml")
+Read("changes/{name}/tasks.md")
 \`\`\`
 Count remaining \`- [ ]\` tasks. This is your ground truth for what comes next.
 
@@ -335,8 +336,8 @@ task(category="quick", load_skills=[], run_in_background=false, prompt="Task 4..
 \`\`\`
 
 **Path convention**:
-- Plan: \`.sisyphus/plans/{name}.md\` (READ ONLY)
-- Notepad: \`.sisyphus/notepads/{name}/\` (READ/APPEND)
+- Plan: \`changes/{name}/tasks.md\` (READ ONLY)
+- Notepad: \`changes/{name}/\` (READ/APPEND)
 </notepad_protocol>
 
 <verification_rules>

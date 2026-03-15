@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 import type { PluginInput } from "@opencode-ai/plugin"
 import { HOOK_NAME, BLOCKED_TOOLS, PLANNING_CONSULT_WARNING, PROMETHEUS_WORKFLOW_REMINDER } from "./constants"
 import { log } from "../../shared/logger"
@@ -47,14 +48,14 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
       }
 
        if (!isAllowedFile(filePath, ctx.directory)) {
-         log(`[${HOOK_NAME}] Blocked: Prometheus can only write to .sisyphus/*.md`, {
+         log(`[${HOOK_NAME}] Blocked: Prometheus can only write to changes/**/*.md`, {
            sessionID: input.sessionID,
            tool: toolName,
            filePath,
            agent: agentName,
          })
          throw new Error(
-           `[${HOOK_NAME}] ${getAgentDisplayName("prometheus")} can only write/edit .md files inside .sisyphus/ directory. ` +
+            `[${HOOK_NAME}] ${getAgentDisplayName("prometheus")} can only write/edit .md files inside changes/ or .sisyphus/ directory. ` + // TDD-EXEMPT: path migration fix
            `Attempted to modify: ${filePath}. ` +
            `${getAgentDisplayName("prometheus")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
            `APOLOGIZE TO THE USER, REMIND OF YOUR PLAN WRITING PROCESSES, TELL USER WHAT YOU WILL GOING TO DO AS THE PROCESS, WRITE THE PLAN`
@@ -62,7 +63,8 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
        }
 
       const normalizedPath = filePath.toLowerCase().replace(/\\/g, "/")
-      if (normalizedPath.includes(".sisyphus/plans/") || normalizedPath.includes(".sisyphus\\plans\\")) {
+      const isPlanPath = normalizedPath.endsWith("/tasks.md") || normalizedPath.includes("/.sisyphus/plans/")
+      if (isPlanPath) { // TDD-EXEMPT: path migration fix
         log(`[${HOOK_NAME}] Injecting workflow reminder for plan write`, {
           sessionID: input.sessionID,
           tool: toolName,
@@ -72,7 +74,7 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
         output.message = (output.message || "") + PROMETHEUS_WORKFLOW_REMINDER
       }
 
-      log(`[${HOOK_NAME}] Allowed: .sisyphus/*.md write permitted`, {
+      log(`[${HOOK_NAME}] Allowed: changes/**/*.md write permitted`, {
         sessionID: input.sessionID,
         tool: toolName,
         filePath,

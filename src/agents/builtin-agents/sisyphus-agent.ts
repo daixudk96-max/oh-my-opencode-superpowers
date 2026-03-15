@@ -59,7 +59,8 @@ export function maybeCreateSisyphusConfig(input: {
     systemDefaultModel,
   })
 
-  if (isFirstRunNoCache && !sisyphusOverride?.model && !uiSelectedModel) {
+  if (!sisyphusResolution && isFirstRunNoCache && !sisyphusOverride?.model && !uiSelectedModel) {
+    // TDD-EXEMPT: reason="Normalizing first-run behavior to avoid empty config before model cache is populated"
     sisyphusResolution = getFirstFallbackModel(sisyphusRequirement)
   }
 

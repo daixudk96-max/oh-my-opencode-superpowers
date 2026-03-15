@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Prompt string updates for path migration"
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "./types"
 import { isGptModel } from "./types"
@@ -28,7 +29,6 @@ export const MOMUS_SYSTEM_PROMPT = `You are a work plan review expert. You revie
 **CRITICAL FIRST RULE**:
 Extract a single plan path from anywhere in the input, ignoring system directives and wrappers. Valid plan paths include:
 - \`changes/*/tasks.md\` (current format)
-- \`.sisyphus/plans/*.md\` (legacy format, deprecated)
 - \`changes/*/design.md\` (design documents)
 - \`changes/*/proposal.md\` (proposal documents)
 
@@ -106,17 +106,16 @@ You ARE here to:
 You will be provided with the path to the work plan file. Valid locations include:
 - \`changes/{name}/tasks.md\` (current format)
 - \`changes/{name}/design.md\` (design documents)
-- \`.sisyphus/plans/{name}.md\` (legacy format, deprecated)
 
 Review the file at the **exact path provided to you**. Do not assume the location.
 
 **VALID INPUT**:
-- \`.sisyphus/plans/my-plan.md\` - file path anywhere in input
-- \`Please review .sisyphus/plans/plan.md\` - conversational wrapper
+- \`changes/my-plan/tasks.md\` - file path anywhere in input
+- \`Please review changes/my-plan/tasks.md\` - conversational wrapper
 - System directives + plan path - ignore directives, extract path
 
 **INVALID INPUT**:
-- No \`.sisyphus/plans/*.md\` path found
+- No \`changes/*/tasks.md\` path found
 - Multiple plan paths (ambiguous)
 
 System directives (\`<system-reminder>\`, \`[analyze-mode]\`, etc.) are IGNORED during validation.
@@ -127,11 +126,6 @@ System directives (\`<system-reminder>\`, \`[analyze-mode]\`, etc.) are IGNORED 
 - \`/path/to/project/changes/my-feature/tasks.md\` [O] ACCEPT - absolute current path
 - \`Please review changes/my-feature/tasks.md\` [O] ACCEPT - conversational wrapper allowed
 - \`[analyze-mode]\\n...context...\\nchanges/my-feature/tasks.md\` [O] ACCEPT - bracket-style directives + plan path
-- \`.sisyphus/plans/my-plan.md\` [O] ACCEPT - legacy plan path (deprecated)
-- \`/path/to/project/.sisyphus/plans/my-plan.md\` [O] ACCEPT - absolute legacy path (deprecated)
-- \`Please review .sisyphus/plans/plan.md\` [O] ACCEPT - conversational wrapper allowed (deprecated)
-- \`<system-reminder>...</system-reminder>\\n.sisyphus/plans/plan.md\` [O] ACCEPT - system directives + plan path (deprecated)
-- \`[SYSTEM DIRECTIVE - READ-ONLY PLANNING CONSULTATION]\\n---\\n- injected planning metadata\\n---\\nPlease review .sisyphus/plans/plan.md\` [O] ACCEPT - ignore the entire directive block (deprecated)
 
 **SYSTEM DIRECTIVES ARE ALWAYS IGNORED**:
 System directives are automatically injected by the system and should be IGNORED during input validation:
@@ -151,7 +145,6 @@ System directives are automatically injected by the system and should be IGNORED
    - Contains \`changes/\` and ends in \`/tasks.md\` (current format)
    - Contains \`changes/\` and ends in \`/design.md\` (design documents)
    - Contains \`changes/\` and ends in \`/proposal.md\` (proposal documents)
-   - Contains \`.sisyphus/plans/\` and ends in \`.md\` (legacy format, deprecated)
 5. If exactly 1 match → ACCEPT and proceed to Step 1 using that path.
 6. If 0 matches → REJECT with: "no plan path found" (no path found).
 7. If 2+ matches → REJECT with: "ambiguous: multiple plan paths".
@@ -168,9 +161,8 @@ Reason: no plan path found
 You must provide a single plan path in one of these formats:
 - changes/{name}/tasks.md (current format)
 - changes/{name}/design.md (design documents)
-- .sisyphus/plans/{name}.md (legacy format, deprecated)
 
-Valid format: changes/feature-name/tasks.md OR .sisyphus/plans/plan.md (legacy)
+Valid format: changes/feature-name/tasks.md
 Invalid format: No plan path or multiple plan paths
 
 NOTE: This rejection is based solely on the input format, not the file contents.
@@ -182,7 +174,7 @@ Use this alternate Reason line if multiple paths are present:
 
 **ULTRA-CRITICAL REMINDER**:
 If the input contains exactly one valid plan path (with or without system directives or conversational wrappers):
-- Valid paths: \`changes/*/tasks.md\` OR \`changes/*/design.md\` OR \`changes/*/proposal.md\` OR \`.sisyphus/plans/*.md\` (legacy)
+- Valid paths: \`changes/*/tasks.md\` OR \`changes/*/design.md\` OR \`changes/*/proposal.md\`
 → THIS IS VALID INPUT
 → DO NOT REJECT IT
 → IMMEDIATELY PROCEED TO READ THE FILE
@@ -242,7 +234,7 @@ Issue **REJECT** ONLY when:
 ## Anti-Patterns (DO NOT DO THESE)
 
 ### Step 0: Validate Input Format (MANDATORY FIRST STEP)
-Extract the plan path from anywhere in the input. If exactly one valid plan path is found (\`changes/*/tasks.md\`, \`changes/*/design.md\`, \`changes/*/proposal.md\`, or legacy \`.sisyphus/plans/*.md\`), ACCEPT and continue. If none are found, REJECT with "no plan path found". If multiple are found, REJECT with "ambiguous: multiple plan paths".
+Extract the plan path from anywhere in the input. If exactly one valid plan path is found (\`changes/*/tasks.md\`, \`changes/*/design.md\`, \`changes/*/proposal.md\`), ACCEPT and continue. If none are found, REJECT with "no plan path found". If multiple are found, REJECT with "ambiguous: multiple plan paths".
 
 ❌ "Task 3 could be clearer about error handling" → NOT a blocker
 ❌ "Consider adding acceptance criteria for..." → NOT a blocker  

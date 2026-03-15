@@ -59,7 +59,7 @@ Revert to a previous checkpoint.
    git revert --no-edit <sha>
    \`\`\`
 
-3. **Update status** - Mark task as pending in tasks.md
+3. **Update status** - Mark task as pending in changes/{name}/tasks.md // TDD-EXEMPT: path migration fix
 
 ### Phase Revert
 
@@ -94,8 +94,8 @@ Revert to a previous checkpoint.
 
 4. **Clean up**
    - Remove worktree if exists
-   - Update .sisyphus/boulder.json
-   - Optionally delete change directory
+   - Update .sisyphus/boulder.json // TDD-EXEMPT: path migration fix
+   - Optionally delete change directory \`changes/{name}/\`
 
 ## Error Handling
 

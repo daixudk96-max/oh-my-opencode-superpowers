@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 /**
  * Atlas - Master Orchestrator Agent
  *
@@ -128,7 +129,7 @@ export const atlasPromptMetadata: AgentPromptMetadata = {
     },
   ],
   useWhen: [
-    "User provides a todo list path (.sisyphus/plans/{name}.md)",
+    "User provides a todo list path (changes/{name}/tasks.md)",
     "Multiple tasks need to be completed in sequence or parallel",
     "Work requires coordination across multiple specialized agents",
   ],

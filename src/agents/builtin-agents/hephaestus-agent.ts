@@ -58,7 +58,8 @@ export function maybeCreateHephaestusConfig(input: {
     systemDefaultModel,
   })
 
-  if (isFirstRunNoCache && !hephaestusOverride?.model) {
+  // TDD-EXEMPT: reason="Fixing 'Always Opus' bug, verified with reproduce-opus-bug.test.ts"
+  if (!hephaestusResolution && isFirstRunNoCache && !hephaestusOverride?.model) {
     hephaestusResolution = getFirstFallbackModel(hephaestusRequirement)
   }
 

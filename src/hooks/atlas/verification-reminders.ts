@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 import { VERIFICATION_REMINDER } from "./system-reminder-templates"
 
 function buildVerificationReminder(sessionId: string): string {
@@ -43,7 +44,7 @@ ${buildVerificationReminder(sessionId)}
 
 The subagent was instructed to record findings in notepad files. Read them NOW:
 \`\`\`
-Glob(".sisyphus/notepads/${planName}/*.md")
+Glob("changes/${planName}/*.md")
 \`\`\`
 Then \`Read\` each file found — especially:
 - **learnings.md**: Patterns, conventions, successful approaches discovered
@@ -59,7 +60,7 @@ Then \`Read\` each file found — especially:
 
 Do NOT rely on cached progress. Read the plan file NOW:
 \`\`\`
-Read(".sisyphus/plans/${planName}.md")
+Read("changes/${planName}/tasks.md")
 \`\`\`
 Count exactly: how many \`- [ ]\` remain? How many \`- [x]\` completed?
 This is YOUR ground truth. Use it to decide what comes next.
@@ -68,7 +69,7 @@ This is YOUR ground truth. Use it to decide what comes next.
 
 RIGHT NOW - Do not delay. Verification passed → Mark IMMEDIATELY.
 
-Update the plan file \`.sisyphus/plans/${planName}.md\`:
+Update the plan file \`changes/${planName}/tasks.md\`:
 - Change \`- [ ]\` to \`- [x]\` for the completed task
 - Use \`Edit\` tool to modify the checkbox
 

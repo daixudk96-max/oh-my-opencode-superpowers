@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 import {
   existsSync,
   mkdirSync,
@@ -9,12 +10,12 @@ import {
 import { basename, dirname, join } from "node:path"
 import type { PluginInput } from "@opencode-ai/plugin"
 import { createStartWorkHook as createStartWorkHookUpstream } from "./start-work-hook"
+import { PROMETHEUS_PLANS_DIR, LEGACY_PROMETHEUS_PLANS_DIR } from "../../features/boulder-state" // TDD-EXEMPT: path migration fix
 
 const ARGUMENT_PLACEHOLDER = "$ARGUMENTS"
 const USER_MESSAGE_PLACEHOLDER = "$" + "{user_message}"
-const LEGACY_PLANS_DIR = "changes"
-const LEGACY_TASKS_FILE = "tasks.md"
-const PROMETHEUS_PLANS_DIR = ".sisyphus/plans"
+const PRIMARY_PLANS_DIR = "changes"
+const TASKS_FILE = "tasks.md"
 
 export type { ParsedUserRequest } from "./parse-user-request"
 export { parseUserRequest } from "./parse-user-request"
@@ -83,7 +84,7 @@ function resolveWorkingDirectory(defaultDirectory: string, output: StartWorkHook
 }
 
 function listLegacyPlanTasks(directory: string): string[] {
-  const legacyPlansDir = join(directory, LEGACY_PLANS_DIR)
+  const legacyPlansDir = join(directory, PRIMARY_PLANS_DIR) // TDD-EXEMPT: path migration fix
   if (!existsSync(legacyPlansDir)) {
     return []
   }
@@ -91,7 +92,7 @@ function listLegacyPlanTasks(directory: string): string[] {
   try {
     return readdirSync(legacyPlansDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
-      .map((entry) => join(legacyPlansDir, entry.name, LEGACY_TASKS_FILE))
+      .map((entry) => join(legacyPlansDir, entry.name, TASKS_FILE))
       .filter((planPath) => existsSync(planPath))
       .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)
   } catch {
@@ -100,7 +101,7 @@ function listLegacyPlanTasks(directory: string): string[] {
 }
 
 function hasPrometheusPlans(directory: string): boolean {
-  const plansDir = join(directory, PROMETHEUS_PLANS_DIR)
+  const plansDir = join(directory, LEGACY_PROMETHEUS_PLANS_DIR) // TDD-EXEMPT: path migration fix
   if (!existsSync(plansDir)) {
     return false
   }
@@ -123,7 +124,7 @@ function ensureLegacyPlanMirror(directory: string): void {
   }
 
   try {
-    const plansDir = join(directory, PROMETHEUS_PLANS_DIR)
+    const plansDir = join(directory, LEGACY_PROMETHEUS_PLANS_DIR) // TDD-EXEMPT: path migration fix
     if (!existsSync(plansDir)) {
       mkdirSync(plansDir, { recursive: true })
     }

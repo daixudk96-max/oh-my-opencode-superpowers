@@ -420,7 +420,7 @@ describe("atlas hook", () => {
         cleanupMessageStorage(ORCHESTRATOR_SESSION)
       })
 
-      test("should append delegation reminder when orchestrator writes outside .sisyphus/", async () => {
+      test("should append delegation reminder when orchestrator writes outside changes/", async () => {
         // given
         const hook = createAtlasHook(createMockPluginInput())
         const output = {
@@ -441,7 +441,7 @@ describe("atlas hook", () => {
         expect(output.output).toContain("task")
       })
 
-      test("should append delegation reminder when orchestrator edits outside .sisyphus/", async () => {
+      test("should append delegation reminder when orchestrator edits outside changes/", async () => {
         // given
         const hook = createAtlasHook(createMockPluginInput())
         const output = {
@@ -460,14 +460,14 @@ describe("atlas hook", () => {
         expect(output.output).toContain("ORCHESTRATOR, not an IMPLEMENTER")
       })
 
-      test("should NOT append reminder when orchestrator writes inside .sisyphus/", async () => {
+      test("should NOT append reminder when orchestrator writes inside changes/", async () => {
         // given
         const hook = createAtlasHook(createMockPluginInput())
         const originalOutput = "File written successfully"
         const output = {
           title: "Write",
           output: originalOutput,
-          metadata: { filePath: "/project/.sisyphus/plans/work-plan.md" },
+          metadata: { filePath: "/project/changes/feature/tasks.md" },
         }
 
         // when
@@ -481,7 +481,7 @@ describe("atlas hook", () => {
         expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
       })
 
-      test("should NOT append reminder when non-orchestrator writes outside .sisyphus/", async () => {
+      test("should NOT append reminder when non-orchestrator writes outside changes/", async () => {
         // given
         const nonOrchestratorSession = "non-orchestrator-session"
         setupMessageStorage(nonOrchestratorSession, "sisyphus-junior")
@@ -548,15 +548,15 @@ describe("atlas hook", () => {
       })
 
       describe("cross-platform path validation (Windows support)", () => {
-        test("should NOT append reminder when orchestrator writes inside .sisyphus\\ (Windows backslash)", async () => {
-          // given
-          const hook = createAtlasHook(createMockPluginInput())
-          const originalOutput = "File written successfully"
-          const output = {
-            title: "Write",
-            output: originalOutput,
-            metadata: { filePath: ".sisyphus\\plans\\work-plan.md" },
-          }
+      test("should NOT append reminder when orchestrator writes inside changes\\ (Windows backslash)", async () => {
+        // given
+        const hook = createAtlasHook(createMockPluginInput())
+        const originalOutput = "File written successfully"
+        const output = {
+          title: "Write",
+          output: originalOutput,
+          metadata: { filePath: "changes\\feature\\tasks.md" },
+        }
 
           // when
           await hook["tool.execute.after"](
@@ -569,15 +569,15 @@ describe("atlas hook", () => {
           expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
         })
 
-        test("should NOT append reminder when orchestrator writes inside .sisyphus with mixed separators", async () => {
-          // given
-          const hook = createAtlasHook(createMockPluginInput())
-          const originalOutput = "File written successfully"
-          const output = {
-            title: "Write",
-            output: originalOutput,
-            metadata: { filePath: ".sisyphus\\plans/work-plan.md" },
-          }
+      test("should NOT append reminder when orchestrator writes inside changes with mixed separators", async () => {
+        // given
+        const hook = createAtlasHook(createMockPluginInput())
+        const originalOutput = "File written successfully"
+        const output = {
+          title: "Write",
+          output: originalOutput,
+          metadata: { filePath: "changes\\feature/tasks.md" },
+        }
 
           // when
           await hook["tool.execute.after"](
@@ -590,15 +590,15 @@ describe("atlas hook", () => {
           expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
         })
 
-        test("should NOT append reminder for absolute Windows path inside .sisyphus\\", async () => {
-          // given
-          const hook = createAtlasHook(createMockPluginInput())
-          const originalOutput = "File written successfully"
-          const output = {
-            title: "Write",
-            output: originalOutput,
-            metadata: { filePath: "C:\\Users\\test\\project\\.sisyphus\\plans\\x.md" },
-          }
+      test("should NOT append reminder for absolute Windows path inside changes\\", async () => {
+        // given
+        const hook = createAtlasHook(createMockPluginInput())
+        const originalOutput = "File written successfully"
+        const output = {
+          title: "Write",
+          output: originalOutput,
+          metadata: { filePath: "C:\\Users\\test\\project\\changes\\feature\\tasks.md" },
+        }
 
           // when
           await hook["tool.execute.after"](
@@ -611,7 +611,7 @@ describe("atlas hook", () => {
           expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
         })
 
-        test("should append reminder for Windows path outside .sisyphus\\", async () => {
+        test("should append reminder for Windows path outside changes\\", async () => {
           // given
           const hook = createAtlasHook(createMockPluginInput())
           const output = {

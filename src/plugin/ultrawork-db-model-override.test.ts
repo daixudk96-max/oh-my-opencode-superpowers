@@ -50,10 +50,19 @@ describe("scheduleDeferredModelOverride", () => {
     logSpy = spyOn(sharedModule, "log").mockImplementation(() => {})
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     getDataDirSpy?.mockRestore()
     logSpy?.mockRestore()
-    rmSync(tempDir, { recursive: true, force: true })
+    
+    // Give some time for background microtasks/tasks to finish closing DB
+    await new Promise(resolve => setTimeout(resolve, 50))
+    
+    try {
+      rmSync(tempDir, { recursive: true, force: true })
+    } catch (err) {
+      // Ignore EBUSY on Windows if it still happens after timeout
+      if ((err as any).code !== 'EBUSY') throw err
+    }
   })
 
   function insertMessage(id: string, model: { providerID: string; modelID: string }) {
@@ -136,7 +145,7 @@ describe("scheduleDeferredModelOverride", () => {
 
     //#then
     expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("setTimeout fallback failed"),
+      expect.stringContaining("falling back to setTimeout"),
       expect.objectContaining({ messageId: "msg_nonexistent" }),
     )
   })
@@ -195,7 +204,7 @@ describe("scheduleDeferredModelOverride", () => {
 
     //#then
     expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Failed to open DB"),
+      expect.stringContaining("Deferred DB update failed"),
       expect.objectContaining({ messageId: "msg_corrupt" }),
     )
   })

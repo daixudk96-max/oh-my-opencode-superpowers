@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 import { createSystemDirective, SystemDirectiveTypes } from "../../shared/system-directive"
 import { getAgentDisplayName } from "../../shared/agent-display-names"
 
@@ -7,7 +8,7 @@ export const PROMETHEUS_AGENTS = ["prometheus", "Prometheus (Planner)"]
 
 export const ALLOWED_EXTENSIONS = [".md"]
 
-// Only changes/ is writable, .sisyphus/ is read-only
+// Only changes/ is writable
 // Note: No trailing slash - the regex in index.ts handles path separators
 export const ALLOWED_PATH_PREFIXES = ["changes"]
 

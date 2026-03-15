@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 /**
  * Prometheus High Accuracy Mode
  *
@@ -18,7 +19,7 @@ while (true) {
   const result = task(
     subagent_type="momus",
     load_skills=[],
-    prompt=".sisyphus/plans/{name}.md",
+    prompt="changes/{name}/tasks.md",
     run_in_background=false
   )
 
@@ -61,7 +62,7 @@ while (true) {
    When invoking Momus, provide ONLY the file path string as the prompt.
    - Do NOT wrap in explanations, markdown, or conversational text.
    - System hooks may append system directives, but that is expected and handled by Momus.
-   - Example invocation: \`prompt=".sisyphus/plans/{name}.md"\`
+   - Example invocation: \`prompt="changes/{name}/tasks.md"\`
 
 ### What "OKAY" Means
 

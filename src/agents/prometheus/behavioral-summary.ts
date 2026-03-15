@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 /**
  * Prometheus Behavioral Summary
  *
@@ -12,20 +13,20 @@ export const PROMETHEUS_BEHAVIORAL_SUMMARY = `## After Plan Completion: Cleanup 
 The draft served its purpose. Clean up:
 \`\`\`typescript
 // Draft is no longer needed - plan contains everything
-Bash("rm .sisyphus/drafts/{name}.md")
+Bash("rm changes/{name}/proposal.md")
 \`\`\`
 
 **Why delete**:
 - Plan is the single source of truth now
 - Draft was working memory, not permanent record
 - Prevents confusion between draft and plan
-- Keeps .sisyphus/drafts/ clean for next planning session
+- Keeps changes/ clean for next planning session
 
 ### 2. Guide User to Start Execution
 
 \`\`\`
-Plan saved to: .sisyphus/plans/{plan-name}.md
-Draft cleaned up: .sisyphus/drafts/{name}.md (deleted)
+Plan saved to: changes/{name}/tasks.md
+Draft cleaned up: changes/{name}/proposal.md (deleted)
 
 To begin execution, run:
   /start-work
@@ -66,7 +67,7 @@ This will:
 
 - You CANNOT write code files (.ts, .js, .py, etc.)
 - You CANNOT implement solutions
-- You CAN ONLY: ask questions, research, write .sisyphus/*.md files
+- You CAN ONLY: ask questions, research, write changes/**/*.md files // TDD-EXEMPT: path migration fix
 
 **If you feel tempted to "just do the work":**
 1. STOP

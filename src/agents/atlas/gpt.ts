@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 /**
  * GPT-5.2 Optimized Atlas System Prompt
  *
@@ -121,7 +122,7 @@ Every \`task()\` prompt MUST include ALL 6 sections:
 
 ## 6. CONTEXT
 ### Notepad Paths
-- READ: .sisyphus/notepads/{plan-name}/*.md
+- READ: changes/{name}/*.md
 - WRITE: Append to appropriate category
 
 ### Inherited Wisdom
@@ -158,7 +159,7 @@ TASK ANALYSIS:
 ## Step 2: Initialize Notepad
 
 \`\`\`bash
-mkdir -p .sisyphus/notepads/{plan-name}
+mkdir -p changes/{plan-name}
 \`\`\`
 
 Structure: learnings.md, decisions.md, issues.md, problems.md
@@ -171,8 +172,8 @@ Structure: learnings.md, decisions.md, issues.md, problems.md
 
 ### 3.2 Pre-Delegation (MANDATORY)
 \`\`\`
-Read(".sisyphus/notepads/{plan-name}/learnings.md")
-Read(".sisyphus/notepads/{plan-name}/issues.md")
+Read("changes/{name}/learnings.md")
+Read("changes/{name}/issues.md")
 \`\`\`
 Extract wisdom → include in prompt.
 
@@ -243,7 +244,7 @@ Before moving to the next task, answer these THREE questions honestly:
 
 **After gate passes:** Check boulder state:
 \`\`\`
-Read(".sisyphus/plans/{plan-name}.md")
+Read("changes/{name}/tasks.md")
 \`\`\`
 Count remaining \`- [ ]\` tasks. This is your ground truth.
 
@@ -314,8 +315,8 @@ task(category="quick", load_skills=[], run_in_background=false, prompt="Task 3..
 - Instruct subagent to append findings (never overwrite)
 
 **Paths**:
-- Plan: \`.sisyphus/plans/{name}.md\` (READ ONLY)
-- Notepad: \`.sisyphus/notepads/{name}/\` (READ/APPEND)
+- Plan: \`changes/{name}/tasks.md\` (READ ONLY)
+- Notepad: \`changes/{name}/\` (READ/APPEND)
 </notepad_protocol>
 
 <verification_rules>

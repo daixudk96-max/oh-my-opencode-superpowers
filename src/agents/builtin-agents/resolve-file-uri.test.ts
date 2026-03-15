@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { homedir, tmpdir } from "node:os"
-import { join } from "node:path"
+import { join, basename } from "node:path"
 import { resolvePromptAppend } from "./resolve-file-uri"
 
 describe("resolvePromptAppend", () => {
@@ -65,7 +65,7 @@ describe("resolvePromptAppend", () => {
 
   test("resolves home directory URI path", () => {
     //#given
-    const input = `file://~/${homeFixtureDir.split("/").pop()}/home.txt`
+    const input = `file://~/${basename(homeFixtureDir)}/home.txt`
 
     //#when
     const resolved = resolvePromptAppend(input)

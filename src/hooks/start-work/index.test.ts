@@ -8,6 +8,7 @@ import {
   writeBoulderState,
   clearBoulderState,
   readBoulderState,
+  PROMETHEUS_PLANS_DIR,
 } from "../../features/boulder-state"
 import type { BoulderState } from "../../features/boulder-state"
 import * as sessionState from "../../features/claude-code-session-state"
@@ -160,15 +161,19 @@ describe("start-work hook", () => {
 
     test("should auto-select when only one incomplete plan among multiple plans", async () => {
       // given - multiple plans but only one incomplete
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
 
       // Plan 1: complete (all checked)
-      const plan1Path = join(plansDir, "plan-complete.md")
+      const plan1Dir = join(plansDir, "plan-complete")
+      mkdirSync(plan1Dir, { recursive: true })
+      const plan1Path = join(plan1Dir, "tasks.md")
       writeFileSync(plan1Path, "# Plan Complete\n- [x] Task 1\n- [x] Task 2")
 
       // Plan 2: incomplete (has unchecked)
-      const plan2Path = join(plansDir, "plan-incomplete.md")
+      const plan2Dir = join(plansDir, "plan-incomplete")
+      mkdirSync(plan2Dir, { recursive: true })
+      const plan2Path = join(plan2Dir, "tasks.md")
       writeFileSync(plan2Path, "# Plan Incomplete\n- [ ] Task 1\n- [x] Task 2")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -190,13 +195,17 @@ describe("start-work hook", () => {
 
     test("should wrap multiple plans message in system-reminder tag", async () => {
       // given - multiple incomplete plans
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
 
-      const plan1Path = join(plansDir, "plan-a.md")
+      const plan1Dir = join(plansDir, "plan-a")
+      mkdirSync(plan1Dir, { recursive: true })
+      const plan1Path = join(plan1Dir, "tasks.md")
       writeFileSync(plan1Path, "# Plan A\n- [ ] Task 1")
 
-      const plan2Path = join(plansDir, "plan-b.md")
+      const plan2Dir = join(plansDir, "plan-b")
+      mkdirSync(plan2Dir, { recursive: true })
+      const plan2Path = join(plan2Dir, "tasks.md")
       writeFileSync(plan2Path, "# Plan B\n- [ ] Task 2")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -218,13 +227,17 @@ describe("start-work hook", () => {
 
     test("should use 'ask user' prompt style for multiple plans", async () => {
       // given - multiple incomplete plans
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
 
-      const plan1Path = join(plansDir, "plan-x.md")
+      const plan1Dir = join(plansDir, "plan-x")
+      mkdirSync(plan1Dir, { recursive: true })
+      const plan1Path = join(plan1Dir, "tasks.md")
       writeFileSync(plan1Path, "# Plan X\n- [ ] Task 1")
 
-      const plan2Path = join(plansDir, "plan-y.md")
+      const plan2Dir = join(plansDir, "plan-y")
+      mkdirSync(plan2Dir, { recursive: true })
+      const plan2Path = join(plan2Dir, "tasks.md")
       writeFileSync(plan2Path, "# Plan Y\n- [ ] Task 2")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -245,15 +258,19 @@ describe("start-work hook", () => {
 
     test("should select explicitly specified plan name from user-request, ignoring existing boulder state", async () => {
       // given - existing boulder state pointing to old plan
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
 
       // Old plan (in boulder state)
-      const oldPlanPath = join(plansDir, "old-plan.md")
+      const oldPlanDir = join(plansDir, "old-plan")
+      mkdirSync(oldPlanDir, { recursive: true })
+      const oldPlanPath = join(oldPlanDir, "tasks.md")
       writeFileSync(oldPlanPath, "# Old Plan\n- [ ] Old Task 1")
 
       // New plan (user wants this one)
-      const newPlanPath = join(plansDir, "new-plan.md")
+      const newPlanDir = join(plansDir, "new-plan")
+      mkdirSync(newPlanDir, { recursive: true })
+      const newPlanPath = join(newPlanDir, "tasks.md")
       writeFileSync(newPlanPath, "# New Plan\n- [ ] New Task 1")
 
       // Set up stale boulder state pointing to old plan
@@ -291,10 +308,12 @@ describe("start-work hook", () => {
 
     test("should strip ultrawork/ulw keywords from plan name argument", async () => {
       // given - plan with ultrawork keyword in user-request
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
 
-      const planPath = join(plansDir, "my-feature-plan.md")
+      const planDir = join(plansDir, "my-feature-plan")
+      mkdirSync(planDir, { recursive: true })
+      const planPath = join(planDir, "tasks.md")
       writeFileSync(planPath, "# My Feature Plan\n- [ ] Task 1")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -322,10 +341,12 @@ describe("start-work hook", () => {
 
     test("should strip ulw keyword from plan name argument", async () => {
       // given - plan with ulw keyword in user-request
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
 
-      const planPath = join(plansDir, "api-refactor.md")
+      const planDir = join(plansDir, "api-refactor")
+      mkdirSync(planDir, { recursive: true })
+      const planPath = join(planDir, "tasks.md")
       writeFileSync(planPath, "# API Refactor\n- [ ] Task 1")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -353,10 +374,12 @@ describe("start-work hook", () => {
 
     test("should match plan by partial name", async () => {
       // given - user specifies partial plan name
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
 
-      const planPath = join(plansDir, "2026-01-15-feature-implementation.md")
+      const planDir = join(plansDir, "2026-01-15-feature-implementation")
+      mkdirSync(planDir, { recursive: true })
+      const planPath = join(planDir, "tasks.md")
       writeFileSync(planPath, "# Feature Implementation\n- [ ] Task 1")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -418,9 +441,11 @@ describe("start-work hook", () => {
 
     test("should inject model-decides instructions when no --worktree flag", async () => {
       // given - single plan, no worktree flag
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
-      writeFileSync(join(plansDir, "my-plan.md"), "# Plan\n- [ ] Task 1")
+      const planDir = join(plansDir, "my-plan")
+      mkdirSync(planDir, { recursive: true })
+      writeFileSync(join(planDir, "tasks.md"), "# Plan\n- [ ] Task 1")
 
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
@@ -438,9 +463,11 @@ describe("start-work hook", () => {
 
     test("should inject worktree path when --worktree flag is valid", async () => {
       // given - single plan + valid worktree path
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
-      writeFileSync(join(plansDir, "my-plan.md"), "# Plan\n- [ ] Task 1")
+      const planDir = join(plansDir, "my-plan")
+      mkdirSync(planDir, { recursive: true })
+      writeFileSync(join(planDir, "tasks.md"), "# Plan\n- [ ] Task 1")
       detectSpy.mockReturnValue("/validated/worktree")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -458,9 +485,11 @@ describe("start-work hook", () => {
 
     test("should store worktree_path in boulder when --worktree is valid", async () => {
       // given - plan + valid worktree
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
-      writeFileSync(join(plansDir, "my-plan.md"), "# Plan\n- [ ] Task 1")
+      const planDir = join(plansDir, "my-plan")
+      mkdirSync(planDir, { recursive: true })
+      writeFileSync(join(planDir, "tasks.md"), "# Plan\n- [ ] Task 1")
       detectSpy.mockReturnValue("/valid/wt")
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -478,9 +507,11 @@ describe("start-work hook", () => {
 
     test("should NOT store worktree_path when --worktree path is invalid", async () => {
       // given - plan + invalid worktree path (detectWorktreePath returns null)
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
-      writeFileSync(join(plansDir, "my-plan.md"), "# Plan\n- [ ] Task 1")
+      const planDir = join(plansDir, "my-plan")
+      mkdirSync(planDir, { recursive: true })
+      writeFileSync(join(planDir, "tasks.md"), "# Plan\n- [ ] Task 1")
       // detectSpy already returns null by default
 
       const hook = createStartWorkHook(createMockPluginInput())
@@ -556,10 +587,12 @@ describe("start-work hook", () => {
   describe("execution mode selection", () => {
     test("should auto-select Wave-Parallel mode when remaining tasks are greater than five", async () => {
       // given - one plan with 6 remaining tasks
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
+      const planDir = join(plansDir, "wave-plan")
+      mkdirSync(planDir, { recursive: true })
       writeFileSync(
-        join(plansDir, "wave-plan.md"),
+        join(planDir, "tasks.md"),
         "# Wave Plan\n- [ ] T1\n- [ ] T2\n- [ ] T3\n- [ ] T4\n- [ ] T5\n- [ ] T6"
       )
 
@@ -580,10 +613,12 @@ describe("start-work hook", () => {
 
     test("should honor explicit sequential mode override even when task count is high", async () => {
       // given - one plan with 6 remaining tasks but explicit sequential mode
-      const plansDir = join(testDir, ".sisyphus", "plans")
+      const plansDir = join(testDir, "changes")
       mkdirSync(plansDir, { recursive: true })
+      const planDir = join(plansDir, "forced-sequential")
+      mkdirSync(planDir, { recursive: true })
       writeFileSync(
-        join(plansDir, "forced-sequential.md"),
+        join(planDir, "tasks.md"),
         "# Forced Sequential\n- [ ] T1\n- [ ] T2\n- [ ] T3\n- [ ] T4\n- [ ] T5\n- [ ] T6"
       )
 

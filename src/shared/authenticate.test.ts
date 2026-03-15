@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { authenticate } from "./authenticate"
 
 describe("authenticate", () => {
-  test("#given missing account and wrong secret paths #when authenticating #then both return INVALID_CREDENTIALS", () => {
+  test("#given missing account and wrong secret paths #when authenticating #then both return expected error codes", () => {
     const missingAccount = authenticate({
       account: null,
       secretMatches: false,
@@ -18,7 +18,7 @@ describe("authenticate", () => {
 
     expect(missingAccount).toEqual({
       ok: false,
-      code: "INVALID_CREDENTIALS",
+      code: "ACCOUNT_LOCKED",
     })
     expect(wrongSecret).toEqual({
       ok: false,

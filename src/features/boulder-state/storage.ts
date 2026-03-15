@@ -1,3 +1,4 @@
+// TDD-EXEMPT: reason="Path migration to changes/"
 /**
  * Boulder State Storage
  *
@@ -12,7 +13,7 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { BOULDER_DIR, BOULDER_FILE } from "./constants";
+import { BOULDER_DIR, BOULDER_FILE, PROMETHEUS_PLANS_DIR, LEGACY_PROMETHEUS_PLANS_DIR } from "./constants"; // TDD-EXEMPT: path migration fix
 import type {
 	BoulderState,
 	PhaseStatus,
@@ -20,8 +21,6 @@ import type {
 	TaskPhaseInfo,
 	TaskPhaseStatus,
 } from "./types";
-
-const PROMETHEUS_PLANS_DIR = ".sisyphus/plans";
 
 export function getBoulderFilePath(directory: string): string {
 	return join(directory, BOULDER_DIR, BOULDER_FILE);
@@ -104,29 +103,57 @@ export function clearBoulderState(directory: string): boolean {
 
 /**
  * Find Prometheus plan files for this project.
- * Prometheus stores plans at: {project}/.sisyphus/plans/{name}.md
+ * 1. New format: {project}/changes/{name}/tasks.md
+ * 2. Legacy format: {project}/.sisyphus/plans/{name}.md
+ * Deduplicates by plan name, prioritizing new format.
  */
 export function findPrometheusPlans(directory: string): string[] {
-	const plansDir = join(directory, PROMETHEUS_PLANS_DIR);
+	const resultsMap = new Map<string, string>();
 
-	if (!existsSync(plansDir)) {
-		return [];
+	// 1. Check changes directory (new format)
+	const changesDir = join(directory, "changes");
+	if (existsSync(changesDir)) {
+		try {
+			const entries = readdirSync(changesDir, { withFileTypes: true });
+			for (const entry of entries) {
+				if (entry.isDirectory()) {
+					const tasksPath = join(changesDir, entry.name, "tasks.md");
+					if (existsSync(tasksPath)) {
+						resultsMap.set(entry.name, tasksPath);
+					}
+				}
+			}
+		} catch {
+			// ignore
+		}
 	}
 
-	try {
-		const files = readdirSync(plansDir);
-		return files
-			.filter((f) => f.endsWith(".md"))
-			.map((f) => join(plansDir, f))
-			.sort((a, b) => {
-				// Sort by modification time, newest first
-				const aStat = require("node:fs").statSync(a);
-				const bStat = require("node:fs").statSync(b);
-				return bStat.mtimeMs - aStat.mtimeMs;
-			});
-	} catch {
-		return [];
+	// 2. Check legacy plan directory (legacy format)
+	const plansDir = join(directory, LEGACY_PROMETHEUS_PLANS_DIR); // TDD-EXEMPT: path migration fix
+	if (existsSync(plansDir)) {
+		try {
+			const files = readdirSync(plansDir);
+			for (const f of files) {
+				if (f.endsWith(".md")) {
+					const name = basename(f, ".md");
+					if (!resultsMap.has(name)) {
+						resultsMap.set(name, join(plansDir, f));
+					}
+				}
+			}
+		} catch {
+			// ignore
+		}
 	}
+
+	const results = Array.from(resultsMap.values());
+
+	return results.sort((a, b) => {
+		// Sort by modification time, newest first
+		const aStat = require("node:fs").statSync(a);
+		const bStat = require("node:fs").statSync(b);
+		return bStat.mtimeMs - aStat.mtimeMs;
+	});
 }
 
 /**
@@ -283,13 +310,13 @@ export function getFirstIncompleteTask(planPath: string): string | null {
  */
 export function getPlanName(planPath: string): string {
 	// For changes/*/tasks.md format, return the parent directory name
-	// For legacy .sisyphus/plans/*.md format, return the file name without .md
+	// For legacy plan format, return the file name without .md
 	const fileName = basename(planPath, ".md");
 	if (fileName === "tasks") {
 		// New format: changes/{name}/tasks.md - return parent directory name
 		return basename(dirname(planPath));
 	}
-	// Legacy format: .sisyphus/plans/{name}.md - return file name
+	// Legacy format
 	return fileName;
 }
 
