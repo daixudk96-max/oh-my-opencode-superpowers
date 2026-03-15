@@ -2,7 +2,7 @@
 
 > 从 auto-registry 基础设施建好到全部功能融合完成的完整步骤。
 > 创建时间: 2026-03-11
-> 最后更新: 2026-03-14 (② verified, ④ verified, next: ③)
+> 最后更新: 2026-03-15 (①~⑥ 全部完成, next: Step 7/8)
 
 ---
 
@@ -212,11 +212,28 @@
 
 ---
 
-### C 类功能索引（从未实现，代码不存在）— 25 项
+### C→B 重分类（审计后发现代码已存在）— 11 项
 
-> 这些功能只有设计/计划，代码库中未找到对应实现。优先级待定，可选在 Step 7 中筛选实现。
+> 2026-03-15 审计发现以下原 C 类项实际已有完整代码，重新归入 B 类。
 
-#### C 类 Skills — context-engineering 系列（9 项，来自 sisyphus draft）
+| 原编号 | 功能名称 | 实际代码位置 | 说明 |
+|:------:|----------|-------------|------|
+| C10 | background-compaction | `src/hooks/preemptive-compaction.ts` + manifest | 以 preemptive-compaction 名实现 |
+| C13 | L1 lightweight-detection | `src/hooks/observer-detector/` + manifest | 以 observer-detector 名实现 |
+| C14 | TypeScript 观察记录器 | `src/hooks/observation-recorder/` + manifest | 完整实现 |
+| C15 | L2 周期分析 | `src/hooks/observer-detector/` 内含 L2 触发 | 集成在 observer-detector 中 |
+| C16 | L3 会话摘要提取 | `src/downstream/hooks/pattern-extraction/manifest.ts` | 以 pattern-extraction 名实现 |
+| C17 | MCP Health Checker | `src/mcp/health-checker.ts` + test | 完整实现含测试 |
+| C22 | mdsel 预编译 bundle | `src/features/builtin-skills/mdsel/cli.mjs` | 已编译打包 |
+| C23 | mdsel Windows 适配 | `mdsel-reminder.cjs` + `install.cjs` | CJS hook 脚本已适配 |
+| C24 | plan worktree metadata | `src/features/boulder-state/types.ts` worktree_path | 类型已定义 |
+| C25 | 自动创建 plan worktree | `src/features/boulder-state/worktree-manager.ts` | 完整实现 |
+
+### C 类功能索引（真正未实现）— 14 项
+
+#### C 类 Skills — context-engineering 系列（9 项，仅有 draft 设计文档）
+
+> 来源: `.sisyphus/drafts/add-context-engineering-skills-*.md`，无 `src/` 代码。
 
 | # | Skill 名称 | 描述 | 来源 | 决策 |
 |:-:|-----------|------|------|:----:|
@@ -230,43 +247,35 @@
 | C8 | advanced-evaluation | 高级评估 | add-context-engineering-skills | 待定 |
 | C9 | tool-design | 工具设计技能 | add-context-engineering-skills | 待定 |
 
-#### C 类 Hooks（4 项）
+#### C 类 Hooks（2 项，无代码无设计）
 
 | # | Hook 名称 | 描述 | 来源 | 决策 |
 |:-:|-----------|------|------|:----:|
-| C10 | background-compaction | 异步上下文压缩 | activate-dormant-hooks | 待定 |
 | C11 | plan-reminder | PreToolUse 自动重读 task_plan.md | add-context-engineering-skills | 待定 |
 | C12 | findings-capture | 2-Action Rule 自动提醒更新 findings.md | add-context-engineering-skills | 待定 |
-| C13 | L1 lightweight-detection | 实时检测循环和失败模式 | implement-missing-features | 待定 |
 
-#### C 类 Modules / 其他（12 项）
+#### C 类 Modules（4 项，有设计文档待实现）
+
+> 来源: `changes/50-enhancements/design.md` 含 43 个增强任务规划。
 
 | # | 功能名称 | 描述 | 来源 | 决策 |
 |:-:|----------|------|------|:----:|
-| C14 | TypeScript 观察记录器 | TS 版观察记录模块 | implement-missing-features | 待定 |
-| C15 | L2 周期分析 | 后台 observer agent 周期性分析 | implement-missing-features | 待定 |
-| C16 | L3 会话摘要提取 | 会话结束时提取模式总结 | implement-missing-features | 待定 |
-| C17 | MCP Health Checker 模块 | `checkAllOnStartup` 启动检查（代码可能存在但未完整集成） | 50-enhancements | 待定 |
 | C18 | Rules 系统增强 | 角色感知 + 角色配置 | 50-enhancements | 待定 |
 | C19 | Context 系统改进 | 意图模式、主动压缩 | 50-enhancements | 待定 |
 | C20 | Agent 系统增强 | 决策框架、结构化交接 | 50-enhancements | 待定 |
 | C21 | 并行系统改进 | 依赖感知、缓存友好 | 50-enhancements | 待定 |
-| C22 | mdsel 预编译 bundle | 打包为单文件 | mdsel-skill-fusion | 待定 |
-| C23 | mdsel Windows 适配 | Windows 兼容 | mdsel-skill-fusion | 待定 |
-| C24 | plan worktree metadata | boulder state 中添加计划工作树元数据 | start-work-hardening | 待定 |
-| C25 | 自动创建 plan worktree | start-work 时自动创建计划工作树 | start-work-hardening | 待定 |
 
 ---
 
-### 全量统计
+### 全量统计（2026-03-15 审计后更新）
 
 | 分类 | 数量 | 说明 |
 |------|:----:|------|
-| 已验证 PASS | 42 | 代码 + 注册均正常，需迁移 manifest |
-| 已验证 FAIL | 15 | 代码在但有缺陷，需修复 + 迁移 |
-| 已验证 PARTIAL | 1 | 部分功能缺失 |
-| B 类（代码在，未验证） | 30 | 需写 manifest 迁移 |
-| C 类（从未实现） | 25 | 筛选后决策是否实现 |
+| 已验证 PASS | 42 | 代码 + 注册均正常 |
+| 已验证 FAIL | 15 | 已在 ①④ 中修复 |
+| 已验证 PARTIAL | 1 | 已在 ④ 中修复 |
+| B 类（代码在，未验证） | 41 | 原 30 + C→B 重分类 11 项 |
+| C 类（真正未实现） | 14 | 9 context-engineering + 2 hooks + 4 modules（原 25 - 11 重分类） |
 | **总计** | **113** | |
 
 ---
@@ -282,9 +291,9 @@
   ↓
 ④ fix-remaining-fail-partial (✅ F8/F9/F12/P1 全部验证通过)
   ↓
-⑤ reform-upstream-registrations         ← 🔜 NEXT: 清理 index.ts 手动接线 + 修复 17 个双重执行
+⑤ reform-upstream-registrations (✅ 代码审计通过, auto-registry dist 环境待修复)
   ↓
-⑥ verify-and-cleanup                    ← 全量验证 + .sisyphus 清理 + skill 更新
+⑥ verify-and-cleanup (✅ .sisyphus 清理 + 回归修复 + 构建通过)
 ```
 
 ---
@@ -454,7 +463,7 @@
 
 ---
 
-## ⑤ reform-upstream-registrations ← 🔜 NEXT
+## ⑤ reform-upstream-registrations (✅ 验证完成)
 
 **changes 目录**: `changes/reform-upstream-registrations/`
 
