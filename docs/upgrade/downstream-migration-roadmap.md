@@ -2,7 +2,7 @@
 
 > 从 auto-registry 基础设施建好到全部功能融合完成的完整步骤。
 > 创建时间: 2026-03-11
-> 最后更新: 2026-03-15 (①~⑥ 全部完成, next: Step 7/8)
+> 最后更新: 2026-03-19 (①~⑦ 全部完成, auto-registry dist 已验证正常, next: C 类功能开发或其他新需求)
 
 ---
 
@@ -150,9 +150,10 @@
 | `verify-misc-session-scorer-notepad` | 5 | 0 | 0 | 5 |
 | `verify-auth` | 3 | 1 | 0 | 4 |
 | `verify-test-hooks-real-environment3` | 1 | 0 | 0 | 1 |
+| `verify-open-code-user-session` | 9 | 2 | 0 | 11 |
 
 > `verify-b-class-features` 为专项验证批次：覆盖 41 个 B 类功能，状态使用 `PASS / FAIL / AGENT_INVISIBLE`，并记录了全量 `bun test` 的阻塞结果。由于该批次没有以传统 `PASS / FAIL / PARTIAL` 三分法统计，故不并入上表计数。
-| **合计** | **42** | **15** | **1** | **58** |
+| **合计** | **55** | **19** | **1** | **75** |
 
 ---
 
@@ -277,8 +278,9 @@
 | 历史已验证 FAIL | 15 | 已在 ①④ 中修复 |
 | 历史已验证 PARTIAL | 1 | 已在 ④ 中修复 |
 | B 类专项验证 | 41 | `verify-b-class-features` 已完成静态/行为验证；全量 `bun test` 因 deterministic failures 被记录并按用户指令跳过 |
+| 真实 session 验证 | 11 | `verify-open-code-user-session`: 9 PASS / 2 BLOCKED, 5 个 bug 修复 |
 | C 类（真正未实现） | 14 | 9 context-engineering + 2 hooks + 4 modules（原 25 - 11 重分类） |
-| **总计** | **113** | |
+| **总计** | **124** | |
 
 ---
 
@@ -293,9 +295,11 @@
   ↓
 ④ fix-remaining-fail-partial (✅ F8/F9/F12/P1 全部验证通过)
   ↓
-⑤ reform-upstream-registrations (✅ 代码审计通过, auto-registry dist 环境待修复)
+⑤ reform-upstream-registrations (✅ 代码审计通过, auto-registry dist 已验证正常)
   ↓
 ⑥ verify-and-cleanup (✅ .sisyphus 清理 + 回归修复 + 构建通过)
+  ↓
+⑦ verify-open-code-user-session (✅ 真实 session 端到端验证, 5 个 bug 修复)
 ```
 
 ---
@@ -519,6 +523,52 @@
 
 ---
 
+## ⑦ verify-open-code-user-session (✅ 2026-03-19 完成)
+
+**changes 目录**: `changes/verify-open-code-user-session/`
+**目标**: 在真实 OpenCode session 中端到端验证 B 类 hook（failure-counter、debugging-injector、codebase-assessment）
+**验证状态**: 9/11 PASS, 2 BLOCKED
+**代码修复**: 5 个 bug
+
+### 验证结果
+
+| 任务 | 功能 | 状态 |
+|------|------|:----:|
+| V-1.1 | codebase-assessment 首次 Read 触发 | ✅ PASS |
+| V-1.2 | 第二次 Read 不重复注入 | ✅ PASS |
+| V-2.1 | failure-counter 第 1 次 task 失败 → AUTO-INJECTED | ✅ PASS |
+| V-2.2 | 第 2 次失败 → ORACLE DISPATCH | ✅ PASS |
+| V-2.3 | 第 3 次失败 → BLOCKED + 第 4 次被阻止 | ✅ PASS |
+| V-2.4 | /reset-failures 重置 | BLOCKED |
+| V-2.5 | reset 后回到 first-failure | BLOCKED |
+| V-3.1 | debugging-injector lastEditedFile 设置 | ✅ PASS |
+| V-3.2 | 第 1 次 Bash 失败不注入 | ✅ PASS |
+| V-3.3 | 第 2 次 Bash 失败触发注入 | ✅ PASS |
+
+> V-2.4/V-2.5 BLOCKED 原因: `opencode run` 桥接模式不支持发送斜杠命令（`/reset-failures`），subagent 内部也不允许嵌套调用 `task` 工具。
+
+### 发现并修复的 5 个 Bug
+
+| # | 组件 | Bug | 修复 |
+|:-:|------|-----|------|
+| 1 | debugging-injector | `FIX_ATTEMPT_TOOLS` 缺少 `apply_patch` | 添加 `apply_patch` + patchText 路径提取 |
+| 2 | failure-counter | `output.content` 字段不存在 | 改为 `output.output` |
+| 3 | failure-counter | `SUCCESS_PATTERNS` 中 `/task completed/i` 太宽泛 | 改为 `/task completed successfully/i` |
+| 4 | codebase-assessment | `substantiveTools` 大小写不匹配 | `"Read"` → `"read"` |
+| 5 | background-agent | agent payload 格式错误 | `{ name: xxx }` → 纯字符串 |
+
+### 证据文件
+
+| 文件 | 内容 |
+|------|------|
+| `evidence/V-1.1-log.txt` | codebase-assessment 日志条目 |
+| `evidence/V-2.1-V2.3-combined.txt` | failure-counter 三级升级完整日志 |
+| `evidence/V-3.3-debug-stderr.txt` | debugging-injector 9 行调试日志 |
+| `findings.md` | 完整验证发现记录 |
+| `progress.md` | 执行进度日志 |
+
+---
+
 ## 前置已完成项
 
 ### Step 1: auto-registry 基础设施 ✅
@@ -557,3 +607,4 @@
 | `changes/verify-auth/findings.md` | 4 项验证（3 PASS / 1 FAIL） |
 | `changes/verify-test-hooks-real-environment3/findings.md` | 1 项验证（1 PASS） |
 | `changes/verify-b-class-features/findings.md` | 41 项专项验证（静态/行为验证完成；全量 `bun test` 阻塞结果已记录，并于 2026-03-16 经用户授权跳过） |
+| `changes/verify-open-code-user-session/findings.md` | 11 项真实 session 验证（9 PASS / 2 BLOCKED），5 个 bug 修复记录 |
