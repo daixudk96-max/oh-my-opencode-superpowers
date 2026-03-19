@@ -138,9 +138,16 @@ export function createDebugInjectorHook(
 
       // Track edit attempts to know which file we're working on
       if (FIX_ATTEMPT_TOOLS.includes(toolLower)) {
-        const filePath = (output.args.filePath ?? output.args.file_path ?? output.args.path) as
+        let filePath = (output.args.filePath ?? output.args.file_path ?? output.args.path) as
           | string
           | undefined
+        // apply_patch uses patchText; extract first file path from it
+        if (!filePath && toolLower === "apply_patch" && typeof output.args.patchText === "string") {
+          const match = output.args.patchText.match(/\*\*\* (?:Update|Add|Delete) File:\s*(.+)/i)
+          if (match) {
+            filePath = match[1].trim()
+          }
+        }
         if (filePath) {
           lastEditedFile = filePath
         }
@@ -150,8 +157,9 @@ export function createDebugInjectorHook(
     "tool.execute.after": async (
       input: { tool: string; sessionID: string; callID: string },
       output: {
-        args: Record<string, unknown>
-        content?: string
+        title?: string
+        output?: string
+        metadata?: unknown
         messages?: Array<{ role: string; content: string }>
       }
     ): Promise<void> => {
@@ -168,7 +176,7 @@ export function createDebugInjectorHook(
       }
 
       // Check if output indicates failure
-      const outputContent = (output.content ?? "") as string
+      const outputContent = (output.output ?? "") as string
       const hasFailure = isFailureOutput(outputContent)
 
       if (!hasFailure) {

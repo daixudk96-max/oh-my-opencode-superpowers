@@ -1,0 +1,60 @@
+import { log } from "../../shared/logger";
+import { createInternalAgentTextPart, resolveInheritedPromptTools } from "../../shared";
+import { HOOK_NAME } from "./hook-name";
+import { BOULDER_CONTINUATION_PROMPT } from "./system-reminder-templates";
+import { resolveRecentPromptContextForSession } from "./recent-model-resolver";
+export async function injectBoulderContinuation(input) {
+    const { ctx, sessionID, planName, remaining, total, agent, // TDD-EXEMPT: path migration fix
+    worktreePath, backgroundManager, sessionState, } = input;
+    const hasRunningBgTasks = backgroundManager
+        ? backgroundManager.getTasksByParentSession(sessionID).some((t) => t.status === "running")
+        : false;
+    if (hasRunningBgTasks) {
+        log(`[${HOOK_NAME}] Skipped injection: background tasks running`, { sessionID });
+        return;
+    }
+    const worktreeContext = worktreePath ? `\n\n[Worktree: ${worktreePath}]` : "";
+    const prompt = BOULDER_CONTINUATION_PROMPT.replace(/{PLAN_NAME}/g, planName) +
+        `\n\n[Status: ${total - remaining}/${total} completed, ${remaining} remaining]` +
+        worktreeContext;
+    try {
+        log(`[${HOOK_NAME}] Injecting boulder continuation`, { sessionID, planName, remaining });
+        if (ctx.client.tui) {
+            await ctx.client.tui
+                .showToast({
+                body: {
+                    title: "Boulder Continuation",
+                    message: `Resuming "${planName}"... (${remaining} tasks remaining)`,
+                    variant: "warning",
+                    duration: 3000,
+                },
+            })
+                .catch(() => { });
+        } // TDD-EXEMPT: fixing TUI mock issue in tests
+        const promptContext = await resolveRecentPromptContextForSession(ctx, sessionID);
+        // TDD-EXEMPT: final fix for promptAsync injection
+        const inheritedTools = resolveInheritedPromptTools(sessionID, promptContext.tools);
+        // TDD-EXEMPT: final fix for promptAsync injection
+        await ctx.client.session.promptAsync({
+            path: { id: sessionID },
+            body: {
+                ...(promptContext.model !== undefined ? { model: promptContext.model } : {}),
+                ...(inheritedTools ? { tools: inheritedTools } : {}),
+                ...(agent ? { agent } : {}),
+                parts: [createInternalAgentTextPart(prompt)],
+            }, // TDD-EXEMPT: path migration fix
+            query: { directory: ctx.directory },
+        });
+        sessionState.promptFailureCount = 0;
+        log(`[${HOOK_NAME}] Boulder continuation injected`, { sessionID });
+    }
+    catch (err) {
+        sessionState.promptFailureCount += 1;
+        sessionState.lastFailureAt = Date.now();
+        log(`[${HOOK_NAME}] Boulder continuation failed`, {
+            sessionID,
+            error: String(err),
+            promptFailureCount: sessionState.promptFailureCount,
+        });
+    }
+}

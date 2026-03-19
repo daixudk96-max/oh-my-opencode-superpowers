@@ -1,0 +1,141 @@
+import { existsSync, readFileSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
+import { log } from "../../shared/logger";
+function getPluginsBaseDir() {
+    if (process.env.CLAUDE_PLUGINS_HOME) {
+        return process.env.CLAUDE_PLUGINS_HOME;
+    }
+    return join(homedir(), ".claude", "plugins");
+}
+function getInstalledPluginsPath() {
+    return join(getPluginsBaseDir(), "installed_plugins.json");
+}
+function loadInstalledPlugins() {
+    const dbPath = getInstalledPluginsPath();
+    if (!existsSync(dbPath)) {
+        return null;
+    }
+    try {
+        const content = readFileSync(dbPath, "utf-8");
+        return JSON.parse(content);
+    }
+    catch (error) {
+        log("Failed to load installed plugins database", error);
+        return null;
+    }
+}
+function getClaudeSettingsPath() {
+    if (process.env.CLAUDE_SETTINGS_PATH) {
+        return process.env.CLAUDE_SETTINGS_PATH;
+    }
+    return join(homedir(), ".claude", "settings.json");
+}
+function loadClaudeSettings() {
+    const settingsPath = getClaudeSettingsPath();
+    if (!existsSync(settingsPath)) {
+        return null;
+    }
+    try {
+        const content = readFileSync(settingsPath, "utf-8");
+        return JSON.parse(content);
+    }
+    catch (error) {
+        log("Failed to load Claude settings", error);
+        return null;
+    }
+}
+function loadPluginManifest(installPath) {
+    const manifestPath = join(installPath, ".claude-plugin", "plugin.json");
+    if (!existsSync(manifestPath)) {
+        return null;
+    }
+    try {
+        const content = readFileSync(manifestPath, "utf-8");
+        return JSON.parse(content);
+    }
+    catch (error) {
+        log(`Failed to load plugin manifest from ${manifestPath}`, error);
+        return null;
+    }
+}
+function derivePluginNameFromKey(pluginKey) {
+    const atIndex = pluginKey.indexOf("@");
+    return atIndex > 0 ? pluginKey.substring(0, atIndex) : pluginKey;
+}
+function isPluginEnabled(pluginKey, settingsEnabledPlugins, overrideEnabledPlugins) {
+    if (overrideEnabledPlugins && pluginKey in overrideEnabledPlugins) {
+        return overrideEnabledPlugins[pluginKey];
+    }
+    if (settingsEnabledPlugins && pluginKey in settingsEnabledPlugins) {
+        return settingsEnabledPlugins[pluginKey];
+    }
+    return true;
+}
+function extractPluginEntries(db) {
+    if (db.version === 1) {
+        return Object.entries(db.plugins).map(([key, installation]) => [key, installation]);
+    }
+    return Object.entries(db.plugins).map(([key, installations]) => [key, installations[0]]);
+}
+export function discoverInstalledPlugins(options) {
+    const db = loadInstalledPlugins();
+    const settings = loadClaudeSettings();
+    const plugins = [];
+    const errors = [];
+    if (!db || !db.plugins) {
+        return { plugins, errors };
+    }
+    const settingsEnabledPlugins = settings?.enabledPlugins;
+    const overrideEnabledPlugins = options?.enabledPluginsOverride;
+    for (const [pluginKey, installation] of extractPluginEntries(db)) {
+        if (!installation)
+            continue;
+        if (!isPluginEnabled(pluginKey, settingsEnabledPlugins, overrideEnabledPlugins)) {
+            log(`Plugin disabled: ${pluginKey}`);
+            continue;
+        }
+        const { installPath, scope, version } = installation;
+        if (!existsSync(installPath)) {
+            errors.push({
+                pluginKey,
+                installPath,
+                error: "Plugin installation path does not exist",
+            });
+            continue;
+        }
+        const manifest = loadPluginManifest(installPath);
+        const pluginName = manifest?.name || derivePluginNameFromKey(pluginKey);
+        const loadedPlugin = {
+            name: pluginName,
+            version: version || manifest?.version || "unknown",
+            scope: scope,
+            installPath,
+            pluginKey,
+            manifest: manifest ?? undefined,
+        };
+        if (existsSync(join(installPath, "commands"))) {
+            loadedPlugin.commandsDir = join(installPath, "commands");
+        }
+        if (existsSync(join(installPath, "agents"))) {
+            loadedPlugin.agentsDir = join(installPath, "agents");
+        }
+        if (existsSync(join(installPath, "skills"))) {
+            loadedPlugin.skillsDir = join(installPath, "skills");
+        }
+        const hooksPath = join(installPath, "hooks", "hooks.json");
+        if (existsSync(hooksPath)) {
+            loadedPlugin.hooksPath = hooksPath;
+        }
+        const mcpPath = join(installPath, ".mcp.json");
+        if (existsSync(mcpPath)) {
+            loadedPlugin.mcpPath = mcpPath;
+        }
+        plugins.push(loadedPlugin);
+        log(`Discovered plugin: ${pluginName}@${version} (${scope})`, {
+            installPath,
+            hasManifest: !!manifest,
+        });
+    }
+    return { plugins, errors };
+}

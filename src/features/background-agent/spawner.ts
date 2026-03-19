@@ -16,6 +16,12 @@ export interface SpawnerContext {
   onTaskError: (task: BackgroundTask, error: Error) => void
 }
 
+type SessionPromptAsyncArgs = Parameters<OpencodeClient["session"]["promptAsync"]>[0] & {
+  body: {
+    agent: string | { name: string }
+  }
+}
+
 export function createTask(input: LaunchInput): BackgroundTask {
   return {
     id: `bg_${crypto.randomUUID().slice(0, 8)}`,
@@ -216,7 +222,7 @@ export async function resumeTask(
     : undefined
   const resumeVariant = task.model?.variant
 
-  client.session.promptAsync({
+  const resumePromptArgs = {
     path: { id: task.sessionID },
     body: {
       agent: task.agent,
@@ -230,7 +236,9 @@ export async function resumeTask(
       },
       parts: [createInternalAgentTextPart(input.prompt)],
     },
-  }).catch((error) => {
+  } as unknown as SessionPromptAsyncArgs
+
+  client.session.promptAsync(resumePromptArgs).catch((error) => {
     log("[background-agent] resume prompt error:", error)
     onTaskError(task, error instanceof Error ? error : new Error(String(error)))
   })

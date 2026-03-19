@@ -94,6 +94,7 @@ export function parseModelSuggestion(error: unknown): ModelSuggestionInfo | null
 
 interface PromptBody {
   model?: { providerID: string; modelID: string }
+  agent?: string | { name: string }
   [key: string]: unknown
 }
 

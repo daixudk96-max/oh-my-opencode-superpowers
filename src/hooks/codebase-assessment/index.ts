@@ -42,8 +42,9 @@ export function createCodebaseAssessmentHook(ctx: PluginInput) {
       }
 
       // Skip for tools that don't indicate real work starting
-      const substantiveTools = ["Read", "Glob", "Grep", "Edit", "Write", "Bash"]
-      if (!substantiveTools.includes(tool)) {
+      // Note: opencode passes tool names in lowercase (e.g. "read"), so compare case-insensitively
+      const substantiveTools = ["read", "glob", "grep", "edit", "write", "bash"]
+      if (!substantiveTools.includes(tool.toLowerCase())) {
         return
       }
 

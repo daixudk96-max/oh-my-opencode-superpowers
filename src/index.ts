@@ -1,4 +1,5 @@
 // TDD-EXEMPT: reason="Verified Task 3.7 registration ordering"
+
 import type { Plugin } from "@opencode-ai/plugin";
 import { initConfigContext } from "./cli/config-manager/config-context";
 import type { HookName } from "./config";
@@ -11,9 +12,9 @@ import { createPluginInterface } from "./plugin-interface";
 import { createModelCacheState } from "./plugin-state";
 import {
 	createContextDetector,
+	type HookCondition,
 	injectServerAuthIntoClient,
 	log,
-	type HookCondition,
 } from "./shared";
 import { createFirstMessageVariantGate } from "./shared/first-message-variant";
 import { repairMisbucketedSessionMetadata } from "./shared/session-bucket-repair";
@@ -41,7 +42,8 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 
 	for (const hookConfig of disabledHookConfigs ?? []) {
 		const name = typeof hookConfig === "string" ? hookConfig : hookConfig.name;
-		const condition = typeof hookConfig === "string" ? undefined : hookConfig.when;
+		const condition =
+			typeof hookConfig === "string" ? undefined : hookConfig.when;
 
 		if (!condition || detector.matchesCondition(projectContext, condition)) {
 			disabledHooks.add(name);
@@ -56,7 +58,6 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 	const isHookEnabled = (hookName: HookName): boolean =>
 		!disabledHooks.has(hookName);
 	const safeHookEnabled = pluginConfig.experimental?.safe_hook_creation ?? true;
-
 
 	const firstMessageVariantGate = createFirstMessageVariantGate();
 
@@ -117,6 +118,13 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 			await downstreamHooks.runChatMessage(input as never, output as never);
 		},
 
+		UserPromptSubmit: async (input: unknown, output: unknown) => {
+			await downstreamHooks.runUserPromptSubmit(
+				input as never,
+				output as never,
+			);
+		},
+
 		event: async (input) => {
 			await baseEvent?.(input as never);
 
@@ -155,17 +163,26 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 		},
 
 		"tool.execute.before": async (input, output) => {
-			log("[OhMyOpenCodePlugin] tool.execute.before", { tool: input.tool, sessionID: input.sessionID, args: output.args });
+			log("[OhMyOpenCodePlugin] tool.execute.before", {
+				tool: input.tool,
+				sessionID: input.sessionID,
+				args: output.args,
+			});
 			await baseToolExecuteBefore?.(input as never, output as never);
-			await downstreamHooks.runToolExecuteBefore(input as never, output as never);
+			await downstreamHooks.runToolExecuteBefore(
+				input as never,
+				output as never,
+			);
 		},
-
 
 		"tool.execute.after": async (input, output) => {
 			await baseToolExecuteAfter?.(input as never, output as never);
 
 			if (!output) return;
-			await downstreamHooks.runToolExecuteAfter(input as never, output as never);
+			await downstreamHooks.runToolExecuteAfter(
+				input as never,
+				output as never,
+			);
 		},
 
 		"experimental.session.compacting": async (
@@ -201,5 +218,3 @@ export type {
 // OpenCode treats ALL exports as plugin instances and calls them.
 // Config error utilities are available via "./shared/config-errors" for internal use only.
 export type { ConfigLoadError } from "./shared/config-errors";
-
-

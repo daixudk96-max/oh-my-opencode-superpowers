@@ -165,8 +165,9 @@ export function createFailureCounterHook(
     "tool.execute.after": async (
       input: { tool: string; sessionID: string; callID: string },
       output: {
-        args: Record<string, unknown>
-        content?: string
+        title?: string
+        output?: string
+        metadata?: unknown
         messages?: Array<{ role: string; content: string }>
       }
     ): Promise<void> => {
@@ -181,7 +182,7 @@ export function createFailureCounterHook(
         return
       }
 
-      const outputContent = (output.content ?? "") as string
+      const outputContent = (output.output ?? "") as string
       const sessionId = input.sessionID
 
       // Check for success - reset counter

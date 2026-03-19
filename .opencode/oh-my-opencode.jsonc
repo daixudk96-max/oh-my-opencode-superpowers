@@ -3,90 +3,90 @@
 {
   "agents": {
     "sisyphus": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "atlas": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "hephaestus": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "oracle": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "librarian": {
-      "model": "gcl/gemini-3-flash-preview-high-search"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "explore": {
-      "model": "gcl/gemini-3-flash-preview-high-search"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "frontend-ui-ux-engineer": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "document-writer": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "multimodal-looker": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "archiver": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "metis": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "momus": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "prometheus": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "sisyphus-junior": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "observer": {
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     }
   },
   "categories": {
     "visual-engineering": {
       "description": "Frontend, UI/UX, design tasks",
-      "model": "gcl/gemini-3-flash-preview-high",
+      "model": "openai-proxy/gpt-5.1-codex-mini",
       "temperature": 0.3
     },
     "ultrabrain": {
       "description": "Deep reasoning",
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "artistry": {
       "description": "Creative tasks",
-      "model": "gcl/gemini-3-flash-preview-high",
+      "model": "openai-proxy/gpt-5.1-codex-mini",
       "temperature": 0.7
     },
     "quick": {
       "description": "Fast tasks",
-      "model": "gcl/gemini-3-flash-preview-high",
+      "model": "openai-proxy/gpt-5.1-codex-mini",
       "temperature": 0.1
     },
     "unspecified-low": {
       "description": "Low effort tasks",
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "unspecified-high": {
       "description": "High effort tasks",
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "writing": {
       "description": "Writing tasks",
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "most-capable": {
       "description": "Most capable model",
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     },
     "general": {
       "description": "General purpose tasks",
-      "model": "gcl/gemini-3-flash-preview-high"
+      "model": "openai-proxy/gpt-5.1-codex-mini"
     }
   }
 }

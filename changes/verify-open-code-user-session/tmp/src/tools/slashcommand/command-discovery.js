@@ -1,0 +1,91 @@
+import { existsSync, readdirSync, readFileSync } from "fs";
+import { basename, join } from "path";
+import { parseFrontmatter, sanitizeModelField, getOpenCodeConfigDir, discoverPluginCommandDefinitions, } from "../../shared";
+import { isMarkdownFile } from "../../shared/file-utils";
+import { getClaudeConfigDir } from "../../shared";
+import { loadBuiltinCommands } from "../../features/builtin-commands";
+function discoverCommandsFromDir(commandsDir, scope) {
+    if (!existsSync(commandsDir))
+        return [];
+    const entries = readdirSync(commandsDir, { withFileTypes: true });
+    const commands = [];
+    for (const entry of entries) {
+        if (!isMarkdownFile(entry))
+            continue;
+        const commandPath = join(commandsDir, entry.name);
+        const commandName = basename(entry.name, ".md");
+        try {
+            const content = readFileSync(commandPath, "utf-8");
+            const { data, body } = parseFrontmatter(content);
+            const isOpencodeSource = scope === "opencode" || scope === "opencode-project";
+            const metadata = {
+                name: commandName,
+                description: data.description || "",
+                argumentHint: data["argument-hint"],
+                model: sanitizeModelField(data.model, isOpencodeSource ? "opencode" : "claude-code"),
+                agent: data.agent,
+                subtask: Boolean(data.subtask),
+            };
+            commands.push({
+                name: commandName,
+                path: commandPath,
+                metadata,
+                content: body,
+                scope,
+            });
+        }
+        catch {
+            continue;
+        }
+    }
+    return commands;
+}
+function discoverPluginCommands(options) {
+    const pluginDefinitions = discoverPluginCommandDefinitions(options);
+    return Object.entries(pluginDefinitions).map(([name, definition]) => ({
+        name,
+        metadata: {
+            name,
+            description: definition.description || "",
+            model: definition.model,
+            agent: definition.agent,
+            subtask: definition.subtask,
+        },
+        content: definition.template,
+        scope: "plugin",
+    }));
+}
+export function discoverCommandsSync(directory, options) {
+    const configDir = getOpenCodeConfigDir({ binary: "opencode" });
+    const userCommandsDir = join(getClaudeConfigDir(), "commands");
+    const projectCommandsDir = join(directory ?? process.cwd(), ".claude", "commands");
+    const opencodeGlobalDir = join(configDir, "command");
+    const opencodeProjectDir = join(directory ?? process.cwd(), ".opencode", "command");
+    const userCommands = discoverCommandsFromDir(userCommandsDir, "user");
+    const opencodeGlobalCommands = discoverCommandsFromDir(opencodeGlobalDir, "opencode");
+    const projectCommands = discoverCommandsFromDir(projectCommandsDir, "project");
+    const opencodeProjectCommands = discoverCommandsFromDir(opencodeProjectDir, "opencode-project");
+    const pluginCommands = discoverPluginCommands(options);
+    const builtinCommandsMap = loadBuiltinCommands();
+    const builtinCommands = Object.values(builtinCommandsMap).map((command) => ({
+        name: command.name,
+        metadata: {
+            name: command.name,
+            description: command.description || "",
+            argumentHint: command.argumentHint,
+            model: command.model,
+            agent: command.agent,
+            subtask: command.subtask,
+        },
+        content: command.template,
+        scope: "builtin",
+    }));
+    return [
+        ...projectCommands,
+        ...userCommands,
+        ...opencodeProjectCommands,
+        ...opencodeGlobalCommands,
+        ...builtinCommands,
+        ...pluginCommands,
+    ];
+}

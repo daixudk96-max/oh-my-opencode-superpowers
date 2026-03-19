@@ -11,9 +11,9 @@
 | 指标 | 数值 |
 |------|------|
 | 下游功能总数 | 113 项（`docs/未验证新功能.md`） |
-| 已验证（PASS/FAIL/PARTIAL） | 66 项（50 / 15 / 1） |
-| B 类（代码在，未验证，需迁移） | 22 项 |
-| C 类（从未实现） | 25 项 |
+| 历史已验证（PASS/FAIL/PARTIAL） | 58 项（42 / 15 / 1） |
+| B 类专项验证 | 41 项（静态/行为验证完成；全量 `bun test` 回归门禁于 2026-03-16 经用户授权记录后跳过） |
+| C 类（从未实现） | 14 项 |
 | bun test 基线 | 593 fail / 127 errors / 22 snapshot failures |
 | .sisyphus 残留引用 | 368 处 / 79 个文件 |
 
@@ -150,6 +150,8 @@
 | `verify-misc-session-scorer-notepad` | 5 | 0 | 0 | 5 |
 | `verify-auth` | 3 | 1 | 0 | 4 |
 | `verify-test-hooks-real-environment3` | 1 | 0 | 0 | 1 |
+
+> `verify-b-class-features` 为专项验证批次：覆盖 41 个 B 类功能，状态使用 `PASS / FAIL / AGENT_INVISIBLE`，并记录了全量 `bun test` 的阻塞结果。由于该批次没有以传统 `PASS / FAIL / PARTIAL` 三分法统计，故不并入上表计数。
 | **合计** | **42** | **15** | **1** | **58** |
 
 ---
@@ -271,10 +273,10 @@
 
 | 分类 | 数量 | 说明 |
 |------|:----:|------|
-| 已验证 PASS | 42 | 代码 + 注册均正常 |
-| 已验证 FAIL | 15 | 已在 ①④ 中修复 |
-| 已验证 PARTIAL | 1 | 已在 ④ 中修复 |
-| B 类（代码在，未验证） | 41 | 原 30 + C→B 重分类 11 项 |
+| 历史已验证 PASS | 42 | 代码 + 注册均正常 |
+| 历史已验证 FAIL | 15 | 已在 ①④ 中修复 |
+| 历史已验证 PARTIAL | 1 | 已在 ④ 中修复 |
+| B 类专项验证 | 41 | `verify-b-class-features` 已完成静态/行为验证；全量 `bun test` 因 deterministic failures 被记录并按用户指令跳过 |
 | C 类（真正未实现） | 14 | 9 context-engineering + 2 hooks + 4 modules（原 25 - 11 重分类） |
 | **总计** | **113** | |
 
@@ -554,3 +556,4 @@
 | `changes/verify-c5-guideline-anchoring/findings.md` | 4 项验证（4 PASS） |
 | `changes/verify-auth/findings.md` | 4 项验证（3 PASS / 1 FAIL） |
 | `changes/verify-test-hooks-real-environment3/findings.md` | 1 项验证（1 PASS） |
+| `changes/verify-b-class-features/findings.md` | 41 项专项验证（静态/行为验证完成；全量 `bun test` 阻塞结果已记录，并于 2026-03-16 经用户授权跳过） |

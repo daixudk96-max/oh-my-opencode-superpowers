@@ -1,0 +1,15 @@
+import { log } from "../../../shared/logger";
+import { showSpinnerToast } from "./spinner-toast";
+export async function showVersionToast(ctx, version, message) {
+    const displayVersion = version ?? "unknown";
+    await showSpinnerToast(ctx, displayVersion, message);
+    log(`[auto-update-checker] Startup toast shown: v${displayVersion}`);
+}
+export async function showLocalDevToast(ctx, version, isSisyphusEnabled) {
+    const displayVersion = version ?? "dev";
+    const message = isSisyphusEnabled
+        ? "Sisyphus running in local development mode."
+        : "Running in local development mode. oMoMoMo...";
+    await showSpinnerToast(ctx, `${displayVersion} (dev)`, message);
+    log(`[auto-update-checker] Local dev toast shown: v${displayVersion}`);
+}

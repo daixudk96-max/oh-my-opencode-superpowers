@@ -2,8 +2,8 @@
  * Debugging Injector Hook Tests
  */
 
-import { describe, test, expect, beforeEach } from "bun:test"
 import { createDebugInjectorHook } from "./index"
+import { beforeEach, describe, expect, test } from "bun:test"
 
 describe("Debugging Injector Hook", () => {
   describe("Configuration", () => {
@@ -15,10 +15,9 @@ describe("Debugging Injector Hook", () => {
       )
       const input = { tool: "lsp_diagnostics", sessionID: "test", callID: "1" }
       const output: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: something failed" }
+      } = { output: "error: something failed" }
 
       // #when - hook is called multiple times
       await hook["tool.execute.after"](input, output)
@@ -27,6 +26,35 @@ describe("Debugging Injector Hook", () => {
 
       // #then - should not inject skill
       expect(output.messages).toBeUndefined()
+    })
+
+    test("should be enabled by default", async () => {
+      // #given - a hook using default config
+      const hook = createDebugInjectorHook({ cwd: "/test" })
+      const editInput = { tool: "edit", sessionID: "test", callID: "1" }
+      const editOutput: { args: Record<string, unknown> } = {
+        args: { filePath: "src/utils/helper.ts", newString: "new code" },
+      }
+      await hook["tool.execute.before"](editInput, editOutput)
+
+      const verifyInput = { tool: "lsp_diagnostics", sessionID: "test", callID: "2" }
+
+      // #when - failures reach the default threshold
+      const output1: {
+        output?: string
+        messages?: Array<{ role: string; content: string }>
+      } = { output: "error: default failure" }
+      await hook["tool.execute.after"](verifyInput, output1)
+
+      const output2: {
+        output?: string
+        messages?: Array<{ role: string; content: string }>
+      } = { output: "error: default failure again" }
+      await hook["tool.execute.after"](verifyInput, output2)
+
+      // #then - injection occurs without explicit config
+      expect(output2.messages).toBeDefined()
+      expect(output2.messages?.[0].content).toContain("DEBUGGING SKILL")
     })
   })
 
@@ -65,10 +93,9 @@ describe("Debugging Injector Hook", () => {
 
       const verifyInput = { tool: "lsp_diagnostics", sessionID: "test", callID: "2" }
       const verifyOutput: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: Type 'string' is not assignable to type 'number'" }
+      } = { output: "error: Type 'string' is not assignable to type 'number'" }
 
       // #when - verification fails once
       await hook["tool.execute.after"](verifyInput, verifyOutput)
@@ -89,17 +116,15 @@ describe("Debugging Injector Hook", () => {
 
       // #when - verification fails twice (reaching threshold)
       const output1: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: first failure" }
+      } = { output: "error: first failure" }
       await hook["tool.execute.after"](verifyInput, output1)
 
       const output2: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: second failure" }
+      } = { output: "error: second failure" }
       await hook["tool.execute.after"](verifyInput, output2)
 
       // #then - should inject debugging skill
@@ -121,24 +146,21 @@ describe("Debugging Injector Hook", () => {
 
       // #when - verification fails multiple times
       const output1: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: first failure" }
+      } = { output: "error: first failure" }
       await hook["tool.execute.after"](verifyInput, output1)
 
       const output2: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: second failure" }
+      } = { output: "error: second failure" }
       await hook["tool.execute.after"](verifyInput, output2)
 
       const output3: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: third failure" }
+      } = { output: "error: third failure" }
       await hook["tool.execute.after"](verifyInput, output3)
 
       // #then - should inject skill only on second failure
@@ -163,26 +185,23 @@ describe("Debugging Injector Hook", () => {
 
       // First failure
       const output1: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: first failure" }
+      } = { output: "error: first failure" }
       await resetHook["tool.execute.after"](verifyInput, output1)
 
       // Success - should reset
       const successOutput: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "No errors found" }
+      } = { output: "No errors found" }
       await resetHook["tool.execute.after"](verifyInput, successOutput)
 
       // #when - another failure after reset
       const output2: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: new failure" }
+      } = { output: "error: new failure" }
       await resetHook["tool.execute.after"](verifyInput, output2)
 
       // #then - should not inject skill (count was reset)
@@ -208,10 +227,9 @@ describe("Debugging Injector Hook", () => {
       await hook["tool.execute.before"](editInputA, editOutputA)
 
       const outputA1: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: failure A" }
+      } = { output: "error: failure A" }
       await hook["tool.execute.after"](verifyInput, outputA1)
 
       // Failure on file B
@@ -222,18 +240,16 @@ describe("Debugging Injector Hook", () => {
       await hook["tool.execute.before"](editInputB, editOutputB)
 
       const outputB1: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: failure B" }
+      } = { output: "error: failure B" }
       await hook["tool.execute.after"](verifyInput, outputB1)
 
       // #when - second failure on file B
       const outputB2: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "error: another failure B" }
+      } = { output: "error: another failure B" }
       await hook["tool.execute.after"](verifyInput, outputB2)
 
       // #then - should inject for file B (2 failures) but not file A (1 failure)
@@ -260,17 +276,15 @@ describe("Debugging Injector Hook", () => {
 
       // #when - bash fails twice
       const output1: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "npm ERR! test failed" }
+      } = { output: "npm ERR! test failed" }
       await hook["tool.execute.after"](bashInput, output1)
 
       const output2: {
-        args: Record<string, unknown>
-        content?: string
+        output?: string
         messages?: Array<{ role: string; content: string }>
-      } = { args: {}, content: "Error: Cannot find module" }
+      } = { output: "Error: Cannot find module" }
       await hook["tool.execute.after"](bashInput, output2)
 
       // #then - should inject debugging skill

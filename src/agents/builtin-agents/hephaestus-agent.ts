@@ -51,11 +51,14 @@ export function maybeCreateHephaestusConfig(input: {
 
   if (!hasRequiredProvider) return undefined
 
+  const systemDefaultForResolution =
+    isFirstRunNoCache && !hasHephaestusExplicitConfig ? undefined : systemDefaultModel
+
   let hephaestusResolution = applyModelResolution({
     userModel: hephaestusOverride?.model,
     requirement: hephaestusRequirement,
     availableModels,
-    systemDefaultModel,
+    systemDefaultModel: systemDefaultForResolution,
   })
 
   // TDD-EXEMPT: reason="Fixing 'Always Opus' bug, verified with reproduce-opus-bug.test.ts"

@@ -1,0 +1,32 @@
+import { AGENT_MODEL_REQUIREMENTS } from "../../shared";
+import { applyOverrides } from "./agent-overrides";
+import { applyModelResolution } from "./model-resolution";
+import { createAtlasAgent } from "../atlas";
+export function maybeCreateAtlasConfig(input) {
+    const { disabledAgents, agentOverrides, uiSelectedModel, availableModels, systemDefaultModel, availableAgents, availableSkills, mergedCategories, directory, userCategories, } = input;
+    if (disabledAgents.includes("atlas"))
+        return undefined;
+    const orchestratorOverride = agentOverrides["atlas"];
+    const atlasRequirement = AGENT_MODEL_REQUIREMENTS["atlas"];
+    const atlasResolution = applyModelResolution({
+        uiSelectedModel: orchestratorOverride?.model ? undefined : uiSelectedModel,
+        userModel: orchestratorOverride?.model,
+        requirement: atlasRequirement,
+        availableModels,
+        systemDefaultModel,
+    });
+    if (!atlasResolution)
+        return undefined;
+    const { model: atlasModel, variant: atlasResolvedVariant } = atlasResolution;
+    let orchestratorConfig = createAtlasAgent({
+        model: atlasModel,
+        availableAgents,
+        availableSkills,
+        userCategories,
+    });
+    if (atlasResolvedVariant) {
+        orchestratorConfig = { ...orchestratorConfig, variant: atlasResolvedVariant };
+    }
+    orchestratorConfig = applyOverrides(orchestratorConfig, orchestratorOverride, mergedCategories, directory);
+    return orchestratorConfig;
+}

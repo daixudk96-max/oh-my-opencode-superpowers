@@ -4,7 +4,7 @@ import type { BackgroundManager } from "../features/background-agent"
 import { log } from "../shared"
 import { discoverDownstreamHooks } from "./auto-registry"
 import { extendHookNameSchema } from "./schema-extensions"
-import type { HookFactoryContext } from "./types"
+import type { HookFactoryContext, HookManifest } from "./types"
 
 type SupportedLifecycle =
   | "chat.message"
@@ -12,6 +12,7 @@ type SupportedLifecycle =
   | "tool.execute.before"
   | "tool.execute.after"
   | "experimental.session.compacting"
+  | "UserPromptSubmit"
 
 type HookHandler = ((input: unknown, output?: unknown) => unknown | Promise<unknown>) | undefined
 type LifecycleHandlers = Record<SupportedLifecycle, HookHandler[]>
@@ -22,6 +23,7 @@ const SUPPORTED_LIFECYCLES: SupportedLifecycle[] = [
   "tool.execute.before",
   "tool.execute.after",
   "experimental.session.compacting",
+  "UserPromptSubmit",
 ]
 
 function createEmptyLifecycleHandlers(): LifecycleHandlers {
@@ -31,6 +33,7 @@ function createEmptyLifecycleHandlers(): LifecycleHandlers {
     "tool.execute.before": [],
     "tool.execute.after": [],
     "experimental.session.compacting": [],
+    UserPromptSubmit: [],
   }
 }
 
@@ -70,6 +73,19 @@ export interface DownstreamHookBootstrapResult {
   runToolExecuteBefore(input: unknown, output: unknown): Promise<void>
   runToolExecuteAfter(input: unknown, output: unknown): Promise<void>
   runExperimentalSessionCompacting(input: unknown, output: unknown): Promise<void>
+  runUserPromptSubmit(input: unknown, output: unknown): Promise<void>
+}
+
+declare global {
+  var __ohMyOpenCodeDownstreamHooksOverride:
+    | ((params: {
+        ctx: PluginInput
+        disabledHooks?: Set<string>
+        backgroundManager?: BackgroundManager
+        pluginConfig?: OhMyOpenCodeConfig
+        manifests?: HookManifest[]
+      }) => Promise<DownstreamHookBootstrapResult>)
+    | undefined
 }
 
 export async function bootstrapDownstreamHooks(params: {
@@ -77,8 +93,13 @@ export async function bootstrapDownstreamHooks(params: {
   disabledHooks?: Set<string>
   backgroundManager?: BackgroundManager
   pluginConfig?: OhMyOpenCodeConfig
+  manifests?: HookManifest[]
 }): Promise<DownstreamHookBootstrapResult> {
-  const manifests = await discoverDownstreamHooks().catch(() => [])
+  const override = globalThis.__ohMyOpenCodeDownstreamHooksOverride
+  if (override) {
+    return override(params)
+  }
+  const manifests = params.manifests ?? await discoverDownstreamHooks().catch(() => [])
   const parserSchema = extendHookNameSchema(manifests.map((manifest) => manifest.name))
   const disabledHooks = params.disabledHooks ?? new Set<string>()
   const handlers = createEmptyLifecycleHandlers()
@@ -140,6 +161,9 @@ export async function bootstrapDownstreamHooks(params: {
     },
     runExperimentalSessionCompacting(input: unknown, output: unknown): Promise<void> {
       return runHandlers(handlers["experimental.session.compacting"], input, output)
+    },
+    runUserPromptSubmit(input: unknown, output: unknown): Promise<void> {
+      return runHandlers(handlers.UserPromptSubmit, input, output)
     },
   }
 }

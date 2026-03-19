@@ -1,0 +1,15 @@
+0.0.0-feat/support-delegate-task-subagent-view-202602021728
+$ bun run generate-registry && bun build src/index.ts --outdir dist --target bun --format esm --external @ast-grep/napi && tsc --emitDeclarationOnly && bun build src/cli/index.ts --outdir dist/cli --target bun --format esm --external @ast-grep/napi && bun run build:schema
+$ bun run script/generate-registry.ts
+Generated E:\github\oh-my-opencode-merge\src\downstream\generated-registry.ts with 63 manifests
+Bundled 1368 modules in 308ms
+
+  index.js  3.63 MB  (entry point)
+
+Bundled 399 modules in 74ms
+
+  index.js  1.12 MB  (entry point)
+
+$ bun run script/build-schema.ts
+Generating JSON Schema...
+✓ JSON Schema generated: assets/oh-my-opencode.schema.json

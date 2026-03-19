@@ -1,0 +1,176 @@
+import { log } from "./logger";
+import { createPromptTimeoutContext, PROMPT_TIMEOUT_MS, } from "./prompt-timeout-context";
+function getAlternateClaudeModel(modelID) {
+    const toDot = modelID.replace(/claude-(opus|sonnet|haiku)-4-5/g, "claude-$1-4.5");
+    if (toDot !== modelID)
+        return toDot;
+    const toDash = modelID.replace(/claude-(opus|sonnet|haiku)-4\.5/g, "claude-$1-4-5");
+    if (toDash !== modelID)
+        return toDash;
+    return null;
+}
+function extractMessage(error) {
+    if (typeof error === "string")
+        return error;
+    if (error instanceof Error)
+        return error.message;
+    if (typeof error === "object" && error !== null) {
+        const obj = error;
+        if (typeof obj.message === "string")
+            return obj.message;
+        try {
+            return JSON.stringify(error);
+        }
+        catch {
+            return "";
+        }
+    }
+    return String(error);
+}
+export function parseModelSuggestion(error) {
+    if (!error)
+        return null;
+    if (typeof error === "object") {
+        const errObj = error;
+        if (errObj.name === "ProviderModelNotFoundError" && typeof errObj.data === "object" && errObj.data !== null) {
+            const data = errObj.data;
+            const providerID = String(data.providerID ?? "");
+            const modelID = String(data.modelID ?? "");
+            const suggestions = data.suggestions;
+            if (Array.isArray(suggestions) && suggestions.length > 0 && typeof suggestions[0] === "string") {
+                return {
+                    providerID,
+                    modelID,
+                    suggestion: suggestions[0],
+                };
+            }
+            const alternate = getAlternateClaudeModel(modelID);
+            if (alternate) {
+                return {
+                    providerID,
+                    modelID,
+                    suggestion: alternate,
+                };
+            }
+            return null;
+        }
+        for (const key of ["data", "error", "cause"]) {
+            const nested = errObj[key];
+            if (nested && typeof nested === "object") {
+                const result = parseModelSuggestion(nested);
+                if (result)
+                    return result;
+            }
+        }
+    }
+    const message = extractMessage(error);
+    if (!message)
+        return null;
+    const modelMatch = message.match(/model not found:\s*([^/\s]+)\s*\/\s*([^.\s]+)/i);
+    const suggestionMatch = message.match(/did you mean:\s*([^,?]+)/i);
+    if (modelMatch && suggestionMatch) {
+        return {
+            providerID: modelMatch[1].trim(),
+            modelID: modelMatch[2].trim(),
+            suggestion: suggestionMatch[1].trim(),
+        };
+    }
+    return null;
+}
+export async function promptWithModelSuggestionRetry(client, args, options = {}) {
+    const timeoutMs = options.timeoutMs ?? PROMPT_TIMEOUT_MS;
+    const timeoutContext = createPromptTimeoutContext(args, timeoutMs);
+    // NOTE: Model suggestion retry removed — promptAsync returns 204 immediately,
+    // model errors happen asynchronously server-side and cannot be caught here
+    const promptPromise = client.session.promptAsync({
+        ...args,
+        signal: timeoutContext.signal,
+    });
+    try {
+        await promptPromise;
+        if (timeoutContext.wasTimedOut()) {
+            throw new Error(`promptAsync timed out after ${timeoutMs}ms`);
+        }
+    }
+    catch (error) {
+        if (timeoutContext.wasTimedOut()) {
+            throw new Error(`promptAsync timed out after ${timeoutMs}ms`);
+        }
+        throw error;
+    }
+    finally {
+        timeoutContext.cleanup();
+    }
+}
+/**
+ * Synchronous variant of promptWithModelSuggestionRetry.
+ *
+ * Uses `session.prompt` (blocking HTTP call that waits for the LLM response)
+ * instead of `promptAsync` (fire-and-forget HTTP 204).
+ *
+ * Required by callers that need the response to be available immediately after
+ * the call returns — e.g. look_at, which reads session messages right away.
+ */
+export async function promptSyncWithModelSuggestionRetry(client, args, options = {}) {
+    const timeoutMs = options.timeoutMs ?? PROMPT_TIMEOUT_MS;
+    try {
+        const timeoutContext = createPromptTimeoutContext(args, timeoutMs);
+        try {
+            await client.session.prompt({
+                ...args,
+                signal: timeoutContext.signal,
+            });
+            if (timeoutContext.wasTimedOut()) {
+                throw new Error(`prompt timed out after ${timeoutMs}ms`);
+            }
+        }
+        catch (error) {
+            if (timeoutContext.wasTimedOut()) {
+                throw new Error(`prompt timed out after ${timeoutMs}ms`);
+            }
+            throw error;
+        }
+        finally {
+            timeoutContext.cleanup();
+        }
+    }
+    catch (error) {
+        const suggestion = parseModelSuggestion(error);
+        if (!suggestion || !args.body.model) {
+            throw error;
+        }
+        log("[model-suggestion-retry] Model not found, retrying with suggestion", {
+            original: `${suggestion.providerID}/${suggestion.modelID}`,
+            suggested: suggestion.suggestion,
+        });
+        const retryArgs = {
+            ...args,
+            body: {
+                ...args.body,
+                model: {
+                    providerID: suggestion.providerID,
+                    modelID: suggestion.suggestion,
+                },
+            },
+        };
+        const timeoutContext = createPromptTimeoutContext(retryArgs, timeoutMs);
+        try {
+            await client.session.prompt({
+                ...retryArgs,
+                signal: timeoutContext.signal,
+            });
+            if (timeoutContext.wasTimedOut()) {
+                throw new Error(`prompt timed out after ${timeoutMs}ms`);
+            }
+        }
+        catch (retryError) {
+            if (timeoutContext.wasTimedOut()) {
+                throw new Error(`prompt timed out after ${timeoutMs}ms`);
+            }
+            throw retryError;
+        }
+        finally {
+            timeoutContext.cleanup();
+        }
+    }
+}

@@ -1,0 +1,158 @@
+import { parseImageDimensions } from "./image-dimensions";
+import { calculateTargetDimensions, resizeImage } from "./image-resizer";
+import { log } from "../../shared";
+import { getSessionModel } from "../../shared/session-model-state";
+const SUPPORTED_IMAGE_MIMES = new Set(["image/png", "image/jpeg", "image/gif", "image/webp"]);
+const TOKEN_DIVISOR = 750;
+function isReadTool(toolName) {
+    return toolName.toLowerCase() === "read";
+}
+function asRecord(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return null;
+    }
+    return value;
+}
+function isImageAttachmentRecord(value) {
+    const filename = value.filename;
+    return (typeof value.mime === "string" &&
+        typeof value.url === "string" &&
+        (typeof filename === "undefined" || typeof filename === "string"));
+}
+function extractImageAttachments(output) {
+    const attachmentsValue = output.attachments;
+    if (!Array.isArray(attachmentsValue)) {
+        return [];
+    }
+    const attachments = [];
+    for (const attachmentValue of attachmentsValue) {
+        const attachmentRecord = asRecord(attachmentValue);
+        if (!attachmentRecord) {
+            continue;
+        }
+        const mime = attachmentRecord.mime;
+        const url = attachmentRecord.url;
+        if (typeof mime !== "string" || typeof url !== "string") {
+            continue;
+        }
+        const normalizedMime = mime.toLowerCase();
+        if (!SUPPORTED_IMAGE_MIMES.has(normalizedMime)) {
+            continue;
+        }
+        attachmentRecord.mime = normalizedMime;
+        attachmentRecord.url = url;
+        if (isImageAttachmentRecord(attachmentRecord)) {
+            attachments.push(attachmentRecord);
+        }
+    }
+    return attachments;
+}
+function calculateTokens(width, height) {
+    return Math.ceil((width * height) / TOKEN_DIVISOR);
+}
+function formatResizeAppendix(entries) {
+    const header = entries.some((entry) => entry.status === "resized") ? "[Image Resize Info]" : "[Image Info]";
+    const lines = [`\n\n${header}`];
+    for (const entry of entries) {
+        if (entry.status === "unknown-dims" || !entry.originalDims) {
+            lines.push(`- ${entry.filename}: dimensions could not be parsed`);
+            continue;
+        }
+        const original = entry.originalDims;
+        const originalText = `${original.width}x${original.height}`;
+        const originalTokens = calculateTokens(original.width, original.height);
+        if (entry.status === "within-limits") {
+            lines.push(`- ${entry.filename}: ${originalText} (within limits, tokens: ${originalTokens})`);
+            continue;
+        }
+        if (entry.status === "resize-skipped") {
+            lines.push(`- ${entry.filename}: ${originalText} (resize skipped, tokens: ${originalTokens})`);
+            continue;
+        }
+        if (!entry.resizedDims) {
+            lines.push(`- ${entry.filename}: ${originalText} (resize skipped, tokens: ${originalTokens})`);
+            continue;
+        }
+        const resized = entry.resizedDims;
+        const resizedText = `${resized.width}x${resized.height}`;
+        const resizedTokens = calculateTokens(resized.width, resized.height);
+        lines.push(`- ${entry.filename}: ${originalText} -> ${resizedText} (resized, tokens: ${originalTokens} -> ${resizedTokens})`);
+    }
+    return lines.join("\n");
+}
+function resolveFilename(attachment, index) {
+    if (attachment.filename && attachment.filename.trim().length > 0) {
+        return attachment.filename;
+    }
+    return `image-${index + 1}`;
+}
+export function createReadImageResizerHook(_ctx) {
+    return {
+        "tool.execute.after": async (input, output) => {
+            if (!isReadTool(input.tool)) {
+                return;
+            }
+            const sessionModel = getSessionModel(input.sessionID);
+            if (sessionModel?.providerID !== "anthropic") {
+                return;
+            }
+            if (typeof output.output !== "string") {
+                return;
+            }
+            const outputRecord = output;
+            const attachments = extractImageAttachments(outputRecord);
+            if (attachments.length === 0) {
+                return;
+            }
+            const entries = [];
+            for (const [index, attachment] of attachments.entries()) {
+                const filename = resolveFilename(attachment, index);
+                try {
+                    const originalDims = parseImageDimensions(attachment.url, attachment.mime);
+                    if (!originalDims) {
+                        entries.push({ filename, originalDims: null, resizedDims: null, status: "unknown-dims" });
+                        continue;
+                    }
+                    const targetDims = calculateTargetDimensions(originalDims.width, originalDims.height);
+                    if (!targetDims) {
+                        entries.push({
+                            filename,
+                            originalDims,
+                            resizedDims: null,
+                            status: "within-limits",
+                        });
+                        continue;
+                    }
+                    const resizedResult = await resizeImage(attachment.url, attachment.mime, targetDims);
+                    if (!resizedResult) {
+                        entries.push({
+                            filename,
+                            originalDims,
+                            resizedDims: null,
+                            status: "resize-skipped",
+                        });
+                        continue;
+                    }
+                    attachment.url = resizedResult.resizedDataUrl;
+                    entries.push({
+                        filename,
+                        originalDims: resizedResult.original,
+                        resizedDims: resizedResult.resized,
+                        status: "resized",
+                    });
+                }
+                catch (error) {
+                    log("[read-image-resizer] attachment processing failed", {
+                        error: error instanceof Error ? error.message : String(error),
+                        filename,
+                    });
+                    entries.push({ filename, originalDims: null, resizedDims: null, status: "unknown-dims" });
+                }
+            }
+            if (entries.length === 0) {
+                return;
+            }
+            output.output += formatResizeAppendix(entries);
+        },
+    };
+}

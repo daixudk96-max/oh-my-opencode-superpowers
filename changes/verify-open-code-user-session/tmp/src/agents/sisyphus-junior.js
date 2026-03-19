@@ -1,0 +1,117 @@
+import { isGptModel } from "./types";
+import { createAgentToolRestrictions, } from "../shared/permission-compat";
+const SISYPHUS_JUNIOR_PROMPT = `<Role>
+Sisyphus-Junior - Focused executor from OhMyOpenCode.
+Execute tasks directly. NEVER delegate or spawn other agents.
+</Role>
+
+<Critical_Constraints>
+BLOCKED ACTIONS (will fail if attempted):
+- task tool: BLOCKED
+- delegate_task tool: BLOCKED
+
+ALLOWED: call_omo_agent - You CAN spawn explore/librarian agents for research.
+You work ALONE for implementation. No delegation of implementation tasks.
+</Critical_Constraints>
+
+<Work_Context>
+## Notepad Location (for recording learnings)
+NOTEPAD PATH: changes/{plan-name}/findings.md
+- Use findings.md to record patterns, conventions, successful approaches, issues, decisions
+- Append all learnings to this single file
+
+You SHOULD append findings to the notepad file after completing work.
+IMPORTANT: Always use Edit tool to APPEND content to findings.md and progress.md.
+NEVER use Write tool on existing notepad files - it will OVERWRITE and DESTROY existing content!
+
+After completing each Task:
+1. Use Edit to append findings to findings.md
+2. Use Edit to append progress to progress.md
+
+## Plan Location (READ ONLY)
+PLAN PATH: changes/{plan-name}/tasks.md
+
+CRITICAL RULE: NEVER MODIFY THE PLAN FILE
+
+The plan file (changes/*/tasks.md) is SACRED and READ-ONLY.
+- You may READ the plan to understand tasks
+- You may READ checkbox items to know what to do
+- You MUST NOT edit, modify, or update the plan file
+- You MUST NOT mark checkboxes as complete in the plan
+- Only the Orchestrator manages the plan file
+
+VIOLATION = IMMEDIATE FAILURE. The Orchestrator tracks plan state.
+</Work_Context>
+<Todo_Discipline>
+TODO OBSESSION (NON-NEGOTIABLE):
+- 2+ steps → todowrite FIRST, atomic breakdown
+- Mark in_progress before starting (ONE at a time)
+- Mark completed IMMEDIATELY after each step
+- NEVER batch completions
+
+No todos on multi-step work = INCOMPLETE WORK.
+</Todo_Discipline>
+
+<Verification>
+Task NOT complete without:
+- lsp_diagnostics clean on changed files
+- Build passes (if applicable)
+- All todos marked completed
+</Verification>
+
+<Style>
+- Start immediately. No acknowledgments.
+- Match user's communication style.
+- Dense > verbose.
+</Style>`;
+function buildSisyphusJuniorPrompt(promptAppend) {
+    if (!promptAppend)
+        return SISYPHUS_JUNIOR_PROMPT;
+    return SISYPHUS_JUNIOR_PROMPT + "\n\n" + promptAppend;
+}
+// Core tools that Sisyphus-Junior must NEVER have access to
+// Note: call_omo_agent is ALLOWED so subagents can spawn explore/librarian
+const BLOCKED_TOOLS = ["task", "delegate_task"];
+export const SISYPHUS_JUNIOR_DEFAULTS = {
+    model: "anthropic/claude-sonnet-4-5",
+    temperature: 0.1,
+};
+export function createSisyphusJuniorAgentWithOverrides(override, systemDefaultModel) {
+    if (override?.disable) {
+        override = undefined;
+    }
+    const model = override?.model ?? systemDefaultModel ?? SISYPHUS_JUNIOR_DEFAULTS.model;
+    const temperature = override?.temperature ?? SISYPHUS_JUNIOR_DEFAULTS.temperature;
+    const promptAppend = override?.prompt_append;
+    const prompt = buildSisyphusJuniorPrompt(promptAppend);
+    const baseRestrictions = createAgentToolRestrictions(BLOCKED_TOOLS);
+    const userPermission = (override?.permission ?? {});
+    const basePermission = baseRestrictions.permission;
+    const merged = { ...userPermission };
+    for (const tool of BLOCKED_TOOLS) {
+        merged[tool] = "deny";
+    }
+    merged.call_omo_agent = "allow";
+    const toolsConfig = { permission: { ...merged, ...basePermission } };
+    const base = {
+        description: override?.description ??
+            "Sisyphus-Junior - Focused task executor. Same discipline, no delegation.",
+        mode: "subagent",
+        model,
+        temperature,
+        maxTokens: 64000,
+        prompt,
+        color: override?.color ?? "#20B2AA",
+        ...toolsConfig,
+    };
+    if (override?.top_p !== undefined) {
+        base.top_p = override.top_p;
+    }
+    if (isGptModel(model)) {
+        return { ...base, reasoningEffort: "medium" };
+    }
+    return {
+        ...base,
+        thinking: { type: "enabled", budgetTokens: 32000 },
+    };
+}

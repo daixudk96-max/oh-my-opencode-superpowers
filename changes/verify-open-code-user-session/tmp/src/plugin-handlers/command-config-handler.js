@@ -1,0 +1,59 @@
+import { discoverDownstreamCommands } from "../downstream/auto-registry";
+import { loadBuiltinCommands } from "../features/builtin-commands";
+import { loadOpencodeGlobalCommands, loadOpencodeProjectCommands, loadProjectCommands, loadUserCommands, } from "../features/claude-code-command-loader";
+import { discoverConfigSourceSkills, loadOpencodeGlobalSkills, loadOpencodeProjectSkills, loadProjectSkills, loadUserSkills, skillsToCommandDefinitionRecord, } from "../features/opencode-skill-loader";
+import { getAgentDisplayName } from "../shared/agent-display-names";
+export async function applyCommandConfig(params) {
+    const systemCommands = params.config.command ?? {};
+    const includeClaudeCommands = params.pluginConfig.claude_code?.commands ?? true;
+    const includeClaudeSkills = params.pluginConfig.claude_code?.skills ?? true;
+    const [downstreamCommandManifests, configSourceSkills, userCommands, projectCommands, opencodeGlobalCommands, opencodeProjectCommands, userSkills, projectSkills, opencodeGlobalSkills, opencodeProjectSkills,] = await Promise.all([
+        discoverDownstreamCommands().catch(() => []),
+        discoverConfigSourceSkills({
+            config: params.pluginConfig.skills,
+            configDir: params.ctx.directory,
+        }),
+        includeClaudeCommands ? loadUserCommands() : Promise.resolve({}),
+        includeClaudeCommands
+            ? loadProjectCommands(params.ctx.directory)
+            : Promise.resolve({}),
+        loadOpencodeGlobalCommands(),
+        loadOpencodeProjectCommands(params.ctx.directory),
+        includeClaudeSkills ? loadUserSkills() : Promise.resolve({}),
+        includeClaudeSkills
+            ? loadProjectSkills(params.ctx.directory)
+            : Promise.resolve({}),
+        loadOpencodeGlobalSkills(),
+        loadOpencodeProjectSkills(params.ctx.directory),
+    ]);
+    const downstreamCommands = Object.fromEntries(downstreamCommandManifests.map((manifest) => [
+        manifest.name,
+        manifest.definition,
+    ]));
+    const builtinCommands = loadBuiltinCommands(params.pluginConfig.disabled_commands, {
+        additionalCommands: downstreamCommands,
+    });
+    params.config.command = {
+        ...builtinCommands,
+        ...skillsToCommandDefinitionRecord(configSourceSkills),
+        ...userCommands,
+        ...userSkills,
+        ...opencodeGlobalCommands,
+        ...opencodeGlobalSkills,
+        ...systemCommands,
+        ...projectCommands,
+        ...projectSkills,
+        ...opencodeProjectCommands,
+        ...opencodeProjectSkills,
+        ...params.pluginComponents.commands,
+        ...params.pluginComponents.skills,
+    };
+    remapCommandAgentFields(params.config.command);
+}
+function remapCommandAgentFields(commands) {
+    for (const cmd of Object.values(commands)) {
+        if (cmd?.agent && typeof cmd.agent === "string") {
+            cmd.agent = getAgentDisplayName(cmd.agent);
+        }
+    }
+}

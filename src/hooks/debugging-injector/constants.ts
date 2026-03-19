@@ -8,7 +8,7 @@ import type { DebugInjectorConfig } from "./types"
  * Default configuration for Debugging Injector
  */
 export const DEFAULT_DEBUG_INJECTOR_CONFIG: DebugInjectorConfig = {
-  enabled: false,
+  enabled: true,
   failure_threshold: 2,
   inject_skill_on_threshold: true,
   reset_on_success: true,
@@ -34,7 +34,7 @@ export const FAILURE_PATTERNS: RegExp[] = [
 /**
  * Tools that can indicate a fix attempt
  */
-export const FIX_ATTEMPT_TOOLS = ["edit", "write"]
+export const FIX_ATTEMPT_TOOLS = ["edit", "write", "apply_patch"]
 
 /**
  * Tools that can indicate verification failure

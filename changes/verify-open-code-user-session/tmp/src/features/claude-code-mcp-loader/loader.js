@@ -1,0 +1,100 @@
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
+import { homedir } from "os";
+import { getClaudeConfigDir } from "../../shared";
+import { transformMcpServer } from "./transformer";
+import { log } from "../../shared/logger";
+function getMcpConfigPaths() {
+    const claudeConfigDir = getClaudeConfigDir();
+    const cwd = process.cwd();
+    return [
+        { path: join(homedir(), ".claude.json"), scope: "user" },
+        { path: join(claudeConfigDir, ".mcp.json"), scope: "user" },
+        { path: join(cwd, ".mcp.json"), scope: "project" },
+        { path: join(cwd, ".claude", ".mcp.json"), scope: "local" },
+    ];
+}
+async function loadMcpConfigFile(filePath) {
+    if (!existsSync(filePath)) {
+        return null;
+    }
+    try {
+        const content = await Bun.file(filePath).text();
+        return JSON.parse(content);
+    }
+    catch (error) {
+        log(`Failed to load MCP config from ${filePath}`, error);
+        return null;
+    }
+}
+export function getSystemMcpServerNames() {
+    const names = new Set();
+    const paths = getMcpConfigPaths();
+    for (const { path } of paths) {
+        if (!existsSync(path))
+            continue;
+        try {
+            const content = readFileSync(path, "utf-8");
+            const config = JSON.parse(content);
+            if (!config?.mcpServers)
+                continue;
+            for (const [name, serverConfig] of Object.entries(config.mcpServers)) {
+                if (serverConfig.disabled)
+                    continue;
+                names.add(name);
+            }
+        }
+        catch {
+            continue;
+        }
+    }
+    return names;
+}
+export async function loadMcpConfigs(disabledMcps = []) {
+    const servers = {};
+    const loadedServers = [];
+    const paths = getMcpConfigPaths();
+    const disabledSet = new Set(disabledMcps);
+    for (const { path, scope } of paths) {
+        const config = await loadMcpConfigFile(path);
+        if (!config?.mcpServers)
+            continue;
+        for (const [name, serverConfig] of Object.entries(config.mcpServers)) {
+            if (disabledSet.has(name)) {
+                log(`Skipping MCP "${name}" (in disabled_mcps)`, { path });
+                continue;
+            }
+            if (serverConfig.disabled) {
+                log(`Disabling MCP server "${name}"`, { path });
+                delete servers[name];
+                const existingIndex = loadedServers.findIndex((s) => s.name === name);
+                if (existingIndex !== -1) {
+                    loadedServers.splice(existingIndex, 1);
+                    log(`Removed previously loaded MCP server "${name}"`, { path });
+                }
+                continue;
+            }
+            try {
+                const transformed = transformMcpServer(name, serverConfig);
+                servers[name] = transformed;
+                const existingIndex = loadedServers.findIndex((s) => s.name === name);
+                if (existingIndex !== -1) {
+                    loadedServers.splice(existingIndex, 1);
+                }
+                loadedServers.push({ name, scope, config: transformed });
+                log(`Loaded MCP server "${name}" from ${scope}`, { path });
+            }
+            catch (error) {
+                log(`Failed to transform MCP server "${name}"`, error);
+            }
+        }
+    }
+    return { servers, loadedServers };
+}
+export function formatLoadedServersForToast(loadedServers) {
+    if (loadedServers.length === 0)
+        return "";
+    return loadedServers
+        .map((server) => `${server.name} (${server.scope})`)
+        .join(", ");
+}

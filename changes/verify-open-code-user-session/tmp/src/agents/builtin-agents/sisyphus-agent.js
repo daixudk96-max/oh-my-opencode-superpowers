@@ -1,0 +1,40 @@
+import { AGENT_MODEL_REQUIREMENTS, isAnyFallbackModelAvailable } from "../../shared";
+import { applyEnvironmentContext } from "./environment-context";
+import { applyOverrides } from "./agent-overrides";
+import { applyModelResolution, getFirstFallbackModel } from "./model-resolution";
+import { createSisyphusAgent } from "../sisyphus";
+export function maybeCreateSisyphusConfig(input) {
+    const { disabledAgents, agentOverrides, uiSelectedModel, availableModels, systemDefaultModel, isFirstRunNoCache, availableAgents, availableSkills, availableCategories, mergedCategories, directory, useTaskSystem, disableOmoEnv = false, } = input;
+    const sisyphusOverride = agentOverrides["sisyphus"];
+    const sisyphusRequirement = AGENT_MODEL_REQUIREMENTS["sisyphus"];
+    const hasSisyphusExplicitConfig = sisyphusOverride !== undefined;
+    const meetsSisyphusAnyModelRequirement = !sisyphusRequirement?.requiresAnyModel ||
+        hasSisyphusExplicitConfig ||
+        isFirstRunNoCache ||
+        isAnyFallbackModelAvailable(sisyphusRequirement.fallbackChain, availableModels);
+    if (disabledAgents.includes("sisyphus") || !meetsSisyphusAnyModelRequirement)
+        return undefined;
+    let sisyphusResolution = applyModelResolution({
+        uiSelectedModel: sisyphusOverride?.model ? undefined : uiSelectedModel,
+        userModel: sisyphusOverride?.model,
+        requirement: sisyphusRequirement,
+        availableModels,
+        systemDefaultModel,
+    });
+    if (!sisyphusResolution && isFirstRunNoCache && !sisyphusOverride?.model && !uiSelectedModel) {
+        // TDD-EXEMPT: reason="Normalizing first-run behavior to avoid empty config before model cache is populated"
+        sisyphusResolution = getFirstFallbackModel(sisyphusRequirement);
+    }
+    if (!sisyphusResolution)
+        return undefined;
+    const { model: sisyphusModel, variant: sisyphusResolvedVariant } = sisyphusResolution;
+    let sisyphusConfig = createSisyphusAgent(sisyphusModel, availableAgents, undefined, availableSkills, availableCategories, useTaskSystem);
+    if (sisyphusResolvedVariant) {
+        sisyphusConfig = { ...sisyphusConfig, variant: sisyphusResolvedVariant };
+    }
+    sisyphusConfig = applyOverrides(sisyphusConfig, sisyphusOverride, mergedCategories, directory);
+    sisyphusConfig = applyEnvironmentContext(sisyphusConfig, directory, {
+        disableOmoEnv,
+    });
+    return sisyphusConfig;
+}

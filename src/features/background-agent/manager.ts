@@ -51,6 +51,12 @@ import { checkAndInterruptStaleTasks } from "./task-poller"
 
 type OpencodeClient = PluginInput["client"]
 
+type SessionPromptAsyncArgs = Parameters<OpencodeClient["session"]["promptAsync"]>[0] & {
+  body: {
+    agent: string | { name: string }
+  }
+}
+
 
 interface MessagePartInfo {
   sessionID?: string
@@ -349,10 +355,11 @@ export class BackgroundManager {
       : undefined
     const launchVariant = input.model?.variant
 
+    const launchAgentPayload = { name: input.agent }
     promptWithModelSuggestionRetry(this.client, {
       path: { id: sessionID },
       body: {
-        agent: input.agent,
+        agent: launchAgentPayload,
         ...(launchModel ? { model: launchModel } : {}),
         ...(launchVariant ? { variant: launchVariant } : {}),
         system: input.skillContent,
@@ -618,15 +625,16 @@ export class BackgroundManager {
     // Fire-and-forget prompt via promptAsync (no response body needed)
     // Include model if task has one (preserved from original launch with category config)
     // variant must be top-level in body, not nested inside model (OpenCode PromptInput schema)
+    const resumeAgentPayload = { name: existingTask.agent }
     const resumeModel = existingTask.model
       ? { providerID: existingTask.model.providerID, modelID: existingTask.model.modelID }
       : undefined
     const resumeVariant = existingTask.model?.variant
 
-    this.client.session.promptAsync({
+    const resumePromptArgs = {
       path: { id: existingTask.sessionID },
       body: {
-        agent: existingTask.agent,
+        agent: resumeAgentPayload,
         ...(resumeModel ? { model: resumeModel } : {}),
         ...(resumeVariant ? { variant: resumeVariant } : {}),
         tools: (() => {
@@ -641,7 +649,9 @@ export class BackgroundManager {
         })(),
         parts: [createInternalAgentTextPart(input.prompt)],
       },
-    }).catch((error) => {
+    } as unknown as SessionPromptAsyncArgs
+
+    this.client.session.promptAsync(resumePromptArgs).catch((error) => {
       log("[background-agent] resume prompt error:", error)
       existingTask.status = "interrupt"
       const errorMessage = error instanceof Error ? error.message : String(error)

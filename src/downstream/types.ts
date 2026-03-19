@@ -1,14 +1,12 @@
+import type { PluginInput, ToolDefinition } from "@opencode-ai/plugin"
 import type { AgentConfig } from "@opencode-ai/sdk"
-import type { ToolDefinition } from "@opencode-ai/plugin"
 import type { AgentPromptMetadata } from "../agents/types"
 import type { OhMyOpenCodeConfig } from "../config/schema/oh-my-opencode-config"
+import type { BackgroundManager } from "../features/background-agent"
 import type { BuiltinSkill } from "../features/builtin-skills/types"
 import type { CommandDefinition } from "../features/claude-code-command-loader/types"
 import type { McpServerConfig } from "../features/claude-code-mcp-loader/types"
 import type { PluginInstance as Hooks } from "../plugin/types"
-
-import type { PluginInput } from "@opencode-ai/plugin"
-import type { BackgroundManager } from "../features/background-agent"
 
 export interface HookFactoryContext extends PluginInput {
   cwd: string
@@ -16,7 +14,7 @@ export interface HookFactoryContext extends PluginInput {
   pluginConfig?: OhMyOpenCodeConfig
 }
 
-export type HookLifecycle = keyof Hooks
+export type HookLifecycle = keyof Hooks | "UserPromptSubmit"
 
 export type HookFactory = (...args: never[]) => Partial<Record<HookLifecycle, unknown>>
 

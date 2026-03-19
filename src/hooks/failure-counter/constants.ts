@@ -51,7 +51,7 @@ export const SUCCESS_PATTERNS = [
   /✅/,
   /\bSUCCESS\b/i,
   /\bcompleted successfully\b/i,
-  /\btask completed\b/i,
+  /\btask completed successfully\b/i,
   /\bDONE\b/,
 ]
 
