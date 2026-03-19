@@ -2,7 +2,7 @@
 
 > 从 auto-registry 基础设施建好到全部功能融合完成的完整步骤。
 > 创建时间: 2026-03-11
-> 最后更新: 2026-03-19 (①~⑦ 全部完成, auto-registry dist 已验证正常, next: C 类功能开发或其他新需求)
+> 最后更新: 2026-03-19 (①~⑧ 全部完成, ⑨ 上游同步计划已建立, ⑩ hook 修复待上游同步后重评估)
 
 ---
 
@@ -300,6 +300,12 @@
 ⑥ verify-and-cleanup (✅ .sisyphus 清理 + 回归修复 + 构建通过)
   ↓
 ⑦ verify-open-code-user-session (✅ 真实 session 端到端验证, 5 个 bug 修复)
+  ↓
+⑧ C 类功能评估 + 待办清单 (✅ 10 项跳过 / 4 项 module 待开发 / 8 个 hook bug 已建计划)
+  ↓
+⑨ sync-upstream-20260319 (⏳ 589 commits 待同步, 计划已建, 待执行真实 merge 后写冲突解决方案)
+  ↓
+⑩ fix-plan-update-reminder-and-boulder-injection (⏳ 8 个 bug, 待 ⑨ 完成后重评估)
 ```
 
 ---
@@ -566,6 +572,148 @@
 | `evidence/V-3.3-debug-stderr.txt` | debugging-injector 9 行调试日志 |
 | `findings.md` | 完整验证发现记录 |
 | `progress.md` | 执行进度日志 |
+
+---
+
+## ⑧ C 类功能评估 + 待办清单（2026-03-19）
+
+### C 类 Skills 评估结果（10 项全部跳过）
+
+| C 编号 | 名称 | 来源 | 结论 | 原因 |
+|:------:|------|------|:----:|------|
+| C1 | planning-with-files | `E:\github\planning-with-files` | ❌ 跳过 | creating-changes + plan-update-reminder 已覆盖规划阶段 |
+| C2 | context-degradation | `Agent-Skills-for-Context-Engineering` | ❌ 跳过 | 纯知识文档，无可执行组件 |
+| C3 | filesystem-context | 同上 | ❌ 跳过 | 理念已内化到现有 plan 系统 |
+| C4 | memory-systems | 同上 | ❌ 跳过 | 纯知识文档，框架选型参考 |
+| C5 | context-compression | 同上 | ❌ 跳过 | 纯知识文档 |
+| C6 | context-optimization | 同上 | ❌ 跳过 | 纯知识文档 |
+| C7 | evaluation | 同上 | ❌ 跳过 | 纯知识文档，面向 agent 系统开发者 |
+| C8 | advanced-evaluation | 同上 | ❌ 跳过 | 同上 |
+| C9 | tool-design | 同上 | ❌ 跳过 | 可作内部参考，不需集成 |
+| C11 | plan-reminder hook | 设计文档 | ❌ 跳过 | `plan-update-reminder` hook 已实现（但有缺陷，见下方修复清单） |
+| C12 | findings-capture hook | 设计文档 | ❌ 跳过 | `plan-update-reminder` 的 2-Action Rule 已包含（但有缺陷） |
+
+> 源项目 `Agent-Skills-for-Context-Engineering` 已备份到 `vendor/agent-skills/`。
+> GitHub 原仓库 13 个 skill 全部是纯知识文档（无 hook/script/自动触发），对终端用户无直接执行价值。
+
+### Hook 修复清单（4 项）
+
+现有 `plan-update-reminder` hook 功能不完整，与 todo 系统相比存在明显差距：
+
+| # | 问题 | 现状 | 目标 |
+|:-:|------|------|------|
+| H1 | 不监听 apply_patch | 只监听 edit/write，OpenCode 内部用 apply_patch | 加入 apply_patch + patchText 路径提取 |
+| H2 | boulder 只有 toast，不能注入聊天 | `output.output +=` 追加到工具输出，agent 可能忽略 | 改用 `output.messages.push()` 直接注入对话上下文 |
+| H3 | boulder 没有像 todo 一样的"内容直出" | todo 能在聊天框里直接展示内容让 AI 主动处理，boulder 不行 | boulder 触发时自动读取 tasks.md 当前状态注入上下文 |
+| H4 | findings 只在任务结束时写入 | 执行过程中的发现、中间决策、遇到的问题都丢失 | 2-Action Rule 触发时读取 findings.md 注入，让 agent 看到"该补充什么" |
+
+### Module 增强清单（4 项，来自 `changes/50-enhancements/design.md`）
+
+| # | 名称 | 描述 | 复杂度 |
+|:-:|------|------|:------:|
+| C18 | Rules 系统增强 | 角色感知 + 角色配置 | 复杂 |
+| C19 | Context 系统改进 | 意图模式、主动压缩 | 中偏复杂 |
+| C20 | Agent 系统增强 | 决策框架、结构化交接 | 中等 |
+| C21 | 并行系统改进 | 依赖感知、缓存友好 | 复杂 |
+
+### 建议开发顺序
+
+1. **⑨ 同步上游**（最优先）— 上游 task_sessions 等改动直接解决部分 bug
+2. **⑩ hook 修复**（同步后重评估）— 上游未解决的 bug 再修
+3. **C18~C21**（module 增强）— 按 C20 → C19 → C18 → C21 顺序
+
+---
+
+## ⑨ sync-upstream-20260319 (⏳ 待执行)
+
+**changes 目录**: `changes/sync-upstream-20260319/`
+**目标**: 同步上游 589 个 commits（2619 文件，+58857/-358110 行）
+**状态**: 计划已建，待执行真实 merge 后根据实际冲突写解决方案
+
+### 上游关键新功能
+
+| 功能 | Commits | 影响 |
+|------|---------|------|
+| atlas task_sessions | 5c619437 等 4 个 | 每个 task 独立 session，可跨 continuation 复用 |
+| todo-description-override | 55ac653e | 改写 TodoWrite 描述，强制 atomic format |
+| todo-continuation 改进 | df7e1ae1 等 | stagnation 检测、dispose 生命周期 |
+| atlas 容错 | 521a1f76 | 10 次连续失败才停止 |
+| plugin dispose | deaac8cb | 完整 teardown 生命周期 |
+| 性能优化 | 5 个 commits | regex 预编译、热路径优化 |
+
+### 7 个热点文件
+
+| 文件 | 变更行数 | 风险 |
+|------|---------|:----:|
+| skills.ts | -2116 行 | 极高 |
+| commands.ts | -439 行 | 高 |
+| builtin-agents.ts | 383 行 | 高 |
+| index.ts | 330 行 | 极高 |
+| hooks.ts schema | 152 行 | 中 |
+| mcp/index.ts | 126 行 | 中 |
+| tools/index.ts | 30 行 | 低 |
+
+### 执行流程
+
+1. 提交当前进度到 fork
+2. 同步 omo-update 目录
+3. 创建合并分支，执行 `git merge upstream/dev --no-commit`
+4. 根据真实冲突写解决方案
+5. 逐个解决冲突，补回下游注册行
+6. 构建验证 + 下游功能完整性检查
+7. 提交合并
+
+### 同步后需重评估的 Bug
+
+| Bug | 可能被上游解决 | 原因 |
+|-----|:---:|------|
+| B3: boulder-continuation 只传数字 | ⚠️ | task_sessions 改变了续跑方式 |
+| B1: apply_patch 不监听 | ❌ | 上游也没加 |
+| B2: output.messages.push 不工作 | ❌ | OpenCode 运行时限制 |
+| B7: plan-attention-refresher 失焦 | ❌ | 下游独立 hook |
+
+---
+
+## ⑩ fix-plan-update-reminder-and-boulder-injection (⏳ 待 ⑨ 完成后重评估)
+
+**changes 目录**: `changes/fix-plan-update-reminder-and-boulder-injection/`
+**目标**: 修复 plan 注入系统的 8 个 bug，使 boulder 达到与 todo 同等的聊天注入能力
+**状态**: 计划已建（8 bug / 7 phase / 14 task），待 ⑨ 同步后重评估
+
+### 已发现的 8 个 Bug
+
+| # | Bug | 位置 | 严重度 |
+|:-:|-----|------|:------:|
+| B1 | plan-update-reminder 不监听 apply_patch | plan-update-reminder | 高 |
+| B2 | output.messages.push() 在 OpenCode 不工作 | debugging-injector + plan-update-reminder | 高 |
+| B3 | boulder-continuation 只传数字不传任务内容 | atlas/boulder-continuation-injector | 中 |
+| B4 | debugging-injector 注入不可见 | debugging-injector | 高 |
+| B5 | /reset-failures 在 opencode run 无法执行 | failure-counter slash command | 中 |
+| B7 | plan-attention-refresher 注入前 30 行含已完成任务（失焦） | plan-attention-refresher | 中 |
+| B8 | plan-attention-refresher 不监听 apply_patch | plan-attention-refresher | 高 |
+
+### 三层注入架构（现状）
+
+```
+Layer 1: plan-attention-refresher (PreToolUse, 60s 冷却)
+  → 每次工具调用前注入 tasks.md 内容
+  → 问题: 注入前 30 行原文，含已完成任务
+
+Layer 2: plan-update-reminder (PostToolUse, 2-Action Rule)
+  → 每次代码修改后提醒更新 findings/tasks/progress
+  → 问题: 不监听 apply_patch
+
+Layer 3: boulder-continuation-injector (session.idle, promptAsync)
+  → AI 停下来时强制续跑
+  → 问题: 只传 "3/12 completed"，不传具体任务
+```
+
+### 设计决策
+
+- `experimental.task_system` 保持关闭（内存 task 与 boulder/tasks.md 不集成）
+- `new_task_system_enabled` 保持关闭（JSON 小文件模式暂不启用）
+- `readIncompleteTasks()` 预留双数据源接口（未来可适配 JSON 模式）
+- plan-attention-refresher 改为只注入未完成任务（不再读前 30 行原文）
 
 ---
 
