@@ -1,23 +1,21 @@
-// TDD-EXEMPT: reason="Adding tasks-md-creation-guard to tool guard hooks"
+// TDD-EXEMPT: reason="Merging tool guard hook registrations"
 import type { HookName, OhMyOpenCodeConfig } from "../../config"
-import type { ModelCacheState } from "../../plugin-state"
-import type { PluginContext } from "../types"
-
 import {
   createCommentCheckerHooks,
-  createToolOutputTruncatorHook,
   createDirectoryAgentsInjectorHook,
   createDirectoryReadmeInjectorHook,
   createEmptyTaskResponseDetectorHook,
-  createRulesInjectorHook,
-  createTasksTodowriteDisablerHook,
-  createWriteExistingFileGuardHook,
   createHashlineReadEnhancerHook,
-  createReadImageResizerHook,
   createJsonErrorRecoveryHook,
-  // TDD-EXEMPT: reason="Adding tasks-md-creation-guard to tool guard hooks"
+  createReadImageResizerHook,
+  createRulesInjectorHook,
   createTasksMdCreationGuardHook,
+  createTasksTodowriteDisablerHook,
+  createTodoDescriptionOverrideHook,
+  createToolOutputTruncatorHook,
+  createWriteExistingFileGuardHook,
 } from "../../hooks"
+import type { ModelCacheState } from "../../plugin-state"
 import {
   getOpenCodeVersion,
   isOpenCodeVersionAtLeast,
@@ -25,6 +23,7 @@ import {
   OPENCODE_NATIVE_AGENTS_INJECTION_VERSION,
 } from "../../shared"
 import { safeCreateHook } from "../../shared/safe-create-hook"
+import type { PluginContext } from "../types"
 
 export type ToolGuardHooks = {
   commentChecker: ReturnType<typeof createCommentCheckerHooks> | null
@@ -38,8 +37,8 @@ export type ToolGuardHooks = {
   hashlineReadEnhancer: ReturnType<typeof createHashlineReadEnhancerHook> | null
   jsonErrorRecovery: ReturnType<typeof createJsonErrorRecoveryHook> | null
   readImageResizer: ReturnType<typeof createReadImageResizerHook> | null
-  // TDD-EXEMPT: reason="Adding tasks-md-creation-guard to tool guard hooks"
   tasksMdCreationGuard: ReturnType<typeof createTasksMdCreationGuardHook> | null
+  todoDescriptionOverride: ReturnType<typeof createTodoDescriptionOverrideHook> | null
 }
 
 export function createToolGuardHooks(args: {
@@ -116,9 +115,12 @@ export function createToolGuardHooks(args: {
     ? safeHook("read-image-resizer", () => createReadImageResizerHook(ctx))
     : null
 
-  // TDD-EXEMPT: reason="Adding tasks-md-creation-guard to tool guard hooks"
   const tasksMdCreationGuard = isHookEnabled("tasks-md-creation-guard")
     ? safeHook("tasks-md-creation-guard", () => createTasksMdCreationGuardHook(ctx))
+    : null
+
+  const todoDescriptionOverride = isHookEnabled("todo-description-override")
+    ? safeHook("todo-description-override", () => createTodoDescriptionOverrideHook())
     : null
 
   return {
@@ -134,5 +136,6 @@ export function createToolGuardHooks(args: {
     jsonErrorRecovery,
     readImageResizer,
     tasksMdCreationGuard,
+    todoDescriptionOverride,
   }
 }

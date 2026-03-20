@@ -1,27 +1,31 @@
-import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test"
-import { existsSync, mkdirSync, rmSync } from "fs"
-import { join } from "path"
-import * as dataPath from "./data-path"
-import { updateConnectedProvidersCache, readProviderModelsCache } from "./connected-providers-cache"
+/// <reference types="bun-types" />
 
-const TEST_CACHE_DIR = join(import.meta.dir, "__test-cache__")
+import { beforeEach, afterEach, describe, expect, test } from "bun:test"
+
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import {
+	createConnectedProvidersCacheStore,
+} from "./connected-providers-cache"
+
+let fakeUserCacheRoot = ""
+let testCacheDir = ""
+let testCacheStore: ReturnType<typeof createConnectedProvidersCacheStore>
 
 describe("updateConnectedProvidersCache", () => {
-	let cacheDirSpy: ReturnType<typeof spyOn>
-
 	beforeEach(() => {
-		cacheDirSpy = spyOn(dataPath, "getOmoOpenCodeCacheDir").mockReturnValue(TEST_CACHE_DIR)
-		if (existsSync(TEST_CACHE_DIR)) {
-			rmSync(TEST_CACHE_DIR, { recursive: true })
-		}
-		mkdirSync(TEST_CACHE_DIR, { recursive: true })
+		fakeUserCacheRoot = mkdtempSync(join(tmpdir(), "connected-providers-user-cache-"))
+		testCacheDir = join(fakeUserCacheRoot, "oh-my-opencode")
+		testCacheStore = createConnectedProvidersCacheStore(() => testCacheDir)
 	})
 
 	afterEach(() => {
-		cacheDirSpy.mockRestore()
-		if (existsSync(TEST_CACHE_DIR)) {
-			rmSync(TEST_CACHE_DIR, { recursive: true })
+		if (existsSync(fakeUserCacheRoot)) {
+			rmSync(fakeUserCacheRoot, { recursive: true, force: true })
 		}
+		fakeUserCacheRoot = ""
+		testCacheDir = ""
 	})
 
 	test("extracts models from provider.list().all response", async () => {
@@ -38,7 +42,7 @@ describe("updateConnectedProvidersCache", () => {
 								env: [],
 								models: {
 									"gpt-5.3-codex": { id: "gpt-5.3-codex", name: "GPT-5.3 Codex" },
-									"gpt-5.2": { id: "gpt-5.2", name: "GPT-5.2" },
+									"gpt-5.4": { id: "gpt-5.4", name: "GPT-5.4" },
 								},
 							},
 							{
@@ -57,14 +61,14 @@ describe("updateConnectedProvidersCache", () => {
 		}
 
 		//#when
-		await updateConnectedProvidersCache(mockClient)
+		await testCacheStore.updateConnectedProvidersCache(mockClient)
 
 		//#then
-		const cache = readProviderModelsCache()
+		const cache = testCacheStore.readProviderModelsCache()
 		expect(cache).not.toBeNull()
 		expect(cache!.connected).toEqual(["openai", "anthropic"])
 		expect(cache!.models).toEqual({
-			openai: ["gpt-5.3-codex", "gpt-5.2"],
+			openai: ["gpt-5.3-codex", "gpt-5.4"],
 			anthropic: ["claude-opus-4-6", "claude-sonnet-4-6"],
 		})
 	})
@@ -90,10 +94,10 @@ describe("updateConnectedProvidersCache", () => {
 		}
 
 		//#when
-		await updateConnectedProvidersCache(mockClient)
+		await testCacheStore.updateConnectedProvidersCache(mockClient)
 
 		//#then
-		const cache = readProviderModelsCache()
+		const cache = testCacheStore.readProviderModelsCache()
 		expect(cache).not.toBeNull()
 		expect(cache!.models).toEqual({})
 	})
@@ -111,10 +115,10 @@ describe("updateConnectedProvidersCache", () => {
 		}
 
 		//#when
-		await updateConnectedProvidersCache(mockClient)
+		await testCacheStore.updateConnectedProvidersCache(mockClient)
 
 		//#then
-		const cache = readProviderModelsCache()
+		const cache = testCacheStore.readProviderModelsCache()
 		expect(cache).not.toBeNull()
 		expect(cache!.models).toEqual({})
 	})
@@ -124,10 +128,50 @@ describe("updateConnectedProvidersCache", () => {
 		const mockClient = {}
 
 		//#when
-		await updateConnectedProvidersCache(mockClient)
+		await testCacheStore.updateConnectedProvidersCache(mockClient)
 
 		//#then
-		const cache = readProviderModelsCache()
+		const cache = testCacheStore.readProviderModelsCache()
 		expect(cache).toBeNull()
+	})
+
+	test("does not remove unrelated files in the cache directory", async () => {
+		//#given
+		const realCacheDir = join(fakeUserCacheRoot, "oh-my-opencode")
+		const sentinelPath = join(realCacheDir, "connected-providers-cache.test-sentinel.json")
+		mkdirSync(realCacheDir, { recursive: true })
+		writeFileSync(sentinelPath, JSON.stringify({ keep: true }))
+
+		const mockClient = {
+			provider: {
+				list: async () => ({
+					data: {
+						connected: ["openai"],
+						all: [
+							{
+								id: "openai",
+								models: {
+									"gpt-5.4": { id: "gpt-5.4" },
+								},
+							},
+						],
+					},
+				}),
+			},
+		}
+
+		try {
+			//#when
+			await testCacheStore.updateConnectedProvidersCache(mockClient)
+
+			//#then
+			expect(testCacheStore.readConnectedProvidersCache()).toEqual(["openai"])
+			expect(existsSync(sentinelPath)).toBe(true)
+			expect(readFileSync(sentinelPath, "utf-8")).toBe(JSON.stringify({ keep: true }))
+		} finally {
+			if (existsSync(sentinelPath)) {
+				rmSync(sentinelPath, { force: true })
+			}
+		}
 	})
 })

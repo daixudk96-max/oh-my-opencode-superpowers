@@ -16,7 +16,7 @@ Paste this into your LLM agent session:
 
 ```
 Install and configure oh-my-opencode by following the instructions here:
-https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads/dev/docs/guide/installation.md
+https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/docs/guide/installation.md
 ```
 
 Or read the full [Installation Guide](./installation.md) for manual setup, provider authentication, and troubleshooting.
@@ -41,7 +41,7 @@ We used to call this "Claude Code on steroids." That was wrong.
 
 This isn't about making Claude Code better. It's about breaking free from the idea that one model, one provider, one way of working is enough. Anthropic wants you locked in. OpenAI wants you locked in. Everyone wants you locked in.
 
-Oh My OpenCode doesn't play that game. It orchestrates across models, picking the right brain for the right job. Claude for orchestration. GPT for deep reasoning. Gemini for frontend. Haiku for quick tasks. All working together, automatically.
+Oh My OpenCode doesn't play that game. It orchestrates across models, picking the right brain for the right job. Claude for orchestration. GPT for deep reasoning. Gemini for frontend. GPT-5.4 Mini for quick tasks. All working together, automatically.
 
 ---
 
@@ -81,12 +81,13 @@ Named after the Greek myth. He rolls the boulder every day. Never stops. Never g
 Sisyphus is your main orchestrator. He plans, delegates to specialists, and drives tasks to completion with aggressive parallel execution. He doesn't stop halfway. He doesn't get distracted. He finishes.
 
 **Recommended models:**
+
 - **Claude Opus 4.6** — Best overall experience. Sisyphus was built with Claude-optimized prompts.
 - **Claude Sonnet 4.6** — Good balance of capability and cost.
 - **Kimi K2.5** — Great Claude-like alternative. Many users run this combo exclusively.
 - **GLM 5** — Solid option, especially via Z.ai.
 
-Sisyphus has Claude-optimized prompts. No GPT prompt exists for Sisyphus. Claude-family models work best because that's what the prompts were engineered for.
+Sisyphus still works best on Claude-family models, Kimi, and GLM. GPT-5.4 now has a dedicated prompt path, but older GPT models are still a poor fit and should route to Hephaestus instead.
 
 ### Hephaestus: The Legitimate Craftsman
 
@@ -98,9 +99,9 @@ Use Hephaestus when you need deep architectural reasoning, complex debugging acr
 
 **Why this beats vanilla Codex CLI:**
 
-- **Multi-model orchestration.** Pure Codex is single-model. OmO routes different tasks to different models automatically. GPT for deep reasoning. Gemini for frontend. Haiku for speed. The right brain for the right job.
+- **Multi-model orchestration.** Pure Codex is single-model. OmO routes different tasks to different models automatically. GPT for deep reasoning. Gemini for frontend. GPT-5.4 Mini for speed. The right brain for the right job.
 - **Background agents.** Fire 5+ agents in parallel. Something Codex simply cannot do. While one agent writes code, another researches patterns, another checks documentation. Like a real dev team.
-- **Category system.** Tasks are routed by intent, not model name. `visual-engineering` gets Gemini. `ultrabrain` gets GPT-5.3 Codex. `quick` gets Haiku. No manual juggling.
+- **Category system.** Tasks are routed by intent, not model name. `visual-engineering` gets Gemini. `ultrabrain` gets GPT-5.4. `quick` gets GPT-5.4 Mini. No manual juggling.
 - **Accumulated wisdom.** Subagents learn from previous results. Conventions discovered in task 1 are passed to task 5. Mistakes made early aren't repeated. The system gets smarter as it works.
 
 ### Prometheus: The Strategic Planner
@@ -167,49 +168,58 @@ You can override specific agents or categories in your config:
 
 ```jsonc
 {
-  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/dev/assets/oh-my-opencode.schema.json",
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
 
   "agents": {
     // Main orchestrator: Claude Opus or Kimi K2.5 work best
     "sisyphus": {
       "model": "kimi-for-coding/k2p5",
-      "ultrawork": { "model": "anthropic/claude-opus-4-6", "variant": "max" }
+      "ultrawork": { "model": "anthropic/claude-opus-4-6", "variant": "max" },
     },
 
     // Research agents: cheaper models are fine
-    "librarian": { "model": "zai-coding-plan/glm-4.7" },
+    "librarian": { "model": "google/gemini-3-flash" },
     "explore": { "model": "github-copilot/grok-code-fast-1" },
 
     // Architecture consultation: GPT or Claude Opus
-    "oracle": { "model": "openai/gpt-5.2", "variant": "high" }
+    "oracle": { "model": "openai/gpt-5.4", "variant": "high" },
   },
 
   "categories": {
     // Frontend work: Gemini dominates visual tasks
-    "visual-engineering": { "model": "google/gemini-3-pro", "variant": "high" },
+    "visual-engineering": {
+      "model": "google/gemini-3.1-pro",
+      "variant": "high",
+    },
 
-    // Quick tasks: use the cheapest models
-    "quick": { "model": "anthropic/claude-haiku-4-5" },
+    // General high-effort work
+    "unspecified-high": { "model": "anthropic/claude-opus-4-6", "variant": "max" },
 
-    // Deep reasoning: GPT-5.3-codex
-    "ultrabrain": { "model": "openai/gpt-5.3-codex", "variant": "xhigh" }
-  }
+    // Quick tasks: use GPT-5.4-mini (fast and cheap)
+    "quick": { "model": "openai/gpt-5.4-mini" },
+
+    // Deep reasoning: GPT-5.4
+    "ultrabrain": { "model": "openai/gpt-5.4", "variant": "xhigh" },
+  },
 }
 ```
 
 ### Model Families
 
 **Claude-like models** (instruction-following, structured output):
+
 - Claude Opus 4.6, Claude Sonnet 4.6, Claude Haiku 4.5
 - Kimi K2.5 — behaves very similarly to Claude
 - GLM 5 — Claude-like behavior, good for broad tasks
 
 **GPT models** (explicit reasoning, principle-driven):
+
 - GPT-5.3-codex — deep coding powerhouse, required for Hephaestus
-- GPT-5.2 — high intelligence, default for Oracle
+- GPT-5.4 — high intelligence, default for Oracle
 - GPT-5-Nano — ultra-cheap, fast utility tasks
 
 **Different-behavior models**:
+
 - Gemini 3 Pro — excels at visual/frontend tasks
 - MiniMax M2.5 — fast and smart for utility tasks
 - Grok Code Fast 1 — optimized for code grep/search

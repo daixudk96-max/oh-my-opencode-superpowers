@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { mergeConfigs, parseConfigPartially } from "./plugin-config";
-import type { OhMyOpenCodeConfig } from "./config";
+import { OhMyOpenCodeConfigSchema, type OhMyOpenCodeConfig } from "./config";
 
 describe("mergeConfigs", () => {
   describe("categories merging", () => {
@@ -12,7 +12,7 @@ describe("mergeConfigs", () => {
       const base = {
         categories: {
           general: {
-            model: "openai/gpt-5.2",
+            model: "openai/gpt-5.4",
             temperature: 0.5,
           },
           quick: {
@@ -35,7 +35,7 @@ describe("mergeConfigs", () => {
       const result = mergeConfigs(base, override);
 
       // then general.model should be preserved from base
-      expect(result.categories?.general?.model).toBe("openai/gpt-5.2");
+      expect(result.categories?.general?.model).toBe("openai/gpt-5.4");
       // then general.temperature should be overridden
       expect(result.categories?.general?.temperature).toBe(0.3);
       // then quick should be preserved from base
@@ -48,7 +48,7 @@ describe("mergeConfigs", () => {
       const base: OhMyOpenCodeConfig = {
         categories: {
           general: {
-            model: "openai/gpt-5.2",
+            model: "openai/gpt-5.4",
           },
         },
       };
@@ -57,7 +57,7 @@ describe("mergeConfigs", () => {
 
       const result = mergeConfigs(base, override);
 
-      expect(result.categories?.general?.model).toBe("openai/gpt-5.2");
+      expect(result.categories?.general?.model).toBe("openai/gpt-5.4");
     });
 
     it("should use override categories when base has no categories", () => {
@@ -66,14 +66,14 @@ describe("mergeConfigs", () => {
       const override: OhMyOpenCodeConfig = {
         categories: {
           general: {
-            model: "openai/gpt-5.2",
+            model: "openai/gpt-5.4",
           },
         },
       };
 
       const result = mergeConfigs(base, override);
 
-      expect(result.categories?.general?.model).toBe("openai/gpt-5.2");
+      expect(result.categories?.general?.model).toBe("openai/gpt-5.4");
     });
   });
 
@@ -81,7 +81,7 @@ describe("mergeConfigs", () => {
     it("should deep merge agents", () => {
       const base: OhMyOpenCodeConfig = {
         agents: {
-          oracle: { model: "openai/gpt-5.2" },
+          oracle: { model: "openai/gpt-5.4" },
         },
       };
 
@@ -94,9 +94,9 @@ describe("mergeConfigs", () => {
 
       const result = mergeConfigs(base, override);
 
-      expect(result.agents?.oracle?.model).toBe("openai/gpt-5.2");
+      expect(result.agents?.oracle).toMatchObject({ model: "openai/gpt-5.4" });
       expect(result.agents?.oracle?.temperature).toBe(0.5);
-      expect(result.agents?.explore?.model).toBe("anthropic/claude-haiku-4-5");
+      expect(result.agents?.explore).toMatchObject({ model: "anthropic/claude-haiku-4-5" });
     });
 
     it("should merge disabled arrays without duplicates", () => {
@@ -115,10 +115,44 @@ describe("mergeConfigs", () => {
       expect(result.disabled_hooks).toContain("session-recovery");
       expect(result.disabled_hooks?.length).toBe(3);
     });
+
+    it("should union disabled_tools from base and override without duplicates", () => {
+      const base: OhMyOpenCodeConfig = {
+        disabled_tools: ["todowrite", "interactive_bash"],
+      };
+
+      const override: OhMyOpenCodeConfig = {
+        disabled_tools: ["interactive_bash", "look_at"],
+      };
+
+      const result = mergeConfigs(base, override);
+
+      expect(result.disabled_tools).toContain("todowrite");
+      expect(result.disabled_tools).toContain("interactive_bash");
+      expect(result.disabled_tools).toContain("look_at");
+      expect(result.disabled_tools?.length).toBe(3);
+    });
   });
 });
 
 describe("parseConfigPartially", () => {
+  describe("disabled_hooks compatibility", () => {
+    //#given a config with a future hook name unknown to this version
+    //#when validating against the full config schema
+    //#then should accept the hook name so runtime and schema stay aligned
+
+    it("should accept unknown disabled_hooks values for forward compatibility", () => {
+      const result = OhMyOpenCodeConfigSchema.safeParse({
+        disabled_hooks: ["future-hook-name"],
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.disabled_hooks).toEqual(["future-hook-name"]);
+      }
+    });
+  });
+
   describe("fully valid config", () => {
     //#given a config where all sections are valid
     //#when parsing the config
@@ -127,8 +161,8 @@ describe("parseConfigPartially", () => {
     it("should return the full config when everything is valid", () => {
       const rawConfig = {
         agents: {
-          oracle: { model: "openai/gpt-5.2" },
-          momus: { model: "openai/gpt-5.2" },
+          oracle: { model: "openai/gpt-5.4" },
+          momus: { model: "openai/gpt-5.4" },
         },
         disabled_hooks: ["comment-checker"],
       };
@@ -136,8 +170,8 @@ describe("parseConfigPartially", () => {
       const result = parseConfigPartially(rawConfig);
 
       expect(result).not.toBeNull();
-      expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.2");
-      expect(result!.agents?.momus?.model).toBe("openai/gpt-5.2");
+      expect(result!.agents?.oracle).toMatchObject({ model: "openai/gpt-5.4" });
+      expect(result!.agents?.momus).toMatchObject({ model: "openai/gpt-5.4" });
       expect(result!.disabled_hooks).toEqual(["comment-checker"]);
     });
   });
@@ -150,8 +184,8 @@ describe("parseConfigPartially", () => {
     it("should preserve valid agent overrides when another section is invalid", () => {
       const rawConfig = {
         agents: {
-          oracle: { model: "openai/gpt-5.2" },
-          momus: { model: "openai/gpt-5.2" },
+          oracle: { model: "openai/gpt-5.4" },
+          momus: { model: "openai/gpt-5.4" },
           prometheus: {
             permission: {
               edit: { "*": "ask", ".sisyphus/**": "allow" },
@@ -171,7 +205,7 @@ describe("parseConfigPartially", () => {
     it("should preserve valid agents when a non-agent section is invalid", () => {
       const rawConfig = {
         agents: {
-          oracle: { model: "openai/gpt-5.2" },
+          oracle: { model: "openai/gpt-5.4" },
         },
         disabled_hooks: ["not-a-real-hook"],
       };
@@ -179,7 +213,7 @@ describe("parseConfigPartially", () => {
       const result = parseConfigPartially(rawConfig);
 
       expect(result).not.toBeNull();
-      expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.2");
+      expect(result!.agents?.oracle).toMatchObject({ model: "openai/gpt-5.4" });
       expect(result!.disabled_hooks).toEqual(["not-a-real-hook"]);
     });
   });
@@ -224,7 +258,7 @@ describe("parseConfigPartially", () => {
     it("should ignore unknown keys and return valid sections", () => {
       const rawConfig = {
         agents: {
-          oracle: { model: "openai/gpt-5.2" },
+          oracle: { model: "openai/gpt-5.4" },
         },
         some_future_key: { foo: "bar" },
       };
@@ -232,7 +266,7 @@ describe("parseConfigPartially", () => {
       const result = parseConfigPartially(rawConfig);
 
       expect(result).not.toBeNull();
-      expect(result!.agents?.oracle?.model).toBe("openai/gpt-5.2");
+      expect(result!.agents?.oracle).toMatchObject({ model: "openai/gpt-5.4" });
       expect((result as Record<string, unknown>)["some_future_key"]).toBeUndefined();
     });
   });

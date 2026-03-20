@@ -1,10 +1,10 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
-import { isGptModel } from "./types"
 import type { AgentOverrideConfig } from "../config/schema"
 import {
   createAgentToolRestrictions,
   type PermissionValue,
 } from "../shared/permission-compat"
+import { isGptModel } from "./types"
 
 const SISYPHUS_JUNIOR_PROMPT = `<Role>
 Sisyphus-Junior - Focused executor from OhMyOpenCode.
@@ -73,7 +73,7 @@ Task NOT complete without:
 
 function buildSisyphusJuniorPrompt(promptAppend?: string): string {
   if (!promptAppend) return SISYPHUS_JUNIOR_PROMPT
-  return SISYPHUS_JUNIOR_PROMPT + "\n\n" + promptAppend
+  return `${SISYPHUS_JUNIOR_PROMPT}\n\n${promptAppend}`
 }
 
 // Core tools that Sisyphus-Junior must NEVER have access to
@@ -87,7 +87,8 @@ export const SISYPHUS_JUNIOR_DEFAULTS = {
 
 export function createSisyphusJuniorAgentWithOverrides(
   override: AgentOverrideConfig | undefined,
-  systemDefaultModel?: string
+  systemDefaultModel?: string,
+  _useTaskSystem?: boolean,
 ): AgentConfig {
   if (override?.disable) {
     override = undefined

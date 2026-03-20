@@ -27,6 +27,7 @@ import {
 	discoverCommandsSync,
 	interactive_bash,
 } from "../tools";
+import { normalizeToolArgSchemas } from "./normalize-tool-arg-schemas";
 import type { SkillContext } from "./skill-context";
 import type { PluginContext, ToolsRecord } from "./types";
 
@@ -63,6 +64,8 @@ export function createToolRegistry(args: {
 		ctx,
 		managers.backgroundManager,
 		pluginConfig.disabled_agents ?? [],
+		pluginConfig.agents,
+		pluginConfig.categories,
 	);
 
 	const isMultimodalLookerEnabled = !(pluginConfig.disabled_agents ?? []).some(
@@ -153,6 +156,10 @@ export function createToolRegistry(args: {
 		...taskToolsRecord,
 		...hashlineToolsRecord,
 	};
+
+	for (const toolDefinition of Object.values(allTools)) {
+		normalizeToolArgSchemas(toolDefinition);
+	}
 
 	const filteredTools = filterDisabledTools(
 		allTools,

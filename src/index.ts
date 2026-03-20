@@ -8,17 +8,16 @@ import { createManagers } from "./create-managers";
 import { createTools } from "./create-tools";
 import { bootstrapDownstreamHooks } from "./downstream/runtime-hook-executor";
 import { loadPluginConfig } from "./plugin-config";
+import { createPluginDispose, type PluginDispose } from "./plugin-dispose";
 import { createPluginInterface } from "./plugin-interface";
 import { createModelCacheState } from "./plugin-state";
-import {
-	createContextDetector,
-	type HookCondition,
-	injectServerAuthIntoClient,
-	log,
-} from "./shared";
+import { injectServerAuthIntoClient, log } from "./shared";
+import { createContextDetector, type HookCondition } from "./shared/context-detector";
 import { createFirstMessageVariantGate } from "./shared/first-message-variant";
 import { repairMisbucketedSessionMetadata } from "./shared/session-bucket-repair";
 import { startTmuxCheck } from "./tools";
+
+let activePluginDispose: PluginDispose | null = null;
 
 const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 	// Initialize config context for plugin runtime (prevents warnings from hooks)
@@ -29,6 +28,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 
 	injectServerAuthIntoClient(ctx.client);
 	startTmuxCheck();
+	await activePluginDispose?.();
 
 	const pluginConfig = loadPluginConfig(ctx.directory, ctx);
 	const detector = createContextDetector();
@@ -96,6 +96,12 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 		availableSkills: toolsResult.availableSkills,
 	});
 
+	const dispose = createPluginDispose({
+		backgroundManager: managers.backgroundManager,
+		skillMcpManager: managers.skillMcpManager,
+		disposeHooks: hooks.disposeHooks,
+	});
+
 	const pluginInterface = createPluginInterface({
 		ctx,
 		pluginConfig,
@@ -104,6 +110,8 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 		hooks,
 		tools: toolsResult.filteredTools,
 	});
+
+	activePluginDispose = dispose;
 
 	const baseChatMessage = pluginInterface["chat.message"];
 	const baseEvent = pluginInterface.event;
@@ -189,13 +197,16 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 			_input: { sessionID: string },
 			output: { context: string[] },
 		): Promise<void> => {
+			await hooks.compactionContextInjector?.capture(_input.sessionID);
 			await hooks.compactionTodoPreserver?.capture(_input.sessionID);
 			await hooks.claudeCodeHooks?.["experimental.session.compacting"]?.(
 				_input,
 				output,
 			);
 			if (hooks.compactionContextInjector) {
-				output.context.push(hooks.compactionContextInjector(_input.sessionID));
+				output.context.push(
+					hooks.compactionContextInjector.inject(_input.sessionID),
+				);
 			}
 			await downstreamHooks.runExperimentalSessionCompacting(_input, output);
 		},

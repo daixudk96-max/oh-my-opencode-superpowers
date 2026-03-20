@@ -92,7 +92,7 @@ describe("parseModelSuggestion", () => {
           data: {
             providerID: "openai",
             modelID: "gpt-5",
-            suggestions: ["gpt-5.2"],
+            suggestions: ["gpt-5.4"],
           },
         },
       }
@@ -104,7 +104,7 @@ describe("parseModelSuggestion", () => {
       expect(result).toEqual({
         providerID: "openai",
         modelID: "gpt-5",
-        suggestion: "gpt-5.2",
+        suggestion: "gpt-5.4",
       })
     })
 

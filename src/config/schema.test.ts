@@ -1,3 +1,5 @@
+/// <reference types="bun-types" />
+
 import { describe, expect, test } from "bun:test"
 import {
   AgentOverrideConfigSchema,
@@ -266,7 +268,7 @@ describe("AgentOverrideConfigSchema", () => {
   describe("backward compatibility", () => {
     test("still accepts model field (deprecated)", () => {
       // given
-      const config = { model: "openai/gpt-5.2" }
+      const config = { model: "openai/gpt-5.4" }
 
       // when
       const result = AgentOverrideConfigSchema.safeParse(config)
@@ -274,14 +276,14 @@ describe("AgentOverrideConfigSchema", () => {
       // then
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.model).toBe("openai/gpt-5.2")
+        expect(result.data.model).toBe("openai/gpt-5.4")
       }
     })
 
     test("accepts both model and category (deprecated usage)", () => {
       // given - category should take precedence at runtime, but both should validate
       const config = { 
-        model: "openai/gpt-5.2",
+        model: "openai/gpt-5.4",
         category: "ultrabrain"
       }
 
@@ -291,7 +293,7 @@ describe("AgentOverrideConfigSchema", () => {
       // then
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.model).toBe("openai/gpt-5.2")
+        expect(result.data.model).toBe("openai/gpt-5.4")
         expect(result.data.category).toBe("ultrabrain")
       }
     })
@@ -343,7 +345,7 @@ describe("AgentOverrideConfigSchema", () => {
 describe("CategoryConfigSchema", () => {
   test("accepts variant as optional string", () => {
     // given
-    const config = { model: "openai/gpt-5.2", variant: "xhigh" }
+    const config = { model: "openai/gpt-5.4", variant: "xhigh" }
 
     // when
     const result = CategoryConfigSchema.safeParse(config)
@@ -371,7 +373,7 @@ describe("CategoryConfigSchema", () => {
 
   test("rejects non-string variant", () => {
     // given
-    const config = { model: "openai/gpt-5.2", variant: 123 }
+    const config = { model: "openai/gpt-5.4", variant: 123 }
 
     // when
     const result = CategoryConfigSchema.safeParse(config)
@@ -416,6 +418,17 @@ describe("HookNameSchema", () => {
       expect(result.success).toBe(true)
     }
   })
+
+  test("rejects removed delegate-task-english-directive hook name", () => {
+    //#given
+    const input = "delegate-task-english-directive"
+
+    //#when
+    const result = HookNameSchema.safeParse(input)
+
+    //#then
+    expect(result.success).toBe(false)
+  })
 })
 
 describe("Sisyphus-Junior agent override", () => {
@@ -424,7 +437,7 @@ describe("Sisyphus-Junior agent override", () => {
     const config = {
       agents: {
         "sisyphus-junior": {
-          model: "openai/gpt-5.2",
+          model: "openai/gpt-5.4",
           temperature: 0.2,
         },
       },
@@ -437,7 +450,7 @@ describe("Sisyphus-Junior agent override", () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.agents?.["sisyphus-junior"]).toBeDefined()
-      expect(result.data.agents?.["sisyphus-junior"]?.model).toBe("openai/gpt-5.2")
+      expect(result.data.agents?.["sisyphus-junior"]?.model).toBe("openai/gpt-5.4")
       expect(result.data.agents?.["sisyphus-junior"]?.temperature).toBe(0.2)
     }
   })
@@ -893,6 +906,25 @@ describe("GitMasterConfigSchema", () => {
     const result = GitMasterConfigSchema.safeParse(config)
 
     //#then
+    expect(result.success).toBe(false)
+  })
+
+  test("accepts shell-safe git_env_prefix", () => {
+    const config = { git_env_prefix: "MY_HOOK=active" }
+
+    const result = GitMasterConfigSchema.safeParse(config)
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.git_env_prefix).toBe("MY_HOOK=active")
+    }
+  })
+
+  test("rejects git_env_prefix with shell metacharacters", () => {
+    const config = { git_env_prefix: "A=1; rm -rf /" }
+
+    const result = GitMasterConfigSchema.safeParse(config)
+
     expect(result.success).toBe(false)
   })
 })

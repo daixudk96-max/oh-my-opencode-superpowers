@@ -10,7 +10,7 @@ describe("resolveModel", () => {
       // given
       const input: ModelResolutionInput = {
         userModel: "anthropic/claude-opus-4-6",
-        inheritedModel: "openai/gpt-5.2",
+        inheritedModel: "openai/gpt-5.4",
         systemDefault: "google/gemini-3.1-pro",
       }
 
@@ -25,7 +25,7 @@ describe("resolveModel", () => {
       // given
       const input: ModelResolutionInput = {
         userModel: undefined,
-        inheritedModel: "openai/gpt-5.2",
+        inheritedModel: "openai/gpt-5.4",
         systemDefault: "google/gemini-3.1-pro",
       }
 
@@ -33,7 +33,7 @@ describe("resolveModel", () => {
       const result = resolveModel(input)
 
       // then
-      expect(result).toBe("openai/gpt-5.2")
+      expect(result).toBe("openai/gpt-5.4")
     })
 
     test("returns systemDefault when both userModel and inheritedModel are undefined", () => {
@@ -57,7 +57,7 @@ describe("resolveModel", () => {
       // given
       const input: ModelResolutionInput = {
         userModel: "",
-        inheritedModel: "openai/gpt-5.2",
+        inheritedModel: "openai/gpt-5.4",
         systemDefault: "google/gemini-3.1-pro",
       }
 
@@ -65,7 +65,7 @@ describe("resolveModel", () => {
       const result = resolveModel(input)
 
       // then
-      expect(result).toBe("openai/gpt-5.2")
+      expect(result).toBe("openai/gpt-5.4")
     })
 
     test("treats whitespace-only string as unset, uses fallback", () => {
@@ -89,7 +89,7 @@ describe("resolveModel", () => {
       // given
       const input: ModelResolutionInput = {
         userModel: "anthropic/claude-opus-4-6",
-        inheritedModel: "openai/gpt-5.2",
+        inheritedModel: "openai/gpt-5.4",
         systemDefault: "google/gemini-3.1-pro",
       }
 
@@ -303,9 +303,9 @@ describe("resolveModelWithFallback", () => {
       // given
       const input: ExtendedModelResolutionInput = {
         fallbackChain: [
-          { providers: ["openai", "anthropic", "google"], model: "gpt-5.2" },
+          { providers: ["openai", "anthropic", "google"], model: "gpt-5.4" },
         ],
-        availableModels: new Set(["openai/gpt-5.2", "anthropic/claude-opus-4-6", "google/gemini-3.1-pro"]),
+        availableModels: new Set(["openai/gpt-5.4", "anthropic/claude-opus-4-6", "google/gemini-3.1-pro"]),
         systemDefaultModel: "google/gemini-3.1-pro",
       }
 
@@ -313,7 +313,7 @@ describe("resolveModelWithFallback", () => {
       const result = resolveModelWithFallback(input)
 
       // then
-      expect(result!.model).toBe("openai/gpt-5.2")
+      expect(result!.model).toBe("openai/gpt-5.4")
       expect(result!.source).toBe("provider-fallback")
     })
 
@@ -500,7 +500,7 @@ describe("resolveModelWithFallback", () => {
         fallbackChain: [
           { providers: ["anthropic"], model: "nonexistent-model" },
         ],
-        availableModels: new Set(["openai/gpt-5.2", "anthropic/claude-opus-4-6"]),
+        availableModels: new Set(["openai/gpt-5.4", "anthropic/claude-opus-4-6"]),
         systemDefaultModel: "google/gemini-3.1-pro",
       }
 
@@ -663,7 +663,7 @@ describe("resolveModelWithFallback", () => {
     test("returns system default when fallbackChain is not provided", () => {
       // given
       const input: ExtendedModelResolutionInput = {
-        availableModels: new Set(["openai/gpt-5.2"]),
+        availableModels: new Set(["openai/gpt-5.4"]),
         systemDefaultModel: "google/gemini-3.1-pro",
       }
 
@@ -684,7 +684,7 @@ describe("resolveModelWithFallback", () => {
       // when
       const result = resolveModelWithFallback({
         fallbackChain: [
-          { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.2", variant: "high" },
+          { providers: ["openai", "github-copilot", "opencode"], model: "gpt-5.4", variant: "high" },
           { providers: ["anthropic", "github-copilot", "opencode"], model: "claude-opus-4-6", variant: "max" },
         ],
         availableModels,
@@ -703,7 +703,7 @@ describe("resolveModelWithFallback", () => {
       // when
       const result = resolveModelWithFallback({
         fallbackChain: [
-          { providers: ["openai", "anthropic"], model: "gpt-5.2" },
+          { providers: ["openai", "anthropic"], model: "gpt-5.4" },
           { providers: ["google"], model: "gemini-3.1-pro" },
         ],
         availableModels,
@@ -718,14 +718,14 @@ describe("resolveModelWithFallback", () => {
     test("returns first matching entry even if later entries have better matches", () => {
       // given
       const availableModels = new Set([
-        "openai/gpt-5.2",
+        "openai/gpt-5.4",
         "anthropic/claude-opus-4-6",
       ])
 
       // when
       const result = resolveModelWithFallback({
         fallbackChain: [
-          { providers: ["openai"], model: "gpt-5.2" },
+          { providers: ["openai"], model: "gpt-5.4" },
           { providers: ["anthropic"], model: "claude-opus-4-6" },
         ],
         availableModels,
@@ -733,7 +733,7 @@ describe("resolveModelWithFallback", () => {
       })
 
       // then
-      expect(result!.model).toBe("openai/gpt-5.2")
+      expect(result!.model).toBe("openai/gpt-5.4")
       expect(result!.source).toBe("provider-fallback")
     })
 
@@ -744,7 +744,7 @@ describe("resolveModelWithFallback", () => {
       // when
       const result = resolveModelWithFallback({
         fallbackChain: [
-          { providers: ["openai"], model: "gpt-5.2" },
+          { providers: ["openai"], model: "gpt-5.4" },
           { providers: ["anthropic"], model: "claude-opus-4-6" },
           { providers: ["google"], model: "gemini-3.1-pro" },
         ],
@@ -955,7 +955,7 @@ describe("resolveModelWithFallback", () => {
         fallbackChain: [
           { providers: ["anthropic"], model: "nonexistent-model" },
         ],
-        availableModels: new Set(["openai/gpt-5.2"]),
+        availableModels: new Set(["openai/gpt-5.4"]),
         systemDefaultModel: undefined,
       }
 
@@ -969,7 +969,7 @@ describe("resolveModelWithFallback", () => {
     test("returns undefined when no fallbackChain and systemDefaultModel is undefined", () => {
       // given
       const input: ExtendedModelResolutionInput = {
-        availableModels: new Set(["openai/gpt-5.2"]),
+        availableModels: new Set(["openai/gpt-5.4"]),
         systemDefaultModel: undefined,
       }
 

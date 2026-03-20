@@ -1,119 +1,134 @@
-export { createTodoContinuationEnforcer, type TodoContinuationEnforcer } from "./todo-continuation-enforcer";
-export { createContextWindowMonitorHook } from "./context-window-monitor";
-export { createSessionNotification } from "./session-notification";
-export { createSessionRecoveryHook, type SessionRecoveryHook, type SessionRecoveryOptions } from "./session-recovery";
+export { createAgentSkillReminderHook } from "./agent-skill-reminder";
+export { createAgentUsageReminderHook } from "./agent-usage-reminder";
+export {
+	type AnthropicContextWindowLimitRecoveryOptions,
+	createAnthropicContextWindowLimitRecoveryHook,
+} from "./anthropic-context-window-limit-recovery";
+export { createAtlasHook } from "./atlas";
+export { createAutoSlashCommandHook } from "./auto-slash-command";
+export { createAutoUpdateCheckerHook } from "./auto-update-checker";
+export { createBackgroundNotificationHook } from "./background-notification";
+export { createBehaviorAnchorHook } from "./behavior-anchor";
+export { createCategorySkillReminderHook } from "./category-skill-reminder";
+export { createClaudeCodeHooksHook } from "./claude-code-hooks";
+export { createCodebaseAssessmentHook } from "./codebase-assessment";
 export { createCommentCheckerHooks } from "./comment-checker";
-export { createToolOutputTruncatorHook } from "./tool-output-truncator";
+export {
+	createCompactionContextInjector,
+	type SummarizeContext,
+} from "./compaction-context-injector";
+export { createCompactionTodoPreserverHook } from "./compaction-todo-preserver";
+export { createContextWindowMonitorHook } from "./context-window-monitor";
+export {
+	createDebugInjectorHook,
+	type DebugInjectorConfig,
+} from "./debugging-injector";
+export { createDelegateTaskRetryHook } from "./delegate-task-retry";
 export { createDirectoryAgentsInjectorHook } from "./directory-agents-injector";
 export { createDirectoryReadmeInjectorHook } from "./directory-readme-injector";
-export { createEmptyTaskResponseDetectorHook } from "./empty-task-response-detector";
-export { createAnthropicContextWindowLimitRecoveryHook, type AnthropicContextWindowLimitRecoveryOptions } from "./anthropic-context-window-limit-recovery";
-
-export { createThinkModeHook } from "./think-mode";
-export { createModelFallbackHook, setPendingModelFallback, clearPendingModelFallback, type ModelFallbackState } from "./model-fallback/hook";
-export { createClaudeCodeHooksHook } from "./claude-code-hooks";
-export { createRulesInjectorHook } from "./rules-injector";
-export { createBackgroundNotificationHook } from "./background-notification"
-export { createAutoUpdateCheckerHook } from "./auto-update-checker";
-
-export { createAgentUsageReminderHook } from "./agent-usage-reminder";
-export { createAgentSkillReminderHook } from "./agent-skill-reminder";
-export { createKeywordDetectorHook } from "./keyword-detector";
-export { createNonInteractiveEnvHook } from "./non-interactive-env";
-export { createInteractiveBashSessionHook } from "./interactive-bash-session";
-
-export { createThinkingBlockValidatorHook } from "./thinking-block-validator";
-export { createCategorySkillReminderHook } from "./category-skill-reminder";
-export { createRalphLoopHook, type RalphLoopHook } from "./ralph-loop";
-export { createAutoSlashCommandHook } from "./auto-slash-command";
 export { createEditErrorRecoveryHook } from "./edit-error-recovery";
-export { createPrometheusMdOnlyHook } from "./prometheus-md-only";
-export { createSisyphusJuniorNotepadHook } from "./sisyphus-junior-notepad";
-export { createNoSisyphusGptHook } from "./no-sisyphus-gpt";
-export { createNoHephaestusNonGptHook } from "./no-hephaestus-non-gpt";
-export { createTaskResumeInfoHook } from "./task-resume-info";
-export { createStartWorkHook } from "./start-work";
-export { createAtlasHook } from "./atlas";
-export { createDelegateTaskRetryHook } from "./delegate-task-retry";
-export { createQuestionLabelTruncatorHook } from "./question-label-truncator";
-
-// TDD Guard Hook - enforces Test-Driven Development for Tier 2/3 files
-export { createTddGuardHook, type TddGuardHookContext, type TddGuardHookOptions, type TddGuardConfig } from "./tdd-guard";
-
-// Debugging Injector Hook - injects systematic-debugging skill after >=2 fix failures
-export { createDebugInjectorHook, type DebugInjectorConfig } from "./debugging-injector";
-
-// Failure Counter Hook - tracks consecutive sisyphus_task failures and triggers responses
-export { createFailureCounterHook, type FailureCounterConfig } from "./failure-counter";
-
-// Skill Suggestion Hook - suggests relevant skills based on prompt keywords
-export { createSkillSuggestionHook } from "./skill-suggestion";
-
-// Skill Auto-Trigger Hook - dynamically suggests skills based on description keywords
-export { createSkillAutoTriggerHook } from "./skill-auto-trigger";
-
-// Planning Flow Guide Hook - guides Metis → Prometheus → Momus planning flow
-export { createPlanningFlowGuideHook } from "./planning-flow-guide";
-
-// Plan Reorganizer Hook - moves completed phases to bottom of tasks.md
-export { createPlanReorganizerHook } from "./plan-reorganizer";
-
-// Plan Update Reminder Hook - reminds to update tasks.md after code changes
-export { createPlanUpdateReminderHook } from "./plan-update-reminder";
-
-// Plan Attention Refresher Hook - refreshes tasks.md into attention window
-export { createPlanAttentionRefresherHook } from "./plan-attention-refresher";
-
-// Subagent Verification Hook - reminds orchestrator to verify delegated work
-export { createSubagentVerificationHook } from "./subagent-verification";
-
-// Background Compaction Hook - not yet implemented
-// export { createBackgroundCompactionHook } from "./background-compaction";
-
-// Codebase Assessment Hook - evaluates project state at session start
-export { createCodebaseAssessmentHook } from "./codebase-assessment";
-
-// LSP Diagnostics Enforcer Hook - ensures diagnostics run before task completion
-export { createLspDiagnosticsEnforcerHook } from "./lsp-diagnostics-enforcer";
-
-// Phase Flow Enforcer Hook - warns when boulder phase transitions are skipped
-export { createPhaseFlowEnforcerHook } from "./phase-flow-enforcer";
-
-// mdsel Reminder Hook - reminds to use mdsel for large markdown files
-export { createMdselReminderHook } from "./mdsel-reminder";
-
-// mdsel Enforcer Hook - blocks reading large .md files, enforces mdsel usage
-export { createMdselEnforcerHook } from "./mdsel-enforcer";
-
-export { createObservationRecorderHook } from "./observation-recorder";
-export { createObserverDetectorHook } from "./observer-detector";
-export { createInstinctTriggerHook } from "./instinct-trigger";
-export { createInstinctLearnerHook } from "./instinct-learner";
-export { createPatternExtractionHook } from "./pattern-extraction";
-export { createNotepadWriteGuardHook } from "./notepad-write-guard";
-export { createObservationWriteGuardHook } from "./observation-write-guard";
-export { createSecretScannerHook } from "./secret-scanner";
-export { createSkillAutoInjectorHook } from "./skill-auto-injector";
-export { createBehaviorAnchorHook } from "./behavior-anchor";
-export { createVerbosityControllerHook } from "./verbosity-controller";
-export { createPhaseRulesInjectorHook } from "./phase-rules-injector";
-export { createKnowledgeInjectionHook } from "./knowledge-injection";
-export { createProjectContextInjectorHook } from "./project-context-injector";
-export { createPrContextInjectorHook } from "./pr-context-injector";
- 
-// Upstream hooks
-export { createStopContinuationGuardHook, type StopContinuationGuard } from "./stop-continuation-guard";
-export { createCompactionContextInjector } from "./compaction-context-injector/hook";
-export type { SummarizeContext } from "./compaction-context-injector";
-export { createCompactionTodoPreserverHook } from "./compaction-todo-preserver";
-export { createUnstableAgentBabysitterHook } from "./unstable-agent-babysitter";
-export { createPreemptiveCompactionHook } from "./preemptive-compaction";
-export { createRuntimeFallbackHook, type RuntimeFallbackHook, type RuntimeFallbackOptions } from "./runtime-fallback";
-export { createTasksTodowriteDisablerHook } from "./tasks-todowrite-disabler";
-export { createWriteExistingFileGuardHook } from "./write-existing-file-guard";
-export { createTasksMdCreationGuardHook } from "./tasks-md-creation-guard";
+export { createEmptyTaskResponseDetectorHook } from "./empty-task-response-detector";
+export {
+	createFailureCounterHook,
+	type FailureCounterConfig,
+} from "./failure-counter";
 export { createHashlineReadEnhancerHook } from "./hashline-read-enhancer";
-export { createJsonErrorRecoveryHook } from "./json-error-recovery";
-export { createReadImageResizerHook } from "./read-image-resizer";
+export { createInstinctLearnerHook } from "./instinct-learner";
+export { createInstinctTriggerHook } from "./instinct-trigger";
+export { createInteractiveBashSessionHook } from "./interactive-bash-session";
+export {
+	createJsonErrorRecoveryHook,
+	JSON_ERROR_PATTERNS,
+	JSON_ERROR_REMINDER,
+	JSON_ERROR_TOOL_EXCLUDE_LIST,
+} from "./json-error-recovery";
+export { createKeywordDetectorHook } from "./keyword-detector";
+export { createKnowledgeInjectionHook } from "./knowledge-injection";
+export { createLspDiagnosticsEnforcerHook } from "./lsp-diagnostics-enforcer";
+export { createMdselEnforcerHook } from "./mdsel-enforcer";
+export { createMdselReminderHook } from "./mdsel-reminder";
+export {
+	clearPendingModelFallback,
+	createModelFallbackHook,
+	type ModelFallbackState,
+	setPendingModelFallback,
+} from "./model-fallback/hook";
+export { createNoHephaestusNonGptHook } from "./no-hephaestus-non-gpt";
+export { createNoSisyphusGptHook } from "./no-sisyphus-gpt";
+export { createNonInteractiveEnvHook } from "./non-interactive-env";
+export { createNotepadWriteGuardHook } from "./notepad-write-guard";
+export { createObservationRecorderHook } from "./observation-recorder";
+export { createObservationWriteGuardHook } from "./observation-write-guard";
+export { createObserverDetectorHook } from "./observer-detector";
+export { createPatternExtractionHook } from "./pattern-extraction";
+export { createPhaseFlowEnforcerHook } from "./phase-flow-enforcer";
+export { createPhaseRulesInjectorHook } from "./phase-rules-injector";
+export { createPlanAttentionRefresherHook } from "./plan-attention-refresher";
+export { createPlanReorganizerHook } from "./plan-reorganizer";
+export { createPlanUpdateReminderHook } from "./plan-update-reminder";
+export { createPlanningFlowGuideHook } from "./planning-flow-guide";
+export { createPrContextInjectorHook } from "./pr-context-injector";
 export { createCommitSizeChecker } from "./pre-tool-use/commit-size-checker";
+export { createPreemptiveCompactionHook } from "./preemptive-compaction";
+export { createProjectContextInjectorHook } from "./project-context-injector";
+export { createPrometheusMdOnlyHook } from "./prometheus-md-only";
+export { createQuestionLabelTruncatorHook } from "./question-label-truncator";
+export { createRalphLoopHook, type RalphLoopHook } from "./ralph-loop";
+export { createReadImageResizerHook } from "./read-image-resizer";
+export { createRulesInjectorHook } from "./rules-injector";
+export {
+	createRuntimeFallbackHook,
+	type RuntimeFallbackHook,
+	type RuntimeFallbackOptions,
+} from "./runtime-fallback";
+export { createSecretScannerHook } from "./secret-scanner";
+export { createSessionNotification } from "./session-notification";
+export {
+	buildWindowsToastScript,
+	escapeAppleScriptText,
+	escapePowerShellSingleQuotedText,
+} from "./session-notification-formatting";
+export { createIdleNotificationScheduler } from "./session-notification-scheduler";
+export {
+	detectPlatform,
+	getDefaultSoundPath,
+	playSessionNotificationSound,
+	sendSessionNotification,
+} from "./session-notification-sender";
+export {
+	createSessionRecoveryHook,
+	type SessionRecoveryHook,
+	type SessionRecoveryOptions,
+} from "./session-recovery";
+export { hasIncompleteTodos } from "./session-todo-status";
+export { createSisyphusJuniorNotepadHook } from "./sisyphus-junior-notepad";
+export { createSkillAutoInjectorHook } from "./skill-auto-injector";
+export { createSkillAutoTriggerHook } from "./skill-auto-trigger";
+export { createSkillSuggestionHook } from "./skill-suggestion";
+export { createStartWorkHook } from "./start-work";
 export { createFinalAuditHook } from "./stop/final-audit-hook";
+export {
+	createStopContinuationGuardHook,
+	type StopContinuationGuard,
+} from "./stop-continuation-guard";
+export { createSubagentVerificationHook } from "./subagent-verification";
+export { createTaskResumeInfoHook } from "./task-resume-info";
+export { createTasksMdCreationGuardHook } from "./tasks-md-creation-guard";
+export { createTasksTodowriteDisablerHook } from "./tasks-todowrite-disabler";
+export {
+	createTddGuardHook,
+	type TddGuardConfig,
+	type TddGuardHookContext,
+	type TddGuardHookOptions,
+} from "./tdd-guard";
+export { createThinkModeHook } from "./think-mode";
+export { createThinkingBlockValidatorHook } from "./thinking-block-validator";
+export {
+	createTodoContinuationEnforcer,
+	type TodoContinuationEnforcer,
+} from "./todo-continuation-enforcer";
+export { createTodoDescriptionOverrideHook } from "./todo-description-override";
+export { createToolOutputTruncatorHook } from "./tool-output-truncator";
+export { createUnstableAgentBabysitterHook } from "./unstable-agent-babysitter";
+export { createVerbosityControllerHook } from "./verbosity-controller";
+export { createWriteExistingFileGuardHook } from "./write-existing-file-guard";

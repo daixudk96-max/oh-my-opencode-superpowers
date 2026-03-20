@@ -1,13 +1,6 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test"
-import { mkdirSync, rmSync, writeFileSync } from "node:fs"
-import { join } from "node:path"
-import { tmpdir } from "node:os"
-
-// Mock dependencies before importing
-const mockInjectHookMessage = mock(() => true)
-mock.module("../../features/hook-message-injector", () => ({
-  injectHookMessage: mockInjectHookMessage,
-}))
+import { describe, expect, it, mock } from "bun:test"
+import type { BackgroundManager } from "../../features/background-agent"
+import { TaskHistory } from "../../features/background-agent/task-history"
 
 mock.module("../../shared/logger", () => ({
   log: () => {},
@@ -27,118 +20,266 @@ mock.module("../../shared/system-directive", () => ({
   },
 }))
 
-import { createCompactionContextInjector } from "./index"
-import type { SummarizeContext } from "./index"
+import { createCompactionContextInjector } from "./hook"
+
+function createMockBackgroundManager(taskHistory = new TaskHistory()): BackgroundManager {
+  return { taskHistory } as BackgroundManager
+}
+
+function createMockContext(
+  messageResponses: Array<Array<{ info?: Record<string, unknown> }>>,
+  promptAsyncMock = mock(async () => ({})),
+) {
+  let callIndex = 0
+
+  return {
+    client: {
+      session: {
+        messages: mock(async () => {
+          const response = messageResponses[Math.min(callIndex, messageResponses.length - 1)] ?? []
+          callIndex += 1
+          return { data: response }
+        }),
+        promptAsync: promptAsyncMock,
+      },
+    },
+    directory: "/tmp/test",
+  }
+}
 
 describe("createCompactionContextInjector", () => {
-  beforeEach(() => {
-    mockInjectHookMessage.mockClear()
+  describe("Agent Verification State preservation", () => {
+    it("includes Agent Verification State section in compaction prompt", () => {
+      //#given
+      const injector = createCompactionContextInjector()
+
+      //#when
+      const prompt = injector.inject()
+
+      //#then
+      expect(prompt).toContain("Agent Verification State")
+      expect(prompt).toContain("Current Agent")
+      expect(prompt).toContain("Verification Progress")
+    })
+
+    it("includes reviewer continuity fields in compaction prompt", () => {
+      //#given
+      const injector = createCompactionContextInjector()
+
+      //#when
+      const prompt = injector.inject()
+
+      //#then
+      expect(prompt).toContain("Previous Rejections")
+      expect(prompt).toContain("Acceptance Status")
+      expect(prompt).toContain("reviewer agents")
+    })
+
+    it("preserves file verification progress in compaction prompt", () => {
+      //#given
+      const injector = createCompactionContextInjector()
+
+      //#when
+      const prompt = injector.inject()
+
+      //#then
+      expect(prompt).toContain("Pending Verifications")
+      expect(prompt).toContain("Files already verified")
+    })
+
+    it("includes explicit constraints guidance in compaction prompt", () => {
+      //#given
+      const injector = createCompactionContextInjector()
+
+      //#when
+      const prompt = injector.inject()
+
+      //#then
+      expect(prompt).toContain("Explicit Constraints (Verbatim Only)")
+      expect(prompt).toContain("Do NOT invent")
+      expect(prompt).toContain("Quote constraints verbatim")
+    })
   })
 
-  describe("Agent Verification State preservation", () => {
-    it("includes Agent Verification State section in compaction prompt", async () => {
-      // given
+  describe("Delegated Agent Sessions", () => {
+    it("includes delegated sessions section in compaction prompt", () => {
+      //#given
       const injector = createCompactionContextInjector()
-      const context: SummarizeContext = {
-        sessionID: "test-session",
-        providerID: "anthropic",
-        modelID: "claude-sonnet-4-5",
-        usageRatio: 0.85,
-        directory: "/test/dir",
-      }
 
-      // when
-      await injector(context)
+      //#when
+      const prompt = injector.inject()
 
-      // then
-      expect(mockInjectHookMessage).toHaveBeenCalledTimes(1)
-      const calls = mockInjectHookMessage.mock.calls as unknown as [string, string, unknown][]
-      const injectedPrompt = calls[0]?.[1] ?? ""
-      expect(injectedPrompt).toContain("Agent Verification State")
-      expect(injectedPrompt).toContain("Current Agent")
-      expect(injectedPrompt).toContain("Verification Progress")
+      //#then
+      expect(prompt).toContain("Delegated Agent Sessions")
+      expect(prompt).toContain("RESUME, DON'T RESTART")
+      expect(prompt).toContain("session_id")
     })
 
-    it("includes Momus-specific context for reviewer agents", async () => {
-      // given
-      const injector = createCompactionContextInjector()
-      const context: SummarizeContext = {
-        sessionID: "test-session",
-        providerID: "anthropic",
-        modelID: "claude-sonnet-4-5",
-        usageRatio: 0.9,
-        directory: "/test/dir",
-      }
+    it("injects actual task history when backgroundManager and sessionID provided", async () => {
+      //#given
+      const mockManager = createMockBackgroundManager()
+      mockManager.taskHistory.record("ses_parent", { id: "t1", sessionID: "ses_child", agent: "explore", description: "Find patterns", status: "completed", category: "quick" })
+      const injector = createCompactionContextInjector({ backgroundManager: mockManager })
 
-      // when
-      await injector(context)
+      //#when
+      const prompt = injector.inject("ses_parent")
 
-      // then
-      const calls = mockInjectHookMessage.mock.calls as unknown as [string, string, unknown][]
-      const injectedPrompt = calls[0]?.[1] ?? ""
-      expect(injectedPrompt).toContain("Previous Rejections")
-      expect(injectedPrompt).toContain("Acceptance Status")
-      expect(injectedPrompt).toContain("reviewer agents")
+      //#then
+      expect(prompt).toContain("Active/Recent Delegated Sessions")
+      expect(prompt).toContain("**explore**")
+      expect(prompt).toContain("[quick]")
+      expect(prompt).toContain("`ses_child`")
     })
 
-    it("preserves file verification progress in compaction prompt", async () => {
-      // given
-      const injector = createCompactionContextInjector()
-      const context: SummarizeContext = {
-        sessionID: "test-session",
-        providerID: "anthropic",
-        modelID: "claude-sonnet-4-5",
-        usageRatio: 0.95,
-        directory: "/test/dir",
-      }
+    it("does not inject task history section when no entries exist", async () => {
+      //#given
+      const mockManager = createMockBackgroundManager()
+      const injector = createCompactionContextInjector({ backgroundManager: mockManager })
 
-      // when
-      await injector(context)
+      //#when
+      const prompt = injector.inject("ses_empty")
 
-      // then
-      const calls = mockInjectHookMessage.mock.calls as unknown as [string, string, unknown][]
-      const injectedPrompt = calls[0]?.[1] ?? ""
-      expect(injectedPrompt).toContain("Pending Verifications")
-      expect(injectedPrompt).toContain("Files already verified")
+      //#then
+      expect(prompt).not.toContain("Active/Recent Delegated Sessions")
     })
+  })
 
-    it("injects known failed patterns from anti-pattern tracker storage", async () => {
-      // given
-      const tempDir = join(tmpdir(), `compaction-anti-pattern-${Date.now()}`)
-      const trackerDir = join(tempDir, ".opencode")
-      mkdirSync(trackerDir, { recursive: true })
-      writeFileSync(
-        join(trackerDir, "anti-patterns.json"),
-        JSON.stringify([
-          {
-            pattern: "retry same patch",
-            reason: "causes repeated failure",
-            timestamp: Date.now(),
-            count: 2,
-          },
-        ])
+  describe("agent checkpoint recovery", () => {
+    it("re-injects checkpointed agent config after compaction when latest agent is lost", async () => {
+      //#given
+      const promptAsyncMock = mock(async () => ({}))
+      const ctx = createMockContext(
+        [
+          [
+            {
+              info: {
+                role: "user",
+                agent: "atlas",
+                model: { providerID: "openai", modelID: "gpt-5" },
+                tools: { bash: "allow" },
+              },
+            },
+          ],
+          [
+            {
+              info: {
+                role: "user",
+                agent: "compaction",
+                model: { providerID: "anthropic", modelID: "claude-opus-4-1" },
+              },
+            },
+          ],
+          [
+            {
+              info: {
+                role: "user",
+                agent: "atlas",
+                model: { providerID: "openai", modelID: "gpt-5" },
+              },
+            },
+          ],
+        ],
+        promptAsyncMock,
       )
+      const injector = createCompactionContextInjector({ ctx })
 
-      const injector = createCompactionContextInjector()
-      const context: SummarizeContext = {
-        sessionID: "test-session",
-        providerID: "anthropic",
-        modelID: "claude-sonnet-4-5",
-        usageRatio: 0.95,
-        directory: tempDir,
+      //#when
+      await injector.capture("ses_checkpoint")
+      await injector.event({
+        event: { type: "session.compacted", properties: { sessionID: "ses_checkpoint" } },
+      })
+
+      //#then
+      expect(promptAsyncMock).toHaveBeenCalledWith({
+        path: { id: "ses_checkpoint" },
+        body: {
+          noReply: true,
+          agent: "atlas",
+          model: { providerID: "openai", modelID: "gpt-5" },
+          tools: { bash: true },
+          parts: [
+            {
+              type: "text",
+              text: expect.stringContaining("restore checkpointed session agent configuration"),
+            },
+          ],
+        },
+        query: { directory: "/tmp/test" },
+      })
+    })
+
+    it("recovers after five consecutive assistant messages with no text", async () => {
+      //#given
+      const promptAsyncMock = mock(async () => ({}))
+      const ctx = createMockContext(
+        [
+          [
+            {
+              info: {
+                role: "user",
+                agent: "atlas",
+                model: { providerID: "openai", modelID: "gpt-5" },
+              },
+            },
+          ],
+          [
+            {
+              info: {
+                role: "user",
+                agent: "atlas",
+                model: { providerID: "openai", modelID: "gpt-5" },
+              },
+            },
+          ],
+          [
+            {
+              info: {
+                role: "user",
+                agent: "atlas",
+                model: { providerID: "openai", modelID: "gpt-5" },
+              },
+            },
+          ],
+        ],
+        promptAsyncMock,
+      )
+      const injector = createCompactionContextInjector({ ctx })
+
+      await injector.capture("ses_no_text_tail")
+      await injector.event({
+        event: { type: "session.compacted", properties: { sessionID: "ses_no_text_tail" } },
+      })
+
+      //#when
+      for (let index = 1; index <= 5; index++) {
+        await injector.event({
+          event: {
+            type: "message.updated",
+            properties: {
+              info: {
+                id: `msg_${index}`,
+                role: "assistant",
+                sessionID: "ses_no_text_tail",
+              },
+            },
+          },
+        })
       }
+      await injector.event({
+        event: { type: "session.idle", properties: { sessionID: "ses_no_text_tail" } },
+      })
 
-      // when
-      await injector(context)
-
-      // then
-      const calls = mockInjectHookMessage.mock.calls as unknown as [string, string, unknown][]
-      const injectedPrompt = calls[0]?.[1] ?? ""
-      expect(injectedPrompt).toContain("Known Failed Patterns")
-      expect(injectedPrompt).toContain("retry same patch")
-      expect(injectedPrompt).toContain("causes repeated failure")
-
-      rmSync(tempDir, { recursive: true, force: true })
+      //#then
+      expect(promptAsyncMock).toHaveBeenCalledTimes(1)
+      expect(promptAsyncMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: { id: "ses_no_text_tail" },
+          body: expect.objectContaining({
+            noReply: true,
+            agent: "atlas",
+          }),
+        }),
+      )
     })
   })
 })

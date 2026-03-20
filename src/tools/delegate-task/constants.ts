@@ -62,6 +62,68 @@ After completing implementation, perform a focused self-review:
 export const VISUAL_CATEGORY_PROMPT_APPEND = `<Category_Context>
 You are working on VISUAL/UI tasks.
 
+<DESIGN_SYSTEM_WORKFLOW_MANDATE>
+## YOU ARE A VISUAL ENGINEER. FOLLOW THIS WORKFLOW OR YOUR OUTPUT IS REJECTED.
+
+YOUR FAILURE MODE: you skip design system analysis and jump straight to hardcoded UI. That produces inconsistent garbage. This stops now.
+
+Every visual task follows this workflow:
+
+### PHASE 1: ANALYZE THE DESIGN SYSTEM
+
+Before writing any CSS, HTML, JSX, Svelte, or component code, you MUST:
+
+1. Search for the design system:
+   - Design tokens: colors, spacing, typography, shadows, border radii
+   - Theme files: CSS variables, Tailwind config, theme files, design tokens
+   - Shared/base components: Button, Card, Input, Layout primitives
+   - Existing UI patterns: page structure, spacing grid, color usage
+
+2. Read at minimum 5-10 existing UI components. Understand:
+   - Naming conventions
+   - Spacing system
+   - Color usage
+   - Typography scale
+   - Component composition patterns
+
+Do not proceed until you can answer all of these. If you cannot, explore more.
+
+### PHASE 2: IF NO DESIGN SYSTEM EXISTS, BUILD ONE FIRST
+
+If the repo has no coherent system:
+1. Stop and extract what exists
+2. Create a minimal design system first:
+   - Color palette
+   - Typography scale
+   - Spacing scale
+   - Border radii, shadows, transitions
+   - Component primitives
+3. Then build the requested UI on top of it
+
+### PHASE 3: BUILD WITH THE SYSTEM
+
+| Element | CORRECT | WRONG |
+|---------|---------|-------|
+| Color | Design token / CSS variable | Hardcoded hex or rgb |
+| Spacing | System value | Arbitrary px values |
+| Typography | Scale value | Ad-hoc font sizes |
+| Component | Extend existing primitives | One-off div soup |
+| Border radius | System token | Random radius |
+
+If the design needs something outside the system, extend the system first, then use it. Never one-off override.
+
+### PHASE 4: VERIFY BEFORE CLAIMING DONE
+
+- Does every color reference a token or CSS variable?
+- Does every spacing use the system scale?
+- Does every component follow existing composition patterns?
+- Would a designer see consistency across old and new UI?
+- Are there zero hardcoded magic numbers for visual properties?
+
+If any answer is no, fix it.
+</DESIGN_SYSTEM_WORKFLOW_MANDATE>
+
+<DESIGN_QUALITY>
 Design-first mindset:
 - Bold aesthetic choices over safe defaults
 - Unexpected layouts, asymmetry, grid-breaking elements
@@ -71,6 +133,7 @@ Design-first mindset:
 - Atmosphere: gradient meshes, noise textures, layered transparencies
 
 AVOID: Generic fonts, purple gradients on white, predictable layouts, cookie-cutter patterns.
+</DESIGN_QUALITY>
 </Category_Context>`
 
 export const ULTRABRAIN_CATEGORY_PROMPT_APPEND = `<Category_Context>
@@ -128,9 +191,9 @@ Approach:
 </Category_Context>
 
 <Caller_Warning>
-THIS CATEGORY USES A LESS CAPABLE MODEL (claude-haiku-4-5).
+THIS CATEGORY USES A SMALLER/FASTER MODEL (gpt-5.4-mini).
 
-The model executing this task has LIMITED reasoning capacity. Your prompt MUST be:
+The model executing this task is optimized for speed over depth. Your prompt MUST be:
 
 **EXHAUSTIVELY EXPLICIT** - Leave NOTHING to interpretation:
 1. MUST DO: List every required action as atomic, numbered steps
@@ -138,9 +201,9 @@ The model executing this task has LIMITED reasoning capacity. Your prompt MUST b
 3. EXPECTED OUTPUT: Describe exact success criteria with concrete examples
 
 **WHY THIS MATTERS:**
-- Less capable models WILL deviate without explicit guardrails
-- Vague instructions → unpredictable results
-- Implicit expectations → missed requirements
+- Smaller models benefit from explicit guardrails
+- Vague instructions may lead to unpredictable results
+- Implicit expectations may be missed
 
 **PROMPT STRUCTURE (MANDATORY):**
 \`\`\`
@@ -270,7 +333,7 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfigWithDefaultSkills>
     defaultSkills: ["frontend-ui-ux", "playwright"],
   },
   ultrabrain: {
-    model: "openai/gpt-5.3-codex",
+    model: "openai/gpt-5.4",
     variant: "xhigh",
     defaultSkills: ["systematic-debugging"],
   },
@@ -285,7 +348,7 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfigWithDefaultSkills>
     defaultSkills: [],
   },
   quick: {
-    model: "anthropic/claude-haiku-4-5",
+    model: "openai/gpt-5.4-mini",
     defaultSkills: ["git-master"],
   },
   "unspecified-low": {

@@ -51,14 +51,20 @@ export interface SystemInfo {
 }
 
 export interface ToolsSummary {
-  lspInstalled: number
-  lspTotal: number
+  lspServers: Array<{ id: string; extensions: string[] }>
   astGrepCli: boolean
   astGrepNapi: boolean
   commentChecker: boolean
   ghCli: { installed: boolean; authenticated: boolean; username: string | null }
   mcpBuiltin: string[]
   mcpUser: string[]
+}
+
+export interface LspServerInfo {
+  id: string
+  installed: boolean
+  extensions: string[]
+  source: "builtin" | "user"
 }
 
 export interface DoctorSummary {
@@ -128,13 +134,6 @@ export interface DependencyInfo {
   version: string | null
   path: string | null
   installHint?: string
-}
-
-export interface LspServerInfo {
-  id: string
-  installed: boolean
-  extensions: string[]
-  source: "builtin" | "config" | "plugin"
 }
 
 export interface McpServerInfo {

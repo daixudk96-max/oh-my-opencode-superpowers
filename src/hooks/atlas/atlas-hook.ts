@@ -4,11 +4,12 @@ import { createContinuationMaxRetriesWrapper } from "../../downstream/patches/co
 import { createAtlasEventHandler } from "./event-handler"
 import { createToolExecuteAfterHandler } from "./tool-execute-after"
 import { createToolExecuteBeforeHandler } from "./tool-execute-before"
-import type { AtlasHookOptions, SessionState } from "./types"
+import type { AtlasHookOptions, PendingTaskRef, SessionState } from "./types"
 
 export function createAtlasHook(ctx: PluginInput, options?: AtlasHookOptions) {
   const sessions = new Map<string, SessionState>()
   const pendingFilePaths = new Map<string, string>()
+  const pendingTaskRefs = new Map<string, PendingTaskRef>()
   const autoCommit = options?.autoCommit ?? true
 
   function getState(sessionID: string): SessionState {
@@ -32,7 +33,7 @@ export function createAtlasHook(ctx: PluginInput, options?: AtlasHookOptions) {
 
   return {
     handler: wrappedEventHandler,
-    "tool.execute.before": createToolExecuteBeforeHandler({ ctx, pendingFilePaths }),
-    "tool.execute.after": createToolExecuteAfterHandler({ ctx, pendingFilePaths, autoCommit }),
+    "tool.execute.before": createToolExecuteBeforeHandler({ ctx, pendingFilePaths, pendingTaskRefs }),
+    "tool.execute.after": createToolExecuteAfterHandler({ ctx, pendingFilePaths, pendingTaskRefs, autoCommit, getState }),
   }
 }

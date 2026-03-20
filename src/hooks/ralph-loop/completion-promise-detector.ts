@@ -1,15 +1,23 @@
-import type { PluginInput } from "@opencode-ai/plugin"
 import { existsSync, readFileSync } from "node:fs"
+import type { PluginInput } from "@opencode-ai/plugin"
 import { log } from "../../shared/logger"
 import { HOOK_NAME } from "./constants"
 import { withTimeout } from "./with-timeout"
 
+interface OpenCodeSessionMessagePart {
+	type?: string
+	text?: string
+	content?: unknown
+	output?: unknown
+}
+
 interface OpenCodeSessionMessage {
 	info?: { role?: string }
-	parts?: Array<{ type: string; text?: string }>
+	parts?: OpenCodeSessionMessagePart[]
 }
 
 interface TranscriptEntry {
+	timestamp?: string
 	type?: string
 	content?: unknown
 	tool_output?: unknown
@@ -68,18 +76,38 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function getToolOutputTextCandidates(toolOutput: unknown): string[] {
 	if (typeof toolOutput === "string") return [toolOutput]
+	if (Array.isArray(toolOutput)) {
+		return toolOutput.flatMap((item) => getToolOutputTextCandidates(item))
+	}
 	if (!isRecord(toolOutput)) return []
 
 	const candidates: string[] = []
 	if (typeof toolOutput.output === "string") candidates.push(toolOutput.output)
 	if (typeof toolOutput.content === "string") candidates.push(toolOutput.content)
 	if (typeof toolOutput.text === "string") candidates.push(toolOutput.text)
+	if (Array.isArray(toolOutput.content)) {
+		candidates.push(...toolOutput.content.flatMap((item) => getToolOutputTextCandidates(item)))
+	}
+	return candidates
+}
+
+function isEntryBeforeStartedAt(entry: TranscriptEntry, startedAt?: string): boolean {
+	return Boolean(startedAt && entry.timestamp && entry.timestamp < startedAt)
+}
+
+function getSessionPartTextCandidates(part: OpenCodeSessionMessagePart): string[] {
+	const candidates: string[] = []
+	if (typeof part.text === "string") candidates.push(part.text)
+	if (part.type === "tool_result") {
+		candidates.push(...getToolOutputTextCandidates(part))
+	}
 	return candidates
 }
 
 export function detectCompletionInTranscript(
 	transcriptPath: string | undefined,
 	promise: string,
+	startedAt?: string,
 ): boolean {
 	if (!transcriptPath) return false
 
@@ -93,17 +121,17 @@ export function detectCompletionInTranscript(
 		for (const line of lines) {
 			try {
 				const entry = JSON.parse(line) as TranscriptEntry
+				if (entry.type === "user" || entry.type === "tool_use") continue
+				if (isEntryBeforeStartedAt(entry, startedAt)) continue
 
-				if (entry.type !== "user" && entry.type !== "tool_use") {
-					if (entry.type === "assistant") {
-						if (typeof entry.content === "string" && isCompletionText(entry.content, pattern)) {
-							return true
-						}
-					} else if (entry.type === "tool_result") {
-						const candidates = getToolOutputTextCandidates(entry.tool_output)
-						if (candidates.some((candidate) => isCompletionText(candidate, pattern))) {
-							return true
-						}
+				if (entry.type === "assistant") {
+					if (typeof entry.content === "string" && isCompletionText(entry.content, pattern)) {
+						return true
+					}
+				} else if (entry.type === "tool_result") {
+					const candidates = getToolOutputTextCandidates(entry.tool_output)
+					if (candidates.some((candidate) => isCompletionText(candidate, pattern))) {
+						return true
 					}
 				}
 			} catch {
@@ -147,11 +175,15 @@ export async function detectCompletionInSessionMessages(
 				: []
 
 		const scopedMessages =
-			typeof options.sinceMessageIndex === "number" && options.sinceMessageIndex >= 0 && options.sinceMessageIndex < messageArray.length
+			typeof options.sinceMessageIndex === "number" &&
+			options.sinceMessageIndex >= 0 &&
+			options.sinceMessageIndex < messageArray.length
 				? messageArray.slice(options.sinceMessageIndex)
 				: messageArray
 
-		const assistantMessages = (scopedMessages as OpenCodeSessionMessage[]).filter((message) => message.info?.role === "assistant")
+		const assistantMessages = (scopedMessages as OpenCodeSessionMessage[]).filter(
+			(message) => message.info?.role === "assistant",
+		)
 		if (assistantMessages.length === 0) return false
 
 		const pattern = buildPromisePattern(options.promise)
@@ -159,11 +191,10 @@ export async function detectCompletionInSessionMessages(
 			const assistant = assistantMessages[index]
 			if (!assistant.parts) continue
 
-			let responseText = ""
-			for (const part of assistant.parts) {
-				if (part.type !== "text") continue
-				responseText += `${responseText ? "\n" : ""}${part.text ?? ""}`
-			}
+			const responseText = assistant.parts
+				.flatMap((part) => getSessionPartTextCandidates(part))
+				.filter((text) => text.length > 0)
+				.join("\n")
 
 			if (isCompletionText(responseText, pattern)) {
 				return true

@@ -121,7 +121,7 @@ jobs:
   publish-main:
     runs-on: ubuntu-latest
     needs: [test, typecheck]
-    if: github.repository == 'code-yeongyu/oh-my-opencode'
+    if: github.repository == 'code-yeongyu/oh-my-openagent'
     outputs:
       version: ${{ steps.version.outputs.version }}
       dist_tag: ${{ steps.version.outputs.dist_tag }}
@@ -204,7 +204,7 @@ jobs:
           bunx tsc --emitDeclarationOnly
           bun run build:schema
 
-      - name: Publish main package
+      - name: Publish oh-my-opencode
         if: steps.check.outputs.skip != 'true'
         run: |
           TAG_ARG=""
@@ -213,20 +213,50 @@ jobs:
           fi
           npm publish --access public --provenance $TAG_ARG
         env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
 
-      - name: Git commit and tag
-        if: steps.check.outputs.skip != 'true'
+      - name: Check if oh-my-openagent already published
+        id: check-openagent
         run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          git add package.json assets/oh-my-opencode.schema.json packages/*/package.json || true
-          git diff --cached --quiet || git commit -m "release: v${{ steps.version.outputs.version }}"
-          git tag -f "v${{ steps.version.outputs.version }}"
-          git push origin --tags --force
-          git push origin HEAD || echo "Branch push failed (non-critical)"
+          VERSION="${{ steps.version.outputs.version }}"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-openagent/${VERSION}")
+          if [ "$STATUS" = "200" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "✓ oh-my-openagent@${VERSION} already published"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish oh-my-openagent
+        if: steps.check-openagent.outputs.skip != 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Update package name, version, and optionalDependencies for oh-my-openagent
+          jq --arg v "$VERSION" '
+            .name = "oh-my-openagent" |
+            .version = $v |
+            .optionalDependencies = (
+              .optionalDependencies | to_entries |
+              map(.key = (.key | sub("^oh-my-opencode-"; "oh-my-openagent-")) | .value = $v) |
+              from_entries
+            )
+          ' package.json > tmp.json && mv tmp.json package.json
+          
+          TAG_ARG=""
+          if [ -n "${{ steps.version.outputs.dist_tag }}" ]; then
+            TAG_ARG="--tag ${{ steps.version.outputs.dist_tag }}"
+          fi
+          npm publish --access public --provenance $TAG_ARG || echo "::warning::oh-my-openagent publish failed"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
+      - name: Restore package.json
+        if: steps.check-openagent.outputs.skip != 'true'
+        run: |
+          git checkout -- package.json
 
   trigger-platform:
     runs-on: ubuntu-latest

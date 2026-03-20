@@ -1,32 +1,34 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
-import type { BuiltinAgentName, AgentOverrides, AgentFactory, AgentPromptMetadata } from "./types"
-import type { CategoriesConfig, GitMasterConfig } from "../config/schema"
+
+import type { BrowserAutomationProvider, CategoriesConfig, GitMasterConfig } from "../config/schema"
 import type { LoadedSkill } from "../features/opencode-skill-loader/types"
-import type { BrowserAutomationProvider } from "../config/schema"
-import { createSisyphusAgent } from "./sisyphus"
-import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
-import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
-import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
-import { createMultimodalLookerAgent, MULTIMODAL_LOOKER_PROMPT_METADATA } from "./multimodal-looker"
-import { createMetisAgent, metisPromptMetadata } from "./metis"
-import { createAtlasAgent, atlasPromptMetadata } from "./atlas"
-import { createMomusAgent, momusPromptMetadata } from "./momus"
-import { createHephaestusAgent } from "./hephaestus"
-import type { AvailableCategory } from "./dynamic-agent-prompt-builder"
+import { discoverDownstreamAgents } from "../downstream/auto-registry"
 import {
   fetchAvailableModels,
   readConnectedProvidersCache,
   readProviderModelsCache,
 } from "../shared"
-import { CATEGORY_DESCRIPTIONS } from "../tools/delegate-task/constants"
 import { mergeCategories } from "../shared/merge-categories"
+import { CATEGORY_DESCRIPTIONS } from "../tools/delegate-task/constants"
+
+import { atlasPromptMetadata, createAtlasAgent } from "./atlas"
 import { buildAvailableSkills } from "./builtin-agents/available-skills"
-import { collectPendingBuiltinAgents } from "./builtin-agents/general-agents"
-import { maybeCreateSisyphusConfig } from "./builtin-agents/sisyphus-agent"
-import { maybeCreateHephaestusConfig } from "./builtin-agents/hephaestus-agent"
 import { maybeCreateAtlasConfig } from "./builtin-agents/atlas-agent"
+import { collectPendingBuiltinAgents } from "./builtin-agents/general-agents"
+import { maybeCreateHephaestusConfig } from "./builtin-agents/hephaestus-agent"
+import { maybeCreateSisyphusConfig } from "./builtin-agents/sisyphus-agent"
 import { buildCustomAgentMetadata, parseRegisteredAgentSummaries } from "./custom-agent-summaries"
-import { discoverDownstreamAgents } from "../downstream/auto-registry"
+import type { AvailableCategory } from "./dynamic-agent-prompt-builder"
+import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
+import { createHephaestusAgent } from "./hephaestus"
+import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
+import { createMetisAgent, metisPromptMetadata } from "./metis"
+import { createMomusAgent, momusPromptMetadata } from "./momus"
+import { createMultimodalLookerAgent, MULTIMODAL_LOOKER_PROMPT_METADATA } from "./multimodal-looker"
+import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
+import { createSisyphusAgent } from "./sisyphus"
+import { createSisyphusJuniorAgentWithOverrides } from "./sisyphus-junior"
+import type { AgentFactory, AgentOverrides, AgentPromptMetadata, BuiltinAgentName } from "./types"
 
 type AgentSource = AgentFactory | AgentConfig
 
@@ -42,6 +44,7 @@ const agentSources: Record<string, AgentSource> = {
   // Note: Atlas is handled specially in createBuiltinAgents()
   // because it needs OrchestratorContext, not just a model string
   atlas: createAtlasAgent as AgentFactory,
+  "sisyphus-junior": createSisyphusJuniorAgentWithOverrides as unknown as AgentFactory,
 }
 
 /**
@@ -105,7 +108,8 @@ export async function createBuiltinAgents(
   const mergedAgentSources: Record<string, AgentSource> = { ...agentSources }
   const mergedAgentMetadata = {
     ...agentMetadata,
-  } as Partial<Record<BuiltinAgentName, AgentPromptMetadata>> & Record<string, AgentPromptMetadata>
+  } as Partial<Record<BuiltinAgentName, AgentPromptMetadata>> &
+    Record<string, AgentPromptMetadata | undefined>
 
   for (const manifest of downstreamAgentManifests) {
     const normalizedName = manifest.name.trim()
@@ -131,10 +135,10 @@ export async function createBuiltinAgents(
     browserProvider,
     uiSelectedModel,
     availableModels,
+    isFirstRunNoCache,
     disabledSkills,
     disableOmoEnv,
   })
-
   const registeredAgents = parseRegisteredAgentSummaries(customAgentSummaries)
   const builtinAgentNames = new Set(Object.keys(mergedAgentSources).map((name) => name.toLowerCase()))
   const disabledAgentNames = new Set(disabledAgents.map((name) => name.toLowerCase()))
@@ -169,7 +173,7 @@ export async function createBuiltinAgents(
     disableOmoEnv,
   })
   if (sisyphusConfig) {
-    result["sisyphus"] = sisyphusConfig
+    result.sisyphus = sisyphusConfig
   }
 
   const hephaestusConfig = maybeCreateHephaestusConfig({
@@ -187,7 +191,7 @@ export async function createBuiltinAgents(
     disableOmoEnv,
   })
   if (hephaestusConfig) {
-    result["hephaestus"] = hephaestusConfig
+    result.hephaestus = hephaestusConfig
   }
 
   // Add pending agents after sisyphus and hephaestus to maintain order
@@ -208,7 +212,7 @@ export async function createBuiltinAgents(
     userCategories: categories,
   })
   if (atlasConfig) {
-    result["atlas"] = atlasConfig
+    result.atlas = atlasConfig
   }
 
   return result

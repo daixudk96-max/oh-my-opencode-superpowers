@@ -1,16 +1,15 @@
 import type { HookName, OhMyOpenCodeConfig } from "../../config"
 import type { BackgroundManager } from "../../features/background-agent"
-import type { PluginContext } from "../types"
-
 import {
-  createTodoContinuationEnforcer,
-  createBackgroundNotificationHook,
-  createStopContinuationGuardHook,
-  createCompactionContextInjector,
-  createCompactionTodoPreserverHook,
   createAtlasHook,
+  createBackgroundNotificationHook,
+  createCompactionTodoPreserverHook,
+  createStopContinuationGuardHook,
+  createTodoContinuationEnforcer,
 } from "../../hooks"
+import { createCompactionContextInjector } from "../../hooks/compaction-context-injector/hook"
 import { safeCreateHook } from "../../shared/safe-create-hook"
+import type { PluginContext } from "../types"
 import { createUnstableAgentBabysitter } from "../unstable-agent-babysitter"
 
 export type ContinuationHooks = {
@@ -56,7 +55,8 @@ export function createContinuationHooks(args: {
     : null
 
   const compactionContextInjector = isHookEnabled("compaction-context-injector")
-    ? safeHook("compaction-context-injector", () => createCompactionContextInjector(backgroundManager))
+    ? safeHook("compaction-context-injector", () =>
+        createCompactionContextInjector({ ctx, backgroundManager }))
     : null
 
   const compactionTodoPreserver = isHookEnabled("compaction-todo-preserver")
@@ -65,7 +65,7 @@ export function createContinuationHooks(args: {
 
   const todoContinuationEnforcer = isHookEnabled("todo-continuation-enforcer")
     ? safeHook("todo-continuation-enforcer", () =>
-        createTodoContinuationEnforcer(ctx, {
+      createTodoContinuationEnforcer(ctx, {
           backgroundManager,
           isContinuationStopped: stopContinuationGuard?.isStopped,
         }))

@@ -1,17 +1,19 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
-import type { BuiltinAgentName, AgentOverrides, AgentPromptMetadata } from "../types"
-import type { CategoryConfig, GitMasterConfig } from "../../config/schema"
-import type { BrowserAutomationProvider } from "../../config/schema"
-import type { AvailableAgent } from "../dynamic-agent-prompt-builder"
+
+import type { BrowserAutomationProvider, CategoryConfig, GitMasterConfig } from "../../config/schema"
 import { AGENT_MODEL_REQUIREMENTS, isModelAvailable } from "../../shared"
 import { buildAgent, isFactory } from "../agent-builder"
+import type { AvailableAgent } from "../dynamic-agent-prompt-builder"
+import type { AgentOverrides, AgentPromptMetadata, BuiltinAgentName } from "../types"
+
 import { applyOverrides } from "./agent-overrides"
 import { applyEnvironmentContext } from "./environment-context"
-import { applyModelResolution } from "./model-resolution"
+import { applyModelResolution, getFirstFallbackModel } from "./model-resolution"
 
 export function collectPendingBuiltinAgents(input: {
   agentSources: Record<string, import("../agent-builder").AgentSource>
-  agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>>
+  agentMetadata: Partial<Record<BuiltinAgentName, AgentPromptMetadata>> &
+    Record<string, AgentPromptMetadata | undefined>
   disabledAgents: string[]
   agentOverrides: AgentOverrides
   directory?: string
@@ -21,6 +23,7 @@ export function collectPendingBuiltinAgents(input: {
   browserProvider?: BrowserAutomationProvider
   uiSelectedModel?: string
   availableModels: Set<string>
+  isFirstRunNoCache: boolean
   disabledSkills?: Set<string>
   useTaskSystem?: boolean
   disableOmoEnv?: boolean
@@ -37,6 +40,7 @@ export function collectPendingBuiltinAgents(input: {
     browserProvider,
     uiSelectedModel,
     availableModels,
+    isFirstRunNoCache,
     disabledSkills,
     disableOmoEnv = false,
   } = input
@@ -45,16 +49,16 @@ export function collectPendingBuiltinAgents(input: {
   const pendingAgentConfigs: Map<string, AgentConfig> = new Map()
 
   for (const [name, source] of Object.entries(agentSources)) {
-    const agentName = name as BuiltinAgentName
+    if (name === "sisyphus") continue
+    if (name === "hephaestus") continue
+    if (name === "atlas") continue
+    if (name === "sisyphus-junior") continue
+    if (disabledAgents.some((disabledAgent) => disabledAgent.toLowerCase() === name.toLowerCase())) continue
 
-    if (agentName === "sisyphus") continue
-    if (agentName === "hephaestus") continue
-    if (agentName === "atlas") continue
-    if (disabledAgents.some((name) => name.toLowerCase() === agentName.toLowerCase())) continue
-
-    const override = agentOverrides[agentName]
-      ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === agentName.toLowerCase())?.[1]
-    const requirement = AGENT_MODEL_REQUIREMENTS[agentName]
+    const builtinAgentName = name as BuiltinAgentName
+    const override = agentOverrides[builtinAgentName]
+      ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1]
+    const requirement = AGENT_MODEL_REQUIREMENTS[builtinAgentName]
 
     // Check if agent requires a specific model
     if (requirement?.requiresModel && availableModels) {
@@ -65,13 +69,16 @@ export function collectPendingBuiltinAgents(input: {
 
     const isPrimaryAgent = isFactory(source) && source.mode === "primary"
 
-    const resolution = applyModelResolution({
+    let resolution = applyModelResolution({
       uiSelectedModel: (isPrimaryAgent && !override?.model) ? uiSelectedModel : undefined,
       userModel: override?.model,
       requirement,
       availableModels,
       systemDefaultModel,
     })
+    if (!resolution && isFirstRunNoCache && !override?.model) {
+      resolution = getFirstFallbackModel(requirement)
+    }
     if (!resolution) continue
     const { model, variant: resolvedVariant } = resolution
 
@@ -82,7 +89,7 @@ export function collectPendingBuiltinAgents(input: {
       config = { ...config, variant: resolvedVariant }
     }
 
-    if (agentName === "librarian") {
+    if (name === "librarian") {
       config = applyEnvironmentContext(config, directory, { disableOmoEnv })
     }
 
@@ -91,10 +98,10 @@ export function collectPendingBuiltinAgents(input: {
     // Store for later - will be added after sisyphus and hephaestus
     pendingAgentConfigs.set(name, config)
 
-    const metadata = agentMetadata[agentName]
+    const metadata = agentMetadata[name]
     if (metadata) {
       availableAgents.push({
-        name: agentName,
+        name,
         description: config.description ?? "",
         metadata,
       })

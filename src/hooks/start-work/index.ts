@@ -9,18 +9,17 @@ import {
 } from "node:fs"
 import { basename, dirname, join } from "node:path"
 import type { PluginInput } from "@opencode-ai/plugin"
+import { LEGACY_PROMETHEUS_PLANS_DIR } from "../../features/boulder-state" // TDD-EXEMPT: path migration fix
 import { createStartWorkHook as createStartWorkHookUpstream } from "./start-work-hook"
-import { PROMETHEUS_PLANS_DIR, LEGACY_PROMETHEUS_PLANS_DIR } from "../../features/boulder-state" // TDD-EXEMPT: path migration fix
+
+export { type ParsedUserRequest, parseUserRequest } from "./parse-user-request"
+export { HOOK_NAME } from "./start-work-hook"
+export { detectWorktreePath, listWorktrees, parseWorktreeListPorcelain } from "./worktree-detector"
 
 const ARGUMENT_PLACEHOLDER = "$ARGUMENTS"
 const USER_MESSAGE_PLACEHOLDER = "$" + "{user_message}"
 const PRIMARY_PLANS_DIR = "changes"
 const TASKS_FILE = "tasks.md"
-
-export type { ParsedUserRequest } from "./parse-user-request"
-export { parseUserRequest } from "./parse-user-request"
-export { HOOK_NAME } from "./start-work-hook"
-export { detectWorktreePath } from "./worktree-detector"
 
 interface StartWorkHookInput {
   sessionID: string

@@ -1,4 +1,5 @@
 import type { FallbackEntry } from "../../shared/model-requirements"
+import type { SessionPermissionRule } from "../../shared/question-denied-session-permission"
 
 export type BackgroundTaskStatus =
   | "pending"
@@ -8,9 +9,17 @@ export type BackgroundTaskStatus =
   | "cancelled"
   | "interrupt"
 
+export interface ToolCallWindow {
+  lastSignature: string
+  consecutiveCount: number
+  threshold: number
+}
+
 export interface TaskProgress {
   toolCalls: number
   lastTool?: string
+  toolCallWindow?: ToolCallWindow
+  countedToolPartIDs?: Set<string>
   lastUpdate: Date
   lastMessage?: string
   lastMessageAt?: Date
@@ -19,11 +28,13 @@ export interface TaskProgress {
 export interface BackgroundTask {
   id: string
   sessionID?: string
+  rootSessionID?: string
   parentSessionID: string
   parentMessageID: string
   description: string
   prompt: string
   agent: string
+  spawnDepth?: number
   status: BackgroundTaskStatus
   queuedAt?: Date
   startedAt?: Date
@@ -72,6 +83,7 @@ export interface LaunchInput {
   skills?: string[]
   skillContent?: string
   category?: string
+  sessionPermission?: SessionPermissionRule[]
 }
 
 export interface ResumeInput {

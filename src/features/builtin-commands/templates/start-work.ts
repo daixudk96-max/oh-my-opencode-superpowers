@@ -159,4 +159,35 @@ Reading plan and beginning execution...
 - **Check for \`<!-- MERGED CONTEXT -->\` before merging** - skip if already merged
 - **Write tasks to todo** before starting execution
 
-`
+## TASK BREAKDOWN (MANDATORY)
+
+After reading the plan file, you MUST decompose every remaining incomplete plan task into granular, implementation-level sub-steps and register ALL of them as task/todo items BEFORE starting any work.
+
+**How to break down**:
+- Each incomplete plan checkbox item (for example, \`- [ ] Add user authentication\`) must be split into concrete, actionable sub-tasks
+- Sub-tasks should be specific enough that each one touches a clear set of files/functions
+- Include: file to modify, what to change, expected behavior, and how to verify
+- Do NOT leave any task vague - "implement feature X" is NOT acceptable; "add validateToken() to src/auth/middleware.ts that checks JWT expiry and returns 401" IS acceptable
+- Preserve the selected execution mode: \`sequential\` uses \`skill("executing-plans")\`; \`parallel\` and \`wave\` use \`skill("wave-parallel-execution")\`
+
+**Example breakdown**:
+Plan task: \`- [ ] Add rate limiting to API\`
+→ Todo items:
+  1. Create \`src/middleware/rate-limiter.ts\` with sliding window algorithm (max 100 req/min per IP)
+  2. Add RateLimiter middleware to \`src/app.ts\` router chain, before auth middleware
+  3. Add rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining) to response in \`rate-limiter.ts\`
+  4. Add test: verify 429 response after exceeding limit in \`src/middleware/rate-limiter.test.ts\`
+  5. Add test: verify headers are present on normal responses
+
+Register these as task/todo items so progress is tracked and visible throughout the session.
+
+## WORKTREE COMPLETION
+
+When working in a worktree (\`worktree_path\` is set in boulder.json) and ALL plan tasks are complete:
+1. Commit all remaining changes in the worktree
+2. Switch to the main working directory (the original repo, NOT the worktree)
+3. Merge the worktree branch into the current branch: \`git merge <worktree-branch>\`
+4. If merge succeeds, clean up: \`git worktree remove <worktree-path>\`
+5. Remove the boulder.json state
+
+This is the default behavior whenever \`worktree_path\` is set. Skip merge only if the user explicitly instructs otherwise (for example, asks to create a PR instead).`

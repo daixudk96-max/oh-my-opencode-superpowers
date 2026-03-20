@@ -54,6 +54,7 @@ export const HookNameSchema = z.enum([
 	"anthropic-effort",
 	"hashline-read-enhancer",
 	"read-image-resizer",
+	"todo-description-override",
 	// TDD-EXEMPT: Schema update verified by src/config/schema.test.ts
 	"plan-reorganizer",
 	"plan-update-reminder",

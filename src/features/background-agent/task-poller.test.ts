@@ -1,4 +1,5 @@
-import { describe, it, expect, mock } from "bun:test"
+declare const require: (name: string) => any
+const { describe, it, expect, mock } = require("bun:test")
 
 import { checkAndInterruptStaleTasks, pruneStaleTasksAndNotifications } from "./task-poller"
 import type { BackgroundTask } from "./types"
@@ -116,13 +117,13 @@ describe("checkAndInterruptStaleTasks", () => {
   })
 
   it("should use DEFAULT_MESSAGE_STALENESS_TIMEOUT_MS when messageStalenessTimeoutMs is not configured", async () => {
-    //#given — task started 15 minutes ago, no config for messageStalenessTimeoutMs
+    //#given — task started 35 minutes ago, no config for messageStalenessTimeoutMs
     const task = createRunningTask({
-      startedAt: new Date(Date.now() - 15 * 60 * 1000),
+      startedAt: new Date(Date.now() - 35 * 60 * 1000),
       progress: undefined,
     })
 
-    //#when — default is 10 minutes (600_000ms)
+    //#when — default is 30 minutes (1_800_000ms)
     await checkAndInterruptStaleTasks({
       tasks: [task],
       client: mockClient as never,
@@ -391,9 +392,99 @@ describe("checkAndInterruptStaleTasks", () => {
     expect(releaseMock).toHaveBeenCalledWith("anthropic/claude-opus-4-6")
     expect(task.concurrencyKey).toBeUndefined()
   })
+
+  it("should invoke interruption callback immediately when stale task is cancelled", async () => {
+    //#given
+    const task = createRunningTask({
+      progress: {
+        toolCalls: 1,
+        lastUpdate: new Date(Date.now() - 200_000),
+      },
+    })
+    const onTaskInterrupted = mock(() => {})
+
+    //#when
+    await checkAndInterruptStaleTasks({
+      tasks: [task],
+      client: mockClient as never,
+      config: { staleTimeoutMs: 180_000 },
+      concurrencyManager: mockConcurrencyManager as never,
+      notifyParentSession: mockNotify,
+      onTaskInterrupted,
+    })
+
+    //#then
+    expect(task.status).toBe("cancelled")
+    expect(onTaskInterrupted).toHaveBeenCalledWith(task)
+  })
+
+  it('should NOT protect task when session has terminal non-idle status like "interrupted"', async () => {
+    //#given — lastUpdate is 5min old, session is "interrupted" (terminal, not active)
+    const task = createRunningTask({
+      startedAt: new Date(Date.now() - 300_000),
+      progress: {
+        toolCalls: 2,
+        lastUpdate: new Date(Date.now() - 300_000),
+      },
+    })
+
+    //#when — session status is "interrupted" (terminal)
+    await checkAndInterruptStaleTasks({
+      tasks: [task],
+      client: mockClient as never,
+      config: { staleTimeoutMs: 180_000 },
+      concurrencyManager: mockConcurrencyManager as never,
+      notifyParentSession: mockNotify,
+      sessionStatuses: { "ses-1": { type: "interrupted" } },
+    })
+
+    //#then — terminal statuses should not protect from stale timeout
+    expect(task.status).toBe("cancelled")
+    expect(task.error).toContain("Stale timeout")
+  })
+
+  it('should NOT protect task when session has unknown status type', async () => {
+    //#given — lastUpdate is 5min old, session has an unknown status
+    const task = createRunningTask({
+      startedAt: new Date(Date.now() - 300_000),
+      progress: {
+        toolCalls: 2,
+        lastUpdate: new Date(Date.now() - 300_000),
+      },
+    })
+
+    //#when — session has unknown status type
+    await checkAndInterruptStaleTasks({
+      tasks: [task],
+      client: mockClient as never,
+      config: { staleTimeoutMs: 180_000 },
+      concurrencyManager: mockConcurrencyManager as never,
+      notifyParentSession: mockNotify,
+      sessionStatuses: { "ses-1": { type: "some-weird-status" } },
+    })
+
+    //#then — unknown statuses should not protect from stale timeout
+    expect(task.status).toBe("cancelled")
+    expect(task.error).toContain("Stale timeout")
+  })
 })
 
 describe("pruneStaleTasksAndNotifications", () => {
+  function createTerminalTask(overrides: Partial<BackgroundTask> = {}): BackgroundTask {
+    return {
+      id: "terminal-task",
+      parentSessionID: "parent",
+      parentMessageID: "msg",
+      description: "terminal",
+      prompt: "terminal",
+      agent: "explore",
+      status: "completed",
+      startedAt: new Date(Date.now() - 40 * 60 * 1000),
+      completedAt: new Date(Date.now() - 31 * 60 * 1000),
+      ...overrides,
+    }
+  }
+
   it("should prune tasks that exceeded TTL", () => {
     //#given
     const tasks = new Map<string, BackgroundTask>()
@@ -421,5 +512,53 @@ describe("pruneStaleTasksAndNotifications", () => {
 
     //#then
     expect(pruned).toContain("old-task")
+  })
+
+  it("should prune terminal tasks when completion time exceeds terminal TTL", () => {
+    //#given
+    const tasks = new Map<string, BackgroundTask>()
+    const terminalStatuses: BackgroundTask["status"][] = ["completed", "error", "cancelled", "interrupt"]
+
+    for (const status of terminalStatuses) {
+      tasks.set(status, createTerminalTask({
+        id: status,
+        description: status,
+        prompt: status,
+        status,
+      }))
+    }
+
+    const pruned: string[] = []
+
+    //#when
+    pruneStaleTasksAndNotifications({
+      tasks,
+      notifications: new Map<string, BackgroundTask[]>(),
+      onTaskPruned: (taskId) => pruned.push(taskId),
+    })
+
+    //#then
+    expect(pruned).toEqual([])
+    expect(Array.from(tasks.keys())).toEqual([])
+  })
+
+  it("should keep terminal tasks with pending notifications until notification cleanup", () => {
+    //#given
+    const task = createTerminalTask()
+    const tasks = new Map<string, BackgroundTask>([[task.id, task]])
+    const notifications = new Map<string, BackgroundTask[]>([[task.parentSessionID, [task]]])
+    const pruned: string[] = []
+
+    //#when
+    pruneStaleTasksAndNotifications({
+      tasks,
+      notifications,
+      onTaskPruned: (taskId) => pruned.push(taskId),
+    })
+
+    //#then
+    expect(pruned).toEqual([])
+    expect(tasks.has(task.id)).toBe(true)
+    expect(notifications.has(task.parentSessionID)).toBe(false)
   })
 })

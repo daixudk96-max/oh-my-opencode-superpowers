@@ -1,11 +1,14 @@
 // TDD-EXEMPT: reason="Integrating tasks-md-creation-guard into tool execution flow"
 import type { PluginContext } from "./types"
+import { randomUUID } from "node:crypto"
 
 import { getMainSessionID } from "../features/claude-code-session-state"
 import { clearBoulderState } from "../features/boulder-state"
 import { log } from "../shared"
 import { resolveSessionAgent } from "./session-agent-resolver"
 import { parseRalphLoopArguments } from "../hooks/ralph-loop/command-arguments"
+import { ULTRAWORK_VERIFICATION_PROMISE } from "../hooks/ralph-loop/constants"
+import { readState, writeState } from "../hooks/ralph-loop/storage"
 
 import type { CreatedHooks } from "../create-hooks"
 
@@ -17,6 +20,26 @@ export function createToolExecuteBeforeHandler(args: {
   output: { args: Record<string, unknown> },
 ) => Promise<void> {
   const { ctx, hooks } = args
+
+  function buildUltraworkOracleVerificationPrompt(prompt: string, originalTask: string, verificationAttemptId: string): string {
+    const verificationPrompt = [
+      "You are verifying the active ULTRAWORK loop result for this session.",
+      "",
+      "Original task:",
+      originalTask,
+      "",
+      "Review the work skeptically and critically.",
+      "Assume it may be incomplete, misleading, or subtly broken until the evidence proves otherwise.",
+      "Look for missing scope, weak verification, process violations, hidden regressions, and any reason the task should NOT be considered complete.",
+      "",
+      `If the work is fully complete, end your response with <promise>${ULTRAWORK_VERIFICATION_PROMISE}</promise>.`,
+      "If the work is not complete, explain the blocking issues clearly and DO NOT emit that promise.",
+      "",
+      `<ulw_verification_attempt_id>${verificationAttemptId}</ulw_verification_attempt_id>`,
+    ].join("\n")
+
+    return `${prompt ? `${prompt}\n\n` : ""}${verificationPrompt}`
+  }
 
   return async (input, output): Promise<void> => {
     await hooks.writeExistingFileGuard?.["tool.execute.before"]?.(input, output)
@@ -64,6 +87,38 @@ export function createToolExecuteBeforeHandler(args: {
       } else if (!subagentType && sessionId) {
         const resolvedAgent = await resolveSessionAgent(ctx.client, sessionId)
         argsObject.subagent_type = resolvedAgent ?? "continue"
+      }
+
+      const normalizedSubagentType =
+        typeof argsObject.subagent_type === "string" ? argsObject.subagent_type : undefined
+      const prompt = typeof argsObject.prompt === "string" ? argsObject.prompt : ""
+      const loopState = typeof ctx.directory === "string" ? readState(ctx.directory) : null
+      const shouldInjectOracleVerification =
+        normalizedSubagentType === "oracle"
+        && loopState?.active === true
+        && loopState.ultrawork === true
+        && loopState.verification_pending === true
+        && loopState.session_id === input.sessionID
+
+      if (shouldInjectOracleVerification) {
+        const verificationAttemptId = randomUUID()
+        log("[tool-execute-before] Injecting ULW oracle verification attempt", {
+          sessionID: input.sessionID,
+          callID: input.callID,
+          verificationAttemptId,
+          loopSessionID: loopState.session_id,
+        })
+        writeState(ctx.directory, {
+          ...loopState,
+          verification_attempt_id: verificationAttemptId,
+          verification_session_id: undefined,
+        })
+        argsObject.run_in_background = false
+        argsObject.prompt = buildUltraworkOracleVerificationPrompt(
+          prompt,
+          loopState.prompt,
+          verificationAttemptId,
+        )
       }
     }
 
