@@ -1,22 +1,21 @@
 /// <reference types="bun-types" />
 
-import type { AgentConfig } from "@opencode-ai/sdk"
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test"
-import * as agents from "../agents"
-import * as shared from "../shared"
-import * as sisyphusJunior from "../agents/sisyphus-junior"
-import type { OhMyOpenCodeConfig } from "../config"
-import * as agentLoader from "../features/claude-code-agent-loader"
-import * as skillLoader from "../features/opencode-skill-loader"
-import { getAgentDisplayName } from "../shared/agent-display-names"
-import { applyAgentConfig } from "./agent-config-handler"
-import type { PluginComponents } from "./plugin-components-loader"
+
+const agents = require("../agents")
+const sisyphusJunior = require("../agents/sisyphus-junior")
+const agentLoader = require("../features/claude-code-agent-loader")
+const skillLoader = require("../features/opencode-skill-loader")
+const shared = require("../shared")
+const { getAgentDisplayName } = require("../shared/agent-display-names")
+const { applyAgentConfig } = require("./agent-config-handler")
 
 const BUILTIN_SISYPHUS_DISPLAY_NAME = getAgentDisplayName("sisyphus")
 const BUILTIN_SISYPHUS_JUNIOR_DISPLAY_NAME = getAgentDisplayName("sisyphus-junior")
 const BUILTIN_MULTIMODAL_LOOKER_DISPLAY_NAME = getAgentDisplayName("multimodal-looker")
+const BUILTIN_PROMETHEUS_DISPLAY_NAME = getAgentDisplayName("prometheus")
 
-function createPluginComponents(): PluginComponents {
+function createPluginComponents() {
   return {
     commands: {},
     skills: {},
@@ -35,10 +34,17 @@ function createBaseConfig(): Record<string, unknown> {
   }
 }
 
-function createPluginConfig(): OhMyOpenCodeConfig {
+function createPluginConfig(
+  overrides: {
+    sisyphus_agent?: Record<string, unknown>
+    agents?: Record<string, unknown>
+  } = {},
+) {
   return {
+    ...overrides,
     sisyphus_agent: {
       planner_enabled: false,
+      ...overrides.sisyphus_agent,
     },
   }
 }
@@ -54,34 +60,36 @@ describe("applyAgentConfig builtin override protection", () => {
   let loadUserAgentsSpy: ReturnType<typeof spyOn>
   let loadProjectAgentsSpy: ReturnType<typeof spyOn>
   let migrateAgentConfigSpy: ReturnType<typeof spyOn>
+  let fetchAvailableModelsSpy: ReturnType<typeof spyOn>
+  let readConnectedProvidersCacheSpy: ReturnType<typeof spyOn>
   let logSpy: ReturnType<typeof spyOn>
 
-  const builtinSisyphusConfig: AgentConfig = {
+  const builtinSisyphusConfig = {
     name: "Builtin Sisyphus",
     prompt: "builtin prompt",
     mode: "primary",
   }
 
-  const builtinOracleConfig: AgentConfig = {
+  const builtinOracleConfig = {
     name: "oracle",
     prompt: "oracle prompt",
     mode: "subagent",
   }
 
-  const builtinMultimodalLookerConfig: AgentConfig = {
+  const builtinMultimodalLookerConfig = {
     name: "multimodal-looker",
     prompt: "multimodal prompt",
     mode: "subagent",
   }
 
-  const builtinAtlasConfig: AgentConfig = {
+  const builtinAtlasConfig = {
     name: "atlas",
     prompt: "atlas prompt",
     mode: "all",
     model: "openai/gpt-5.4",
   }
 
-  const sisyphusJuniorConfig: AgentConfig = {
+  const sisyphusJuniorConfig = {
     name: "Sisyphus-Junior",
     prompt: "junior prompt",
     mode: "all",
@@ -124,6 +132,14 @@ describe("applyAgentConfig builtin override protection", () => {
     loadUserAgentsSpy = spyOn(agentLoader, "loadUserAgents").mockReturnValue({})
     loadProjectAgentsSpy = spyOn(agentLoader, "loadProjectAgents").mockReturnValue({})
 
+    fetchAvailableModelsSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(
+      new Set(["anthropic/claude-opus-4-6", "openai/gpt-5.4", "google/gemini-3.1-pro"]),
+    )
+    readConnectedProvidersCacheSpy = spyOn(
+      shared,
+      "readConnectedProvidersCache",
+    ).mockReturnValue(null)
+
     migrateAgentConfigSpy = spyOn(shared, "migrateAgentConfig").mockImplementation(
       (config: Record<string, unknown>) => config,
     )
@@ -140,6 +156,8 @@ describe("applyAgentConfig builtin override protection", () => {
     discoverOpencodeProjectSkillsSpy.mockRestore()
     loadUserAgentsSpy.mockRestore()
     loadProjectAgentsSpy.mockRestore()
+    fetchAvailableModelsSpy.mockRestore()
+    readConnectedProvidersCacheSpy.mockRestore()
     migrateAgentConfigSpy.mockRestore()
     logSpy.mockRestore()
   })
@@ -277,5 +295,34 @@ describe("applyAgentConfig builtin override protection", () => {
 
     // then
     expect(createSisyphusJuniorAgentSpy).toHaveBeenCalledWith(undefined, "openai/gpt-5.4", false)
+  })
+
+  test("keeps Prometheus prompt_append after GPT base prompt selection", async () => {
+    const result = await applyAgentConfig({
+      config: createBaseConfig(),
+      pluginConfig: createPluginConfig({
+        sisyphus_agent: {
+          planner_enabled: true,
+        },
+        agents: {
+          prometheus: {
+            model: "openai/gpt-5.4",
+            prompt_append: "CUSTOM_APPEND_MARKER",
+          },
+        },
+      }),
+      ctx: { directory: "/tmp" },
+      pluginComponents: createPluginComponents(),
+    })
+
+    const prompt = String(result[BUILTIN_PROMETHEUS_DISPLAY_NAME]?.prompt ?? "")
+
+    expect(result[BUILTIN_PROMETHEUS_DISPLAY_NAME]).toEqual(
+      expect.objectContaining({
+        model: "openai/gpt-5.4",
+      }),
+    )
+    expect(prompt.startsWith("CUSTOM_APPEND_MARKER")).toBe(false)
+    expect(prompt.endsWith("\nCUSTOM_APPEND_MARKER")).toBe(true)
   })
 })
