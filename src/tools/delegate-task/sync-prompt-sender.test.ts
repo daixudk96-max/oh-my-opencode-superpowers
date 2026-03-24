@@ -5,13 +5,32 @@ const {
   mock: bunMock,
 } = require("bun:test")
 
+const {
+  COMPLETION_STANDARD_BEFORE_CLAIMING_DONE_FRAGMENT,
+  PLAIN_LANGUAGE_REPORTING_FRAGMENT,
+  VERIFY_BEFORE_REPORTING_COMPLETION_FRAGMENT,
+} = require("../../shared/communication-verification-fragments")
+
+type PromptArgs = {
+  body: {
+    tools: {
+      question?: boolean
+      task?: boolean
+      call_omo_agent?: boolean
+    }
+    parts: Array<{
+      text: string
+    }>
+  }
+}
+
 bunDescribe("sendSyncPrompt", () => {
   bunTest("passes question=false via tools parameter", async () => {
     //#given
     const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    let promptArgs: any
-    const promptAsync = bunMock(async (input: any) => {
+    let promptArgs: PromptArgs | undefined
+    const promptAsync = bunMock(async (input: PromptArgs) => {
       promptArgs = input
       return { data: {} }
     })
@@ -42,15 +61,15 @@ bunDescribe("sendSyncPrompt", () => {
 
     //#then
     bunExpect(promptAsync).toHaveBeenCalled()
-    bunExpect(promptArgs.body.tools.question).toBe(false)
+    bunExpect(promptArgs?.body.tools.question).toBe(false)
   })
 
   bunTest("applies agent tool restrictions for explore agent", async () => {
     //#given
     const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    let promptArgs: any
-    const promptAsync = bunMock(async (input: any) => {
+    let promptArgs: PromptArgs | undefined
+    const promptAsync = bunMock(async (input: PromptArgs) => {
       promptArgs = input
       return { data: {} }
     })
@@ -82,15 +101,15 @@ bunDescribe("sendSyncPrompt", () => {
 
     //#then
     bunExpect(promptAsync).toHaveBeenCalled()
-    bunExpect(promptArgs.body.tools.call_omo_agent).toBe(false)
+    bunExpect(promptArgs?.body.tools.call_omo_agent).toBe(false)
   })
 
   bunTest("applies agent tool restrictions for librarian agent", async () => {
     //#given
     const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    let promptArgs: any
-    const promptAsync = bunMock(async (input: any) => {
+    let promptArgs: PromptArgs | undefined
+    const promptAsync = bunMock(async (input: PromptArgs) => {
       promptArgs = input
       return { data: {} }
     })
@@ -122,15 +141,15 @@ bunDescribe("sendSyncPrompt", () => {
 
     //#then
     bunExpect(promptAsync).toHaveBeenCalled()
-    bunExpect(promptArgs.body.tools.call_omo_agent).toBe(false)
+    bunExpect(promptArgs?.body.tools.call_omo_agent).toBe(false)
   })
 
   bunTest("does not restrict call_omo_agent for sisyphus agent", async () => {
     //#given
     const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    let promptArgs: any
-    const promptAsync = bunMock(async (input: any) => {
+    let promptArgs: PromptArgs | undefined
+    const promptAsync = bunMock(async (input: PromptArgs) => {
       promptArgs = input
       return { data: {} }
     })
@@ -162,7 +181,91 @@ bunDescribe("sendSyncPrompt", () => {
 
     //#then
     bunExpect(promptAsync).toHaveBeenCalled()
-    bunExpect(promptArgs.body.tools.call_omo_agent).toBe(true)
+    bunExpect(promptArgs?.body.tools.call_omo_agent).toBe(true)
+  })
+
+  bunTest("keeps plan-family task permission but skips non-plan append for prometheus", async () => {
+    //#given
+    const { sendSyncPrompt } = require("./sync-prompt-sender")
+
+    let promptArgs: PromptArgs | undefined
+    const promptAsync = bunMock(async (input: PromptArgs) => {
+      promptArgs = input
+      return { data: {} }
+    })
+
+    const mockClient = {
+      session: {
+        promptAsync,
+      },
+    }
+
+    const input = {
+      sessionID: "test-session",
+      agentToUse: "prometheus",
+      args: {
+        description: "test task",
+        prompt: "test prompt",
+        run_in_background: false,
+        load_skills: [],
+      },
+      systemContent: undefined,
+      categoryModel: undefined,
+      toastManager: null,
+      taskId: undefined,
+    }
+
+    //#when
+    await sendSyncPrompt(mockClient, input)
+
+    //#then
+    bunExpect(promptAsync).toHaveBeenCalled()
+    bunExpect(promptArgs?.body.tools.task).toBe(true)
+    bunExpect(promptArgs?.body.parts[0]?.text).toBe("test prompt\n<!-- OMO_INTERNAL_INITIATOR -->")
+  })
+
+  bunTest("appends planning requirements for plan agents before the internal marker", async () => {
+    //#given
+    const { sendSyncPrompt } = require("./sync-prompt-sender")
+
+    let promptArgs: PromptArgs | undefined
+    const promptAsync = bunMock(async (input: PromptArgs) => {
+      promptArgs = input
+      return { data: {} }
+    })
+
+    const mockClient = {
+      session: {
+        promptAsync,
+      },
+    }
+
+    const input = {
+      sessionID: "test-session",
+      agentToUse: "plan",
+      args: {
+        description: "test task",
+        prompt: "test prompt",
+        run_in_background: false,
+        load_skills: [],
+      },
+      systemContent: undefined,
+      categoryModel: undefined,
+      toastManager: null,
+      taskId: undefined,
+    }
+
+    //#when
+    await sendSyncPrompt(mockClient, input)
+
+    //#then
+    bunExpect(promptAsync).toHaveBeenCalled()
+    bunExpect(promptArgs?.body.tools.task).toBe(true)
+    bunExpect(promptArgs?.body.parts[0]?.text).toContain("Additional requirements for this planning request:")
+    bunExpect(promptArgs?.body.parts[0]?.text).toContain(PLAIN_LANGUAGE_REPORTING_FRAGMENT)
+    bunExpect(promptArgs?.body.parts[0]?.text).toContain(COMPLETION_STANDARD_BEFORE_CLAIMING_DONE_FRAGMENT)
+    bunExpect(promptArgs?.body.parts[0]?.text).not.toContain(VERIFY_BEFORE_REPORTING_COMPLETION_FRAGMENT)
+    bunExpect(promptArgs?.body.parts[0]?.text.endsWith("<!-- OMO_INTERNAL_INITIATOR -->")).toBe(true)
   })
 
   bunTest("retries with promptSync for oracle when promptAsync fails with unexpected EOF", async () => {

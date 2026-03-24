@@ -1,6 +1,10 @@
-import type { BuildSystemContentInput } from "./types"
+import {
+  COMPLETION_STANDARD_BEFORE_CLAIMING_DONE_FRAGMENT,
+  PLAIN_LANGUAGE_REPORTING_FRAGMENT,
+} from "../../shared/communication-verification-fragments"
 import { buildPlanAgentSystemPrepend, isPlanAgent } from "./constants"
 import { buildSystemContentWithTokenLimit } from "./token-limiter"
+import type { BuildSystemContentInput } from "./types"
 
 const FREE_OR_LOCAL_PROMPT_TOKEN_LIMIT = 24000
 const PLAN_AGENT_PROMPT_APPEND = `
@@ -10,7 +14,9 @@ Additional requirements for this planning request:
 - Write the plan in English.
 - Plan well for ultrawork execution.
 - Use TDD-oriented planning.
-- Include a clear atomic commit strategy.`
+- Include a clear atomic commit strategy.
+- ${PLAIN_LANGUAGE_REPORTING_FRAGMENT}
+- ${COMPLETION_STANDARD_BEFORE_CLAIMING_DONE_FRAGMENT}`
 
 function usesFreeOrLocalModel(model: { providerID: string; modelID: string; variant?: string } | undefined): boolean {
   if (!model) {
