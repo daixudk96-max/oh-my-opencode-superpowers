@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from "bun:test"
 import { loadBuiltinCommands } from "./commands"
 import { HANDOFF_TEMPLATE } from "./templates/handoff"
+import { START_WORK_TEMPLATE } from "./templates/start-work"
 import type { BuiltinCommandName } from "./types"
 
 describe("loadBuiltinCommands", () => {
@@ -83,6 +84,25 @@ describe("loadBuiltinCommands", () => {
     //#then
     expect(commands.handoff.description).toContain("context summary")
   })
+
+	it("start-work command includes execution reporting reminders", () => {
+		const commands = loadBuiltinCommands()
+
+		expect(commands["start-work"]).toBeDefined()
+		expect(commands["start-work"].template).toContain(START_WORK_TEMPLATE)
+		expect(commands["start-work"].template).toContain("define what done looks like before you start the work")
+		expect(commands["start-work"].template).toContain("Before you report a task as done, verify the actual changes with the relevant checks")
+		expect(commands["start-work"].template).toContain("use direct plain language")
+	})
+
+	it("start-work command makes no unrelated changes to selection or worktree flow", () => {
+		const template = loadBuiltinCommands()["start-work"].template
+
+		expect(template).toContain("List available plan files from `changes/`")
+		expect(template).toContain("git worktree add <absolute-path> <branch-or-HEAD>")
+		expect(template).toContain("All work happens inside that worktree directory")
+		expect(template).toContain("Read the FULL plan file before delegating any tasks")
+	})
 })
 
 describe("HANDOFF_TEMPLATE", () => {

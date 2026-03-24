@@ -72,6 +72,10 @@ Is task about documentation files (.md, .rst, docs/)?
           NO  → category: "ultrabrain" (default)
 ```
 
+Before you dispatch each task:
+- define what done looks like before you hand the task off
+- turn acceptance criteria into concrete checks the Implementer must satisfy
+
 For each task, dispatch to the appropriate agent:
 
 ```typescript
@@ -113,9 +117,12 @@ ${tddNotes}
 ### 7. MUST DO
 - Follow existing code patterns
 - Use Bun for tests
+- State what done looks like before you start coding
 - Run lsp_diagnostics before completion
+- Verify the work before you report COMPLETED
 - Request Codex prototype before coding (Phase 2)
 - Request Codex review after coding (Phase 3)
+- Summarize results in direct plain language
 
 ### 8. MUST NOT DO
 - Do not modify files outside the listed paths
@@ -135,6 +142,10 @@ Work from: ${worktreePath}
 | `COMPLETED` | Record SHA, mark complete, continue to next task |
 | `QUESTIONS` | Answer questions, resume Implementer with `resume=session_id` |
 | `BLOCKED` | Stop, report to user, wait for feedback |
+
+Before you accept a `COMPLETED` report:
+- Verify the listed acceptance criteria and required checks before you accept a COMPLETED report
+- Make sure the report states what changed, how it was verified, and what is still open
 
 ### Step 2c: Auto Git Checkpoint
 
@@ -173,11 +184,13 @@ After each COMPLETED response:
 **所有任务完成时：**
 - 显示所有已完成任务汇总
 - 显示所有 checkpoint SHAs
+- Use direct plain language. Say what changed, how it was verified, and what is still open.
 - 自动进入 Step 4（Complete Development）
 
 ### Step 4: Complete Development
  
 After all tasks complete and verified:
+- Confirm every task met its done criteria before you move to branch completion.
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice

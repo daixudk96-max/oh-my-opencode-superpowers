@@ -105,8 +105,16 @@ export const START_WORK_TEMPLATE = `You are starting a Sisyphus work session.
    **IMPORTANT**: Only write incomplete tasks (\`[ ]\` or \`[~]\`) to todo.
 
 8. **Read the plan file** and start executing tasks according to atlas workflow
+   - For each task, define what done looks like before you start the work.
+   - Before you report a task as done, verify the actual changes with the relevant checks.
+   - When you summarize progress or completion, use direct plain language. Say what changed, what you verified, and what still needs work.
 
 ## OUTPUT FORMAT
+
+For progress or completion updates:
+- State the done criteria you used
+- State the checks you ran before reporting
+- Use direct plain language. Avoid internal jargon or vague status words.
 
 When listing plans for selection:
 \`\`\`
@@ -155,6 +163,7 @@ Reading plan and beginning execution...
 - Always set worktree_path in boulder.json before executing any tasks
 - Read the FULL plan file before delegating any tasks
 - Follow atlas delegation protocols (7-section format)
+- Do not report a task as done until the verification checks pass
 - **ONLY search in \`changes/\` directory**
 - **Check for \`<!-- MERGED CONTEXT -->\` before merging** - skip if already merged
 - **Write tasks to todo** before starting execution

@@ -217,4 +217,24 @@ describe("createBuiltinSkills", () => {
 		expect(skill?.template).toContain("playwright-cli snapshot")
 		expect(skill?.template).toContain("playwright-cli click")
 	})
+
+	test("executing-plans skill adds done, verification, and direct reporting guidance", () => {
+		const skills = createBuiltinSkills()
+		const executingPlans = skills.find((skill) => skill.name === "executing-plans")
+
+		expect(executingPlans).toBeDefined()
+		expect(executingPlans?.template).toContain("define what done looks like before you hand the task off")
+		expect(executingPlans?.template).toContain("Verify the listed acceptance criteria and required checks before you accept a COMPLETED report")
+		expect(executingPlans?.template).toContain("Use direct plain language")
+	})
+
+	test("executing-plans skill makes no unrelated changes to executor selection flow", () => {
+		const skills = createBuiltinSkills()
+		const template = skills.find((skill) => skill.name === "executing-plans")?.template
+
+		expect(template).toContain("document-writer")
+		expect(template).toContain("frontend-ui-ux-engineer")
+		expect(template).toContain('category: "ultrabrain"')
+		expect(template).toContain("finishing-a-development-branch")
+	})
 })
