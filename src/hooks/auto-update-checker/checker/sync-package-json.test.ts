@@ -52,6 +52,7 @@ describe("syncCachePackageJsonToIntent", () => {
   })
 
   afterEach(() => {
+    mock.restore()
     cleanupTestCache()
   })
 

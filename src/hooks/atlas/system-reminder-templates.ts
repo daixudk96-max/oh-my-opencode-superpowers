@@ -34,7 +34,7 @@ export const BOULDER_CONTINUATION_PROMPT = `${createSystemDirective(SystemDirect
 You have an active work plan with incomplete tasks. Continue working.
 
 RULES:
-- **FIRST**: Read the plan file NOW. If the last completed task is still unchecked, mark it \`- [x]\` IMMEDIATELY before anything else
+- **FIRST**: Read the plan file NOW. For large .md files (>200 words), use the /mdsel skill: \`Skill(skill="mdsel", args="<filepath>")\` to index, then \`Skill(skill="mdsel", args="h2.0 \\"<filepath>\\"")\` to read sections. If the Read tool is blocked, use /mdsel instead. If the last completed task is still unchecked, mark it \`- [x]\` IMMEDIATELY before anything else
 - Proceed without asking for permission
 - Change \`- [ ]\` to \`- [x]\` in the plan file when done
 - Use the notepad at changes/{PLAN_NAME}/ to record learnings

@@ -36,7 +36,9 @@ export function createBoulderGatingWrapper(input: {
     }
 
     if (subagentSessions.has(sessionID)) {
-      await handler(arg)
+      log(`[${HOOK_NAME}] [downstream:boulder-gating] Skipped: child session is tracked as subagent`, {
+        sessionID,
+      })
       return
     }
 

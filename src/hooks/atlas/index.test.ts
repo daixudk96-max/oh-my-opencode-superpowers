@@ -518,8 +518,12 @@ session_id: ses_auth_flow_123
       }
 
       // when
+      await hook["tool.execute.before"](
+        { tool: "task", sessionID, callID: "call-track-task-session" },
+        { args: { prompt: "Implement auth flow" } }
+      )
       await hook["tool.execute.after"](
-        { tool: "task", sessionID },
+        { tool: "task", sessionID, callID: "call-track-task-session" },
         output
       )
 
@@ -529,6 +533,57 @@ session_id: ses_auth_flow_123
       expect(updatedState?.task_sessions?.["todo:1"]?.task_title).toBe("Implement auth flow")
       expect(updatedState?.task_sessions?.["todo:1"]?.agent).toBe("sisyphus-junior")
       expect(updatedState?.task_sessions?.["todo:1"]?.category).toBe("deep")
+
+      cleanupMessageStorage(sessionID)
+    })
+
+     test("should not persist preferred subagent session for unrelated child task prompts", async () => {
+       // given - boulder state with a current final-wave task, Atlas caller, and a child task prompt unrelated to that task
+       const sessionID = "session-unrelated-child-task-test"
+       setupMessageStorage(sessionID, "atlas")
+
+      const planPath = join(TEST_DIR, "unrelated-child-task-plan.md")
+      writeFileSync(planPath, `# Plan
+
+## TODOs
+- [x] 1. Implement auth flow
+
+## Final Verification Wave
+- [ ] F1. Plan Compliance Audit - oracle
+`)
+
+      writeBoulderState(TEST_DIR, {
+        active_plan: planPath,
+        started_at: "2026-01-02T10:00:00Z",
+        session_ids: [sessionID],
+        plan_name: "unrelated-child-task-plan",
+      })
+
+      const hook = createAtlasHook(createMockPluginInput())
+
+      await hook["tool.execute.before"](
+        { tool: "task", sessionID, callID: "call-unrelated-child-task" },
+        { args: { prompt: "Respond with the exact text BOULDER_CHILD_SMOKE_OK" } }
+      )
+
+      await hook["tool.execute.after"](
+        { tool: "task", sessionID, callID: "call-unrelated-child-task" },
+        {
+          title: "Sisyphus Task",
+          output: `Task completed successfully
+
+<task_metadata>
+session_id: ses_child_smoke_123
+</task_metadata>`,
+          metadata: {
+            agent: "sisyphus-junior",
+            category: "quick",
+          },
+        }
+      )
+
+      const updatedState = readBoulderState(TEST_DIR)
+      expect(updatedState?.task_sessions?.["final-wave:f1"]).toBeUndefined()
 
       cleanupMessageStorage(sessionID)
     })
@@ -916,7 +971,7 @@ session_id: ses_untrusted_999
         }
       })
 
-      test("should not contain old STEP 7 MARK COMPLETION IN PLAN FILE text", async () => {
+      test("should contain immediate completion step wording", async () => {
         // given - Atlas caller with boulder state
         const planPath = join(TEST_DIR, "test-plan.md")
         writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [x] Task 2")
@@ -942,9 +997,9 @@ session_id: ses_untrusted_999
           output
         )
 
-        // then - old STEP 7 MARK COMPLETION IN PLAN FILE should be absent
-        expect(output.output).not.toContain("STEP 7: MARK COMPLETION IN PLAN FILE")
-        expect(output.output).not.toContain("MARK COMPLETION IN PLAN FILE")
+        // then - reminder should include explicit immediate completion guidance
+        expect(output.output).toContain("STEP 7: MARK COMPLETION IN PLAN FILE (IMMEDIATELY)")
+        expect(output.output).toContain("DO THIS BEFORE ANYTHING ELSE")
       })
     })
 
@@ -1268,7 +1323,7 @@ session_id: ses_untrusted_999
       expect(mockInput._promptMock).not.toHaveBeenCalled()
     })
 
-    test("should append subagent session to boulder before injecting continuation", async () => {
+    test("should ignore idle continuation for child session tracked as subagent", async () => {
       // given - active boulder plan with another registered session and current session tracked as subagent
       const subagentSessionID = "subagent-session-456"
       const planPath = join(TEST_DIR, "test-plan.md")
@@ -1294,11 +1349,9 @@ session_id: ses_untrusted_999
         },
       })
 
-      // then - session is registered into boulder and continuation is injected
-      expect(readBoulderState(TEST_DIR)?.session_ids).toContain(subagentSessionID)
-      expect(mockInput._promptMock).toHaveBeenCalled()
-      const callArgs = mockInput._promptMock.mock.calls[0][0]
-      expect(callArgs.path.id).toBe(subagentSessionID)
+      // then - child session is ignored by atlas continuation and not appended to boulder
+      expect(readBoulderState(TEST_DIR)?.session_ids).not.toContain(subagentSessionID)
+      expect(mockInput._promptMock).not.toHaveBeenCalled()
     })
 
     test("should inject when registered boulder session has incomplete tasks even if last agent differs", async () => {
@@ -1715,7 +1768,7 @@ session_id: ses_untrusted_999
       expect(mockInput._promptMock).toHaveBeenCalledTimes(1)
     })
 
-    test("should stop continuation after 10 consecutive prompt failures (issue #1355)", async () => {
+    test("should stop continuation after 5 consecutive prompt failures (downstream retry cap)", async () => {
       //#given - boulder state with incomplete plan and prompt always fails
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
@@ -1738,7 +1791,7 @@ session_id: ses_untrusted_999
 
       try {
         //#when - idle fires repeatedly, past cooldown each time
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 5; i++) {
           await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
           await flushMicrotasks()
           now += 6000
@@ -1747,14 +1800,14 @@ session_id: ses_untrusted_999
         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
         await flushMicrotasks()
 
-        //#then - should attempt only 10 times, then disable continuation
-        expect(promptMock).toHaveBeenCalledTimes(10)
+        //#then - should attempt only 5 times, then disable continuation
+        expect(promptMock).toHaveBeenCalledTimes(5)
       } finally {
         Date.now = originalDateNow
       }
     })
 
-    test("should reset prompt failure counter on success and only stop after 10 consecutive failures", async () => {
+    test("should allow one success in between but still stop when 5 failures accumulate", async () => {
       //#given - boulder state with incomplete plan
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
@@ -1779,21 +1832,21 @@ session_id: ses_untrusted_999
       Date.now = () => now
 
       try {
-        //#when - fail, succeed (reset), then fail 10 times (disable), then attempt again
+        //#when - fail, succeed, then keep failing until downstream retry cap blocks continuation
         for (let i = 0; i < 13; i++) {
           await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
           await flushMicrotasks()
           now += 6000
         }
 
-        //#then - 12 prompt attempts; 13th idle is skipped after 10 consecutive failures
-        expect(promptMock).toHaveBeenCalledTimes(12)
+        //#then - one success plus failures until cap reached
+        expect(promptMock).toHaveBeenCalledTimes(7)
       } finally {
         Date.now = originalDateNow
       }
     })
 
-    test("should keep skipping continuation during 5-minute backoff after 10 consecutive failures", async () => {
+    test("should keep skipping continuation once downstream retry cap is reached", async () => {
       //#given - boulder state with incomplete plan and prompt always fails
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
@@ -1815,8 +1868,8 @@ session_id: ses_untrusted_999
       Date.now = () => now
 
       try {
-        //#when - 11th idle occurs inside 5-minute backoff window
-        for (let i = 0; i < 10; i++) {
+        //#when - additional idle events occur after retry cap is hit
+        for (let i = 0; i < 5; i++) {
           await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
           await flushMicrotasks()
           now += 6000
@@ -1827,14 +1880,14 @@ session_id: ses_untrusted_999
         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
         await flushMicrotasks()
 
-        //#then - 11th attempt should still be skipped
-        expect(promptMock).toHaveBeenCalledTimes(10)
+        //#then - extra idle event remains skipped after cap
+        expect(promptMock).toHaveBeenCalledTimes(5)
       } finally {
         Date.now = originalDateNow
       }
     })
 
-    test("should retry continuation after 5-minute backoff expires following 10 consecutive failures", async () => {
+    test("should continue skipping even after long wait while downstream retry cap remains active", async () => {
       //#given - boulder state with incomplete plan and prompt always fails
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
@@ -1856,8 +1909,8 @@ session_id: ses_untrusted_999
       Date.now = () => now
 
       try {
-        //#when - 11th idle occurs after 5+ minutes
-        for (let i = 0; i < 10; i++) {
+        //#when - idle occurs again after long wait
+        for (let i = 0; i < 5; i++) {
           await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
           await flushMicrotasks()
           now += 6000
@@ -1868,15 +1921,15 @@ session_id: ses_untrusted_999
         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
         await flushMicrotasks()
 
-        //#then - 11th attempt should run after backoff expiration
-        expect(promptMock).toHaveBeenCalledTimes(11)
+        //#then - no additional attempt because downstream cap gates before backoff logic
+        expect(promptMock).toHaveBeenCalledTimes(5)
       } finally {
         Date.now = originalDateNow
       }
     })
 
-    test("should reset prompt failure counter after successful retry beyond backoff window", async () => {
-      //#given - boulder state with incomplete plan and success on first retry after backoff
+    test("should remain capped unless session state is reset", async () => {
+      //#given - boulder state with incomplete plan and success scheduled after many failures
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
 
@@ -1889,7 +1942,7 @@ session_id: ses_untrusted_999
       writeBoulderState(TEST_DIR, state)
 
       const promptMock = mock((): Promise<void> => Promise.reject(new Error("Bad Request")))
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 5; i++) {
         promptMock.mockImplementationOnce(() => Promise.reject(new Error("Bad Request")))
       }
       promptMock.mockImplementationOnce(() => Promise.resolve(undefined))
@@ -1901,8 +1954,8 @@ session_id: ses_untrusted_999
       Date.now = () => now
 
       try {
-        //#when - fail 10 times, recover after backoff with success, then fail 10 times again
-        for (let i = 0; i < 10; i++) {
+        //#when - fail enough times to hit cap, then wait and retry
+        for (let i = 0; i < 5; i++) {
           await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
           await flushMicrotasks()
           now += 6000
@@ -1923,8 +1976,8 @@ session_id: ses_untrusted_999
         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
         await flushMicrotasks()
 
-        //#then - success retry resets counter, so 10 additional failures are allowed before skip
-        expect(promptMock).toHaveBeenCalledTimes(21)
+        //#then - cap prevents additional attempts; scheduled success does not execute
+        expect(promptMock).toHaveBeenCalledTimes(5)
       } finally {
         Date.now = originalDateNow
       }
@@ -1952,8 +2005,8 @@ session_id: ses_untrusted_999
       Date.now = () => now
 
       try {
-        //#when - 10 failures disable continuation, then compaction resets it
-        for (let i = 0; i < 10; i++) {
+        //#when - 5 failures disable continuation, then compaction resets it
+        for (let i = 0; i < 5; i++) {
           await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
           await flushMicrotasks()
           now += 6000
@@ -1968,8 +2021,8 @@ session_id: ses_untrusted_999
         await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
         await flushMicrotasks()
 
-        //#then - 10 attempts + 1 after compaction (11 total)
-        expect(promptMock).toHaveBeenCalledTimes(11)
+        //#then - 5 attempts + 1 after compaction (6 total)
+        expect(promptMock).toHaveBeenCalledTimes(6)
       } finally {
         Date.now = originalDateNow
       }

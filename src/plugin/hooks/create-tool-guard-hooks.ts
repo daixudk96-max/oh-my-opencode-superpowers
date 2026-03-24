@@ -1,19 +1,20 @@
 // TDD-EXEMPT: reason="Merging tool guard hook registrations"
 import type { HookName, OhMyOpenCodeConfig } from "../../config"
 import {
-  createCommentCheckerHooks,
-  createDirectoryAgentsInjectorHook,
-  createDirectoryReadmeInjectorHook,
-  createEmptyTaskResponseDetectorHook,
-  createHashlineReadEnhancerHook,
-  createJsonErrorRecoveryHook,
-  createReadImageResizerHook,
-  createRulesInjectorHook,
-  createTasksMdCreationGuardHook,
-  createTasksTodowriteDisablerHook,
-  createTodoDescriptionOverrideHook,
-  createToolOutputTruncatorHook,
-  createWriteExistingFileGuardHook,
+	createCommentCheckerHooks,
+	createDirectoryAgentsInjectorHook,
+	createDirectoryReadmeInjectorHook,
+	createEmptyTaskResponseDetectorHook,
+	createHashlineReadEnhancerHook,
+	createJsonErrorRecoveryHook,
+	createMdselEnforcerHook,
+	createReadImageResizerHook,
+	createRulesInjectorHook,
+	createTasksMdCreationGuardHook,
+	createTasksTodowriteDisablerHook,
+	createTodoDescriptionOverrideHook,
+	createToolOutputTruncatorHook,
+	createWriteExistingFileGuardHook,
 } from "../../hooks"
 import type { ModelCacheState } from "../../plugin-state"
 import {
@@ -26,19 +27,20 @@ import { safeCreateHook } from "../../shared/safe-create-hook"
 import type { PluginContext } from "../types"
 
 export type ToolGuardHooks = {
-  commentChecker: ReturnType<typeof createCommentCheckerHooks> | null
-  toolOutputTruncator: ReturnType<typeof createToolOutputTruncatorHook> | null
-  directoryAgentsInjector: ReturnType<typeof createDirectoryAgentsInjectorHook> | null
-  directoryReadmeInjector: ReturnType<typeof createDirectoryReadmeInjectorHook> | null
-  emptyTaskResponseDetector: ReturnType<typeof createEmptyTaskResponseDetectorHook> | null
-  rulesInjector: ReturnType<typeof createRulesInjectorHook> | null
-  tasksTodowriteDisabler: ReturnType<typeof createTasksTodowriteDisablerHook> | null
-  writeExistingFileGuard: ReturnType<typeof createWriteExistingFileGuardHook> | null
-  hashlineReadEnhancer: ReturnType<typeof createHashlineReadEnhancerHook> | null
-  jsonErrorRecovery: ReturnType<typeof createJsonErrorRecoveryHook> | null
-  readImageResizer: ReturnType<typeof createReadImageResizerHook> | null
-  tasksMdCreationGuard: ReturnType<typeof createTasksMdCreationGuardHook> | null
-  todoDescriptionOverride: ReturnType<typeof createTodoDescriptionOverrideHook> | null
+	commentChecker: ReturnType<typeof createCommentCheckerHooks> | null
+	toolOutputTruncator: ReturnType<typeof createToolOutputTruncatorHook> | null
+	directoryAgentsInjector: ReturnType<typeof createDirectoryAgentsInjectorHook> | null
+	directoryReadmeInjector: ReturnType<typeof createDirectoryReadmeInjectorHook> | null
+	emptyTaskResponseDetector: ReturnType<typeof createEmptyTaskResponseDetectorHook> | null
+	rulesInjector: ReturnType<typeof createRulesInjectorHook> | null
+	tasksTodowriteDisabler: ReturnType<typeof createTasksTodowriteDisablerHook> | null
+	writeExistingFileGuard: ReturnType<typeof createWriteExistingFileGuardHook> | null
+	hashlineReadEnhancer: ReturnType<typeof createHashlineReadEnhancerHook> | null
+	jsonErrorRecovery: ReturnType<typeof createJsonErrorRecoveryHook> | null
+	readImageResizer: ReturnType<typeof createReadImageResizerHook> | null
+	tasksMdCreationGuard: ReturnType<typeof createTasksMdCreationGuardHook> | null
+	todoDescriptionOverride: ReturnType<typeof createTodoDescriptionOverrideHook> | null
+	mdselEnforcer: ReturnType<typeof createMdselEnforcerHook> | null
 }
 
 export function createToolGuardHooks(args: {
@@ -85,9 +87,13 @@ export function createToolGuardHooks(args: {
         createDirectoryReadmeInjectorHook(ctx, modelCacheState))
     : null
 
-  const emptyTaskResponseDetector = isHookEnabled("empty-task-response-detector")
-    ? safeHook("empty-task-response-detector", () => createEmptyTaskResponseDetectorHook(ctx))
-    : null
+	const emptyTaskResponseDetector = isHookEnabled("empty-task-response-detector")
+		? safeHook("empty-task-response-detector", () => createEmptyTaskResponseDetectorHook(ctx))
+		: null
+
+	const mdselEnforcer = isHookEnabled("mdsel-enforcer")
+		? safeHook("mdsel-enforcer", () => createMdselEnforcerHook(ctx))
+		: null
 
   const rulesInjector = isHookEnabled("rules-injector")
     ? safeHook("rules-injector", () =>
@@ -119,23 +125,24 @@ export function createToolGuardHooks(args: {
     ? safeHook("tasks-md-creation-guard", () => createTasksMdCreationGuardHook(ctx))
     : null
 
-  const todoDescriptionOverride = isHookEnabled("todo-description-override")
-    ? safeHook("todo-description-override", () => createTodoDescriptionOverrideHook())
-    : null
+	const todoDescriptionOverride = isHookEnabled("todo-description-override")
+		? safeHook("todo-description-override", () => createTodoDescriptionOverrideHook())
+		: null
 
-  return {
-    commentChecker,
-    toolOutputTruncator,
-    directoryAgentsInjector,
-    directoryReadmeInjector,
-    emptyTaskResponseDetector,
-    rulesInjector,
-    tasksTodowriteDisabler,
-    writeExistingFileGuard,
-    hashlineReadEnhancer,
-    jsonErrorRecovery,
-    readImageResizer,
-    tasksMdCreationGuard,
-    todoDescriptionOverride,
-  }
+	return {
+		commentChecker,
+		toolOutputTruncator,
+		directoryAgentsInjector,
+		directoryReadmeInjector,
+		emptyTaskResponseDetector,
+		rulesInjector,
+		tasksTodowriteDisabler,
+		writeExistingFileGuard,
+		hashlineReadEnhancer,
+		jsonErrorRecovery,
+		readImageResizer,
+		tasksMdCreationGuard,
+		todoDescriptionOverride,
+		mdselEnforcer,
+	}
 }

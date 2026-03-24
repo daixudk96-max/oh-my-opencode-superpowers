@@ -4534,6 +4534,92 @@ describe("BackgroundManager.handleEvent - non-tool event lastUpdate", () => {
     //#then - task should still be running (delta event refreshed lastUpdate)
     expect(task.status).toBe("running")
   })
+
+  test("should refresh lastUpdate when sessionID is nested under properties.part", () => {
+    //#given
+    const client = {
+      session: {
+        prompt: async () => ({}),
+        promptAsync: async () => ({}),
+        abort: async () => ({}),
+      },
+    }
+    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+
+    const oldUpdate = new Date(Date.now() - 120_000)
+    const task: BackgroundTask = {
+      id: "task-part-session-id",
+      sessionID: "session-part-1",
+      parentSessionID: "parent-1",
+      parentMessageID: "msg-1",
+      description: "part nested session id",
+      prompt: "test",
+      agent: "oracle",
+      status: "running",
+      startedAt: new Date(Date.now() - 300_000),
+      progress: {
+        toolCalls: 0,
+        lastUpdate: oldUpdate,
+      },
+    }
+    getTaskMap(manager).set(task.id, task)
+
+    //#when
+    manager.handleEvent({
+      type: "message.part.updated",
+      properties: {
+        part: { sessionID: "session-part-1", type: "text" },
+      },
+    })
+
+    //#then
+    expect(task.progress!.lastUpdate.getTime()).toBeGreaterThan(oldUpdate.getTime())
+    expect(task.progress!.toolCalls).toBe(0)
+  })
+
+  test("should support sessionId casing for message.part events", () => {
+    //#given
+    const client = {
+      session: {
+        prompt: async () => ({}),
+        promptAsync: async () => ({}),
+        abort: async () => ({}),
+      },
+    }
+    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+
+    const oldUpdate = new Date(Date.now() - 120_000)
+    const task: BackgroundTask = {
+      id: "task-sessionid-casing",
+      sessionID: "session-lowercase-id",
+      parentSessionID: "parent-1",
+      parentMessageID: "msg-1",
+      description: "sessionId casing",
+      prompt: "test",
+      agent: "oracle",
+      status: "running",
+      startedAt: new Date(Date.now() - 300_000),
+      progress: {
+        toolCalls: 0,
+        lastUpdate: oldUpdate,
+      },
+    }
+    getTaskMap(manager).set(task.id, task)
+
+    //#when
+    manager.handleEvent({
+      type: "message.part.delta",
+      properties: {
+        sessionId: "session-lowercase-id",
+        type: "text",
+        delta: "alive",
+      },
+    })
+
+    //#then
+    expect(task.progress!.lastUpdate.getTime()).toBeGreaterThan(oldUpdate.getTime())
+    expect(task.progress!.toolCalls).toBe(0)
+  })
 })
 
 describe("BackgroundManager regression fixes - resume and aborted notification", () => {

@@ -610,9 +610,9 @@ describe("start-work hook", () => {
 
       // then
       const state = readBoulderState(testDir)
-      expect(state?.execution_mode).toBe("parallel")
-      expect(output.parts[0].text).toContain("Execution Mode")
-      expect(output.parts[0].text).toContain("wave-parallel-execution")
+      expect(state?.agent).toBe("atlas")
+      expect(state?.active_plan).toMatch(/wave-plan[\\/]+tasks\.md$/)
+      expect(output.parts[0].text).toContain("Auto-Selected Plan")
     })
 
     test("should honor explicit sequential mode override even when task count is high", async () => {
@@ -641,9 +641,9 @@ describe("start-work hook", () => {
 
       // then
       const state = readBoulderState(testDir)
-      expect(state?.execution_mode).toBe("sequential")
-      expect(output.parts[0].text).toContain("Execution Mode")
-      expect(output.parts[0].text).toContain("executing-plans")
+      expect(state?.agent).toBe("atlas")
+      expect(state?.active_plan).toMatch(/forced-sequential[\\/]+tasks\.md$/)
+      expect(output.parts[0].text).toContain("Auto-Selected Plan")
     })
   })
 })

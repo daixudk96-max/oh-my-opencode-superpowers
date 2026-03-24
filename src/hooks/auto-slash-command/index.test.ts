@@ -256,6 +256,19 @@ describe("createAutoSlashCommandHook", () => {
   })
 
   describe("command.execute.before hook", () => {
+    function createCommandSkill(name: string, template: string): LoadedSkill {
+      return {
+        name,
+        path: `/test/skills/${name}/SKILL.md`,
+        definition: {
+          name,
+          description: `Command skill: ${name}`,
+          template,
+        },
+        scope: "user",
+      }
+    }
+
     function createCommandInput(command: string, args: string = ""): CommandExecuteBeforeInput {
       return {
         command,
@@ -297,10 +310,12 @@ describe("createAutoSlashCommandHook", () => {
       expect(output.parts.length).toBe(0)
     })
 
-    it("should inject template for known builtin commands like ralph-loop", async () => {
+    it("should inject template for known configured skill command", async () => {
       //#given
-      const hook = createAutoSlashCommandHook()
-      const input = createCommandInput("ralph-loop")
+      const hook = createAutoSlashCommandHook({
+        skills: [createCommandSkill("skill-cmd", "Skill command template")],
+      })
+      const input = createCommandInput("skill-cmd")
       const output = createCommandOutput("original")
 
       //#when
@@ -308,13 +323,16 @@ describe("createAutoSlashCommandHook", () => {
 
       //#then
       expect(output.parts[0].text).toContain("<auto-slash-command>")
-      expect(output.parts[0].text).toContain("/ralph-loop Command")
+      expect(output.parts[0].text).toContain("/skill-cmd Command")
+      expect(output.parts[0].text).toContain("Skill command template")
     })
 
-    it("should inject template for start-work command without runtime error", async () => {
+    it("should inject template for configured command with args without runtime error", async () => {
       //#given
-      const hook = createAutoSlashCommandHook()
-      const input = createCommandInput("start-work", "50-enhancements-verify-fix")
+      const hook = createAutoSlashCommandHook({
+        skills: [createCommandSkill("arg-cmd", "run ${user_message}")],
+      })
+      const input = createCommandInput("arg-cmd", "50-enhancements-verify-fix")
       const output = createCommandOutput("original")
 
       //#when
@@ -322,22 +340,24 @@ describe("createAutoSlashCommandHook", () => {
 
       //#then
       expect(output.parts[0].text).toContain("<auto-slash-command>")
-      expect(output.parts[0].text).toContain("/start-work Command")
+      expect(output.parts[0].text).toContain("/arg-cmd Command")
       expect(output.parts[0].text).not.toContain("$ARGUMENTS")
-      expect(output.parts[0].text).toContain("<user-request>")
+      expect(output.parts[0].text).toContain("50-enhancements-verify-fix")
     })
 
-    it("should clear unresolved placeholders for start-work command without args", async () => {
+    it("should clear unresolved placeholders for configured command without args", async () => {
       //#given
-      const hook = createAutoSlashCommandHook()
-      const input = createCommandInput("start-work")
+      const hook = createAutoSlashCommandHook({
+        skills: [createCommandSkill("arg-cmd", "run $ARGUMENTS and ${user_message}")],
+      })
+      const input = createCommandInput("arg-cmd")
       const output = createCommandOutput("original")
 
       //#when
       await hook["command.execute.before"](input, output)
 
       //#then
-      expect(output.parts[0].text).toContain("/start-work Command")
+      expect(output.parts[0].text).toContain("/arg-cmd Command")
       expect(output.parts[0].text).not.toContain("$ARGUMENTS")
       expect(output.parts[0].text).not.toContain("${user_message}")
     })

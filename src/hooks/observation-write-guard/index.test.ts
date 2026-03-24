@@ -1,151 +1,148 @@
-import { describe, expect, test, mock } from "bun:test"
+import { afterEach, beforeEach, describe, expect, test } from "bun:test"
+import type { PluginInput } from "@opencode-ai/plugin"
+import { mkdirSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { dirname, join } from "node:path"
 import { createObservationWriteGuardHook } from "./index"
-import { HOOK_NAME, BLOCKED_MESSAGE } from "./constants"
-
-// Mock node:fs existsSync
-mock.module("node:fs", () => ({
-  existsSync: (path: string) => {
-    if (path.includes("existing-observation")) return true
-    if (path.includes("new-observation")) return false
-    return false
-  }
-}))
+import { BLOCKED_MESSAGE, HOOK_NAME, PROTECTED_PATH } from "./constants"
 
 describe(HOOK_NAME, () => {
-  function createMockPluginInput() {
+  let testDir = ""
+
+  beforeEach(() => {
+    testDir = join(tmpdir(), `observation-write-guard-${Date.now()}`)
+    mkdirSync(testDir, { recursive: true })
+  })
+
+  afterEach(() => {
+    rmSync(testDir, { recursive: true, force: true })
+  })
+
+  function createMockPluginInput(): PluginInput {
     return {
-      client: {},
-      directory: "/tmp/test",
-    } as any
+      client: {} as PluginInput["client"],
+      project: {} as PluginInput["project"],
+      directory: testDir,
+      worktree: testDir,
+      serverUrl: new URL("http://localhost"),
+      $: {} as PluginInput["$"],
+    } as PluginInput
   }
 
-  //#region Non-Write tools should not be intercepted
+  function createOutput(filePath?: string): {
+    args?: Record<string, unknown>
+    blocked?: boolean
+    message?: string
+  } {
+    return filePath ? { args: { filePath } } : { args: {} }
+  }
+
+  function observationPath(fileName: string): string {
+    return join(testDir, ...PROTECTED_PATH.split("/"), fileName).replace(
+      /\\/g,
+      "/",
+    )
+  }
+
+  function ensureFile(filePath: string): void {
+    mkdirSync(dirname(filePath), { recursive: true })
+    writeFileSync(filePath, "existing")
+  }
+
   test("should not intercept non-Write tools", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Read" }
-    const output: any = { args: { filePath: "/project/continuous-learning/references/observations/existing-observation.md" } }
+    const output = createOutput(observationPath("existing-observation.md"))
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBeUndefined()
   })
 
   test("should not intercept Edit tool", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Edit" }
-    const output: any = { args: { filePath: "/project/continuous-learning/references/observations/existing-observation.md" } }
+    const output = createOutput(observationPath("existing-observation.md"))
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBeUndefined()
   })
-  //#endregion
 
-  //#region Write to other paths should not be intercepted
   test("should not intercept Write to other paths", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Write" }
-    const output: any = { args: { filePath: "/project/src/some-file.ts" } }
+    const output = createOutput(join(testDir, "src", "some-file.ts"))
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBeUndefined()
   })
 
   test("should not intercept Write to similar but different paths", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Write" }
-    const output: any = { args: { filePath: "/project/observations/some-file.md" } }
+    const output = createOutput(join(testDir, "observations", "some-file.md"))
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBeUndefined()
   })
-  //#endregion
 
-  //#region Write to observations/ with non-existent file should be allowed
   test("should allow Write to observations/ when file does not exist (first-time creation)", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Write" }
-    const output: any = { args: { filePath: "/project/continuous-learning/references/observations/new-observation.md" } }
+    const output = createOutput(observationPath("new-observation.md"))
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBeUndefined()
     expect(output.message).toBeUndefined()
   })
-  //#endregion
 
-  //#region Write to observations/ with existing file should be blocked
   test("should block Write to observations/ when file already exists", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Write" }
-    const output: any = { args: { filePath: "/project/continuous-learning/references/observations/existing-observation.md" } }
+    const filePath = observationPath("existing-observation.md")
+    ensureFile(filePath)
+    const output = createOutput(filePath)
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBe(true)
     expect(output.message).toBe(BLOCKED_MESSAGE)
   })
 
   test("should block Write with lowercase tool name", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "write" }
-    const output: any = { args: { filePath: "/project/continuous-learning/references/observations/existing-observation.md" } }
+    const filePath = observationPath("existing-observation.md")
+    ensureFile(filePath)
+    const output = createOutput(filePath)
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBe(true)
     expect(output.message).toBe(BLOCKED_MESSAGE)
   })
-  //#endregion
 
-  //#region Edge cases
   test("should handle missing filePath gracefully", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Write" }
-    const output: any = { args: {} }
+    const output = createOutput()
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBeUndefined()
   })
 
   test("should handle missing args gracefully", async () => {
-    //#given
     const hook = createObservationWriteGuardHook(createMockPluginInput())
     const input = { tool: "Write" }
-    const output: any = {}
+    const output: { blocked?: boolean; message?: string } = {}
 
-    //#when
     await hook["tool.execute.before"](input, output)
 
-    //#then
     expect(output.blocked).toBeUndefined()
   })
-  //#endregion
 })

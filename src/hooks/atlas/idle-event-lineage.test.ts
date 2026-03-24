@@ -97,7 +97,7 @@ describe("atlas hook idle-event session lineage", () => {
     assert.equal(promptCalls.length, 0)
   })
 
-  it("appends boulder-owned subagent sessions during idle when lineage reaches tracked session", async () => {
+  it("does not append boulder-owned subagent sessions during idle when downstream subagent gate is active", async () => {
     const subagentSessionID = "subagent-session-456"
     const intermediateParentSessionID = "subagent-parent-789"
 
@@ -116,7 +116,7 @@ describe("atlas hook idle-event session lineage", () => {
       },
     })
 
-    assert.equal(readBoulderState(testDirectory)?.session_ids.includes(subagentSessionID), true)
-    assert.equal(promptCalls.length, 1)
+    assert.equal(readBoulderState(testDirectory)?.session_ids.includes(subagentSessionID), false)
+    assert.equal(promptCalls.length, 0)
   })
 })

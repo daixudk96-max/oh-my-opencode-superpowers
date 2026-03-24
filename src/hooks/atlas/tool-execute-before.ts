@@ -19,6 +19,21 @@ export function createToolExecuteBeforeHandler(input: {
 ) => Promise<void> {
   const { ctx, pendingFilePaths, pendingTaskRefs } = input
 
+  function normalizeTaskText(value: string): string {
+    return value
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim()
+  }
+
+  function shouldTrackCurrentTask(prompt: string | undefined, task: TrackedTopLevelTaskRef): boolean {
+    if (!prompt) {
+      return false
+    }
+
+    return normalizeTaskText(prompt).includes(normalizeTaskText(task.title))
+  }
+
   function trackTask(callID: string, task: TrackedTopLevelTaskRef): void {
     pendingTaskRefs.set(callID, { kind: "track", task })
   }
@@ -68,6 +83,22 @@ export function createToolExecuteBeforeHandler(input: {
               label: currentTask.label,
               title: currentTask.title,
             }
+            const prompt = typeof toolOutput.args.prompt === "string" ? toolOutput.args.prompt : undefined
+
+            if (!shouldTrackCurrentTask(prompt, task)) {
+              pendingTaskRefs.set(toolInput.callID, {
+                kind: "skip",
+                reason: "prompt_mismatch",
+                task,
+              })
+              log(`[${HOOK_NAME}] Skipping task session persistence for prompt mismatch`, {
+                sessionID: toolInput.sessionID,
+                callID: toolInput.callID,
+                taskKey: task.key,
+              })
+              return
+            }
+
             const hasExistingClaim = [...pendingTaskRefs.values()].some((pendingTaskRef) => (
               pendingTaskRef.kind === "track" && pendingTaskRef.task.key === task.key
             ))

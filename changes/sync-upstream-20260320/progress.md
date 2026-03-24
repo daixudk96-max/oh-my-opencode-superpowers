@@ -243,3 +243,13 @@
 - [x] 确认 commit message 使用计划中的精确文本：`sync: merge upstream/dev (c3b23bf6) into dev, preserve all downstream features`
 - [x] 决定恢复本地 `.opencode/oh-my-opencode.jsonc` 删除、不提交已知本地杂物，并保留最新生成的 `assets/oh-my-opencode.schema.json`
 - [x] 决定将 `changes/sync-upstream-20260320/` 下的设计/提案/快照/计划/记录文档随本次 merge 一并纳入提交
+
+### 2026-03-20 - Task 3.2 follow-up fix completed
+
+- [x] Task 3.2 follow-up: 修复 `src/hooks/ralph-loop/completion-promise-detector.ts` 中 final-wave F2 拒绝的空 `catch`，将 transcript 读取与 JSONL 解析改为显式安全 helper 返回，不改变 detector 的 completion/filtering 行为；并在 `completion-promise-detector.test.ts` 增加 malformed transcript line 回归测试。
+- 验证目标：`lsp_diagnostics` 对 `src/hooks/ralph-loop/completion-promise-detector.ts` 与 `src/hooks/ralph-loop/completion-promise-detector.test.ts` 均 clean；`rtk test bun test src/hooks/ralph-loop/completion-promise-detector.test.ts` 通过（7 pass, 0 fail）。
+
+### 2026-03-20 - Task 5.1 follow-up Atlas read-only fix completed
+
+- [x] Task 5.1 follow-up: 修复 `src/agents/atlas/default.ts` 与 `src/agents/atlas/gemini.ts` 的 downstream 计划文件回归，统一为 `changes/{name}/tasks.md` read-only 约定，并删除所有允许编辑/勾选计划文件的 prompt 说明；同时更新 `src/agents/atlas/atlas-prompt.test.ts` 与 `src/agents/atlas/prompt-checkbox-enforcement.test.ts`，将断言切换为 downstream `changes/` read-only contract。
+- 验证目标：四个目标文件 `lsp_diagnostics` clean；`rtk test bun test src/agents/atlas/atlas-prompt.test.ts src/agents/atlas/prompt-checkbox-enforcement.test.ts` 通过（16 pass, 0 fail）；针对 `src/agents/atlas/{default,gemini,gpt}.ts` 的遗留编辑指令 grep 为 no matches。

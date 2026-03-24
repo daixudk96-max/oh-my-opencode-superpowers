@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import type { PluginInput } from "@opencode-ai/plugin";
 import * as skillLoader from "../../features/opencode-skill-loader/skill-content";
 import type { LoadedSkill } from "../../features/opencode-skill-loader/types";
-import { hashDescription } from "./cache-checker";
+import { hashSkillSignature } from "./cache-checker";
 import * as cacheStorage from "./cache-storage";
 import { createSkillAutoTriggerHook } from "./index";
 import * as triggerGenerator from "./trigger-generator";
@@ -22,7 +22,15 @@ describe("skill auto-trigger cache cleanup", () => {
 	test("removes deleted skills from cache without fallback", async () => {
 		//#given
 		const description = "Use when audit logs";
-		const hash = hashDescription(description);
+		const hash = hashSkillSignature({
+			name: "keep-skill",
+			scope: "user",
+			definition: {
+				name: "keep-skill",
+				description,
+				template: "",
+			},
+		});
 		const cache: SkillTriggerCache = {
 			version: "1.0",
 			generatedAt: "",

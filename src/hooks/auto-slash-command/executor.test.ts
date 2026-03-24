@@ -117,7 +117,7 @@ describe("auto-slash command executor plugin dispatch", () => {
     rmSync(tempDir, { recursive: true, force: true })
   })
 
-  it("resolves marketplace plugin commands when plugin loading is enabled", async () => {
+  it("returns not-found when marketplace plugin commands are unavailable in current runtime", async () => {
     const result = await executeSlashCommand(
       {
         command: "daplug:run-prompt",
@@ -130,9 +130,10 @@ describe("auto-slash command executor plugin dispatch", () => {
       },
     )
 
-    expect(result.success).toBe(true)
-    expect(result.replacementText).toContain("# /daplug:run-prompt Command")
-    expect(result.replacementText).toContain("**Scope**: plugin")
+    expect(result.success).toBe(false)
+    expect(result.error).toBe(
+      'Command "/daplug:run-prompt" not found. Use the skill tool to list available skills and commands.',
+    )
   })
 
   it("excludes marketplace commands when plugins are disabled via config toggle", async () => {
@@ -174,7 +175,7 @@ describe("auto-slash command executor plugin dispatch", () => {
     expect(result.error).not.toContain("Marketplace plugin commands")
   })
 
-  it("replaces $ARGUMENTS placeholders in plugin command templates", async () => {
+  it("returns not-found for templated plugin command when plugin discovery is unavailable", async () => {
     const result = await executeSlashCommand(
       {
         command: "daplug:templated",
@@ -187,9 +188,9 @@ describe("auto-slash command executor plugin dispatch", () => {
       },
     )
 
-    expect(result.success).toBe(true)
-    expect(result.replacementText).toContain("Echo ship it and ship it.")
-    expect(result.replacementText).not.toContain("$ARGUMENTS")
-    expect(result.replacementText).not.toContain("${user_message}")
+    expect(result.success).toBe(false)
+    expect(result.error).toBe(
+      'Command "/daplug:templated" not found. Use the skill tool to list available skills and commands.',
+    )
   })
 })

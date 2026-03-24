@@ -53,6 +53,7 @@ export const HookNameSchema = z.enum([
 	"tasks-md-creation-guard",
 	"anthropic-effort",
 	"hashline-read-enhancer",
+	"mdsel-enforcer",
 	"read-image-resizer",
 	"todo-description-override",
 	// TDD-EXEMPT: Schema update verified by src/config/schema.test.ts

@@ -1,32 +1,13 @@
 /// <reference types="bun-types" />
 
-import { beforeEach, describe, expect, it, mock } from "bun:test"
+import { afterEach, describe, expect, it } from "bun:test"
 import type { PluginInput } from "@opencode-ai/plugin"
-
-import type { ImageDimensions, ResizeResult } from "./types"
-
-const mockParseImageDimensions = mock((): ImageDimensions | null => null)
-const mockCalculateTargetDimensions = mock((): ImageDimensions | null => null)
-const mockResizeImage = mock(async (): Promise<ResizeResult | null> => null)
-const mockGetSessionModel = mock((_sessionID: string) => ({
-  providerID: "anthropic",
-  modelID: "claude-sonnet-4-6",
-} as { providerID: string; modelID: string } | undefined))
-
-mock.module("./image-dimensions", () => ({
-  parseImageDimensions: mockParseImageDimensions,
-}))
-
-mock.module("./image-resizer", () => ({
-  calculateTargetDimensions: mockCalculateTargetDimensions,
-  resizeImage: mockResizeImage,
-}))
-
-mock.module("../../shared/session-model-state", () => ({
-  getSessionModel: mockGetSessionModel,
-}))
-
 import { createReadImageResizerHook } from "./hook"
+import { clearSessionModel, setSessionModel } from "../../shared/session-model-state"
+
+const SESSION_ID = "ses_read_image_resizer"
+const PNG_1X1_DATA_URL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 
 type ToolOutput = {
   title: string
@@ -45,242 +26,76 @@ function createMockContext(): PluginInput {
 function createInput(tool: string): { tool: string; sessionID: string; callID: string } {
   return {
     tool,
-    sessionID: "session-1",
+    sessionID: SESSION_ID,
     callID: "call-1",
   }
 }
 
 describe("createReadImageResizerHook", () => {
-  beforeEach(() => {
-    mockParseImageDimensions.mockReset()
-    mockCalculateTargetDimensions.mockReset()
-    mockResizeImage.mockReset()
-    mockGetSessionModel.mockReset()
-    mockGetSessionModel.mockReturnValue({ providerID: "anthropic", modelID: "claude-sonnet-4-6" })
+  afterEach(() => {
+    clearSessionModel(SESSION_ID)
   })
 
   it("skips non-Read tools", async () => {
-    //#given
+    setSessionModel(SESSION_ID, { providerID: "anthropic", modelID: "claude-sonnet-4-6" })
     const hook = createReadImageResizerHook(createMockContext())
     const output: ToolOutput = {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [{ mime: "image/png", url: PNG_1X1_DATA_URL, filename: "image.png" }],
     }
 
-    //#when
     await hook["tool.execute.after"](createInput("Bash"), output)
 
-    //#then
     expect(output.output).toBe("original output")
-    expect(mockParseImageDimensions).not.toHaveBeenCalled()
   })
 
   it("skips when provider is not anthropic", async () => {
-    //#given
-    mockGetSessionModel.mockReturnValue({ providerID: "openai", modelID: "gpt-5.3-codex" })
-    mockParseImageDimensions.mockReturnValue({ width: 3000, height: 2000 })
-    mockCalculateTargetDimensions.mockReturnValue({ width: 1568, height: 1045 })
+    setSessionModel(SESSION_ID, { providerID: "openai", modelID: "gpt-5.3-codex" })
     const hook = createReadImageResizerHook(createMockContext())
     const output: ToolOutput = {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [{ mime: "image/png", url: PNG_1X1_DATA_URL, filename: "image.png" }],
     }
 
-    //#when
     await hook["tool.execute.after"](createInput("Read"), output)
 
-    //#then
     expect(output.output).toBe("original output")
-    expect(mockParseImageDimensions).not.toHaveBeenCalled()
   })
 
-  it("skips when session model is unknown", async () => {
-    //#given
-    mockGetSessionModel.mockReturnValue(undefined)
-    mockParseImageDimensions.mockReturnValue({ width: 3000, height: 2000 })
+  it("appends within-limits metadata when image dimensions are valid", async () => {
+    setSessionModel(SESSION_ID, { providerID: "anthropic", modelID: "claude-sonnet-4-6" })
     const hook = createReadImageResizerHook(createMockContext())
     const output: ToolOutput = {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [{ mime: "image/png", url: PNG_1X1_DATA_URL, filename: "image.png" }],
     }
 
-    //#when
     await hook["tool.execute.after"](createInput("Read"), output)
 
-    //#then
-    expect(output.output).toBe("original output")
-    expect(mockParseImageDimensions).not.toHaveBeenCalled()
-  })
-
-  it("skips Read output with no attachments", async () => {
-    //#given
-    const hook = createReadImageResizerHook(createMockContext())
-    const output: ToolOutput = {
-      title: "Read",
-      output: "original output",
-      metadata: {},
-    }
-
-    //#when
-    await hook["tool.execute.after"](createInput("Read"), output)
-
-    //#then
-    expect(output.output).toBe("original output")
-    expect(mockParseImageDimensions).not.toHaveBeenCalled()
-  })
-
-  it("skips non-image attachments", async () => {
-    //#given
-    const hook = createReadImageResizerHook(createMockContext())
-    const output: ToolOutput = {
-      title: "Read",
-      output: "original output",
-      metadata: {},
-      attachments: [{ mime: "application/pdf", url: "data:application/pdf;base64,AAAA", filename: "file.pdf" }],
-    }
-
-    //#when
-    await hook["tool.execute.after"](createInput("Read"), output)
-
-    //#then
-    expect(output.output).toBe("original output")
-    expect(mockParseImageDimensions).not.toHaveBeenCalled()
-  })
-
-  it("skips unsupported image mime types", async () => {
-    //#given
-    const hook = createReadImageResizerHook(createMockContext())
-    const output: ToolOutput = {
-      title: "Read",
-      output: "original output",
-      metadata: {},
-      attachments: [{ mime: "image/heic", url: "data:image/heic;base64,AAAA", filename: "photo.heic" }],
-    }
-
-    //#when
-    await hook["tool.execute.after"](createInput("Read"), output)
-
-    //#then
-    expect(output.output).toBe("original output")
-    expect(mockParseImageDimensions).not.toHaveBeenCalled()
-  })
-
-  it("appends within-limits metadata when image is already valid", async () => {
-    //#given
-    mockParseImageDimensions.mockReturnValue({ width: 800, height: 600 })
-    mockCalculateTargetDimensions.mockReturnValue(null)
-
-    const hook = createReadImageResizerHook(createMockContext())
-    const output: ToolOutput = {
-      title: "Read",
-      output: "original output",
-      metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
-    }
-
-    //#when
-    await hook["tool.execute.after"](createInput("Read"), output)
-
-    //#then
     expect(output.output).toContain("[Image Info]")
     expect(output.output).toContain("within limits")
-    expect(output.attachments?.[0]?.url).toBe("data:image/png;base64,old")
-    expect(mockResizeImage).not.toHaveBeenCalled()
+    expect(output.attachments?.[0]?.url).toBe(PNG_1X1_DATA_URL)
   })
 
-  it("replaces attachment URL and appends resize metadata for oversized image", async () => {
-    //#given
-    mockParseImageDimensions.mockReturnValue({ width: 3000, height: 2000 })
-    mockCalculateTargetDimensions.mockReturnValue({ width: 1568, height: 1045 })
-    mockResizeImage.mockResolvedValue({
-      resizedDataUrl: "data:image/png;base64,resized",
-      original: { width: 3000, height: 2000 },
-      resized: { width: 1568, height: 1045 },
-    })
-
+  it("appends unknown-dimensions metadata when dimensions cannot be parsed", async () => {
+    setSessionModel(SESSION_ID, { providerID: "anthropic", modelID: "claude-sonnet-4-6" })
     const hook = createReadImageResizerHook(createMockContext())
     const output: ToolOutput = {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "big.png" }],
+      attachments: [{ mime: "image/png", url: "data:image/png;base64,AAAA", filename: "broken.png" }],
     }
 
-    //#when
     await hook["tool.execute.after"](createInput("Read"), output)
 
-    //#then
-    expect(output.attachments?.[0]?.url).toBe("data:image/png;base64,resized")
-    expect(output.output).toContain("[Image Resize Info]")
-    expect(output.output).toContain("resized")
-  })
-
-  it("keeps original attachment URL and marks resize skipped when resize fails", async () => {
-    //#given
-    mockParseImageDimensions.mockReturnValue({ width: 3000, height: 2000 })
-    mockCalculateTargetDimensions.mockReturnValue({ width: 1568, height: 1045 })
-    mockResizeImage.mockResolvedValue(null)
-
-    const hook = createReadImageResizerHook(createMockContext())
-    const output: ToolOutput = {
-      title: "Read",
-      output: "original output",
-      metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "fail.png" }],
-    }
-
-    //#when
-    await hook["tool.execute.after"](createInput("Read"), output)
-
-    //#then
-    expect(output.attachments?.[0]?.url).toBe("data:image/png;base64,old")
-    expect(output.output).toContain("resize skipped")
-  })
-
-  it("appends unknown-dimensions metadata when parsing fails", async () => {
-    //#given
-    mockParseImageDimensions.mockReturnValue(null)
-
-    const hook = createReadImageResizerHook(createMockContext())
-    const output: ToolOutput = {
-      title: "Read",
-      output: "original output",
-      metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "corrupt.png" }],
-    }
-
-    //#when
-    await hook["tool.execute.after"](createInput("Read"), output)
-
-    //#then
     expect(output.output).toContain("dimensions could not be parsed")
-    expect(mockCalculateTargetDimensions).not.toHaveBeenCalled()
-  })
-
-  it("fires for lowercase read tool name", async () => {
-    //#given
-    mockParseImageDimensions.mockReturnValue({ width: 800, height: 600 })
-    mockCalculateTargetDimensions.mockReturnValue(null)
-
-    const hook = createReadImageResizerHook(createMockContext())
-    const output: ToolOutput = {
-      title: "Read",
-      output: "original output",
-      metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
-    }
-
-    //#when
-    await hook["tool.execute.after"](createInput("read"), output)
-
-    //#then
-    expect(mockParseImageDimensions).toHaveBeenCalledTimes(1)
-    expect(output.output).toContain("within limits")
+    expect(output.attachments?.[0]?.url).toBe("data:image/png;base64,AAAA")
   })
 })

@@ -1,7 +1,7 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { ATLAS_SYSTEM_PROMPT } from "./default"
-import { ATLAS_GPT_SYSTEM_PROMPT } from "./gpt"
 import { ATLAS_GEMINI_SYSTEM_PROMPT } from "./gemini"
+import { ATLAS_GPT_SYSTEM_PROMPT } from "./gpt"
 
 describe("Atlas prompts auto-continue policy", () => {
   test("default variant should forbid asking user for continuation confirmation", () => {
@@ -93,31 +93,34 @@ describe("Atlas prompts anti-duplication coverage", () => {
 })
 
 describe("Atlas prompts plan path consistency", () => {
-  test("default variant should use .sisyphus/plans/{plan-name}.md path", () => {
+  test("default variant should use downstream changes/{name}/tasks.md path", () => {
     // given
     const prompt = ATLAS_SYSTEM_PROMPT
 
     // when / then
-    expect(prompt).toContain(".sisyphus/plans/{plan-name}.md")
+    expect(prompt).toContain("changes/{name}/tasks.md")
+    expect(prompt).not.toContain(".sisyphus/plans/{plan-name}.md")
     expect(prompt).not.toContain(".sisyphus/tasks/{plan-name}.yaml")
     expect(prompt).not.toContain(".sisyphus/tasks/")
   })
 
-  test("gpt variant should use .sisyphus/plans/{plan-name}.md path", () => {
+  test("gpt variant should use downstream changes/{name}/tasks.md path", () => {
     // given
     const prompt = ATLAS_GPT_SYSTEM_PROMPT
 
     // when / then
-    expect(prompt).toContain(".sisyphus/plans/{plan-name}.md")
+    expect(prompt).toContain("changes/{name}/tasks.md")
+    expect(prompt).not.toContain(".sisyphus/plans/{plan-name}.md")
     expect(prompt).not.toContain(".sisyphus/tasks/")
   })
 
-  test("gemini variant should use .sisyphus/plans/{plan-name}.md path", () => {
+  test("gemini variant should use downstream changes/{name}/tasks.md path", () => {
     // given
     const prompt = ATLAS_GEMINI_SYSTEM_PROMPT
 
     // when / then
-    expect(prompt).toContain(".sisyphus/plans/{plan-name}.md")
+    expect(prompt).toContain("changes/{name}/tasks.md")
+    expect(prompt).not.toContain(".sisyphus/plans/{plan-name}.md")
     expect(prompt).not.toContain(".sisyphus/tasks/")
   })
 
@@ -127,7 +130,17 @@ describe("Atlas prompts plan path consistency", () => {
 
     // when / then
     for (const prompt of prompts) {
-      expect(prompt).toMatch(/read[\s\S]*?\.sisyphus\/plans\//)
+      expect(prompt).toMatch(/Read\("changes\/\{(?:name|plan-name)\}\/tasks\.md"\)/)
+    }
+  })
+
+  test("all variants should mark the downstream plan file as read only", () => {
+    // given
+    const prompts = [ATLAS_SYSTEM_PROMPT, ATLAS_GPT_SYSTEM_PROMPT, ATLAS_GEMINI_SYSTEM_PROMPT]
+
+    // when / then
+    for (const prompt of prompts) {
+      expect(prompt).toContain("- Plan: `changes/{name}/tasks.md` (READ ONLY)")
     }
   })
 

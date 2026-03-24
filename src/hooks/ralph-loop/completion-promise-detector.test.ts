@@ -1,7 +1,13 @@
 /// <reference types="bun-types" />
 import { describe, expect, test } from "bun:test"
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import type { PluginInput } from "@opencode-ai/plugin"
-import { detectCompletionInSessionMessages } from "./completion-promise-detector"
+import {
+  detectCompletionInSessionMessages,
+  detectCompletionInTranscript,
+} from "./completion-promise-detector"
 
 type SessionMessage = {
   info?: { role?: string }
@@ -183,5 +189,27 @@ describe("detectCompletionInSessionMessages", () => {
 
       expect(detected).toBe(false)
     })
+  })
+})
+
+describe("detectCompletionInTranscript", () => {
+  test("#when transcript contains malformed lines before completion #then should keep scanning", () => {
+    // #given
+    const tempDir = mkdtempSync(join(tmpdir(), "completion-promise-detector-"))
+    const transcriptPath = join(tempDir, "transcript.jsonl")
+    writeFileSync(
+      transcriptPath,
+      ['{"type":"assistant","content":"still working"}', 'not json', '{"type":"assistant","content":"done <promise>DONE</promise>"}'].join("\n"),
+    )
+
+    try {
+      // #when
+      const detected = detectCompletionInTranscript(transcriptPath, "DONE")
+
+      // #then
+      expect(detected).toBe(true)
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true })
+    }
   })
 })

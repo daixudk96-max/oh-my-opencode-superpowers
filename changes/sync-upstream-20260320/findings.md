@@ -138,6 +138,11 @@
 
 - `completion-promise-detector.ts` 的最小合并做法是保留下游 `isCompletionText`/instruction-like 误报过滤与 `tool_output` 文本抽取，同时只吸收上游 `startedAt` 时间范围过滤，并让 assistant session parts 在 `tool_result` 情况下复用同一套文本候选提取逻辑。
 
+### 2026-03-20 - Task 3.2 completion-promise-detector.ts follow-up fix
+
+- final-wave F2 的空 `catch` 拒绝项可用两个极小 helper 收束：把 transcript 文件读取与 JSONL 行解析分别封装为返回 `null` 的安全函数，循环层继续 `continue`/`false`，即可移除空 `catch` 而不改变 false-positive 过滤、`startedAt` 窗口或 `tool_result` 扫描行为。
+- 为锁定该行为，`completion-promise-detector.test.ts` 追加一个 transcript 回归：前面存在 malformed JSONL 行时，后续合法 assistant completion 仍应被检测到。
+
 ### 2026-03-20 - Task 1.1
 
 - 已按 upstream/theirs 接受并暂存这 7 个文件：
@@ -277,3 +282,9 @@
 - `assets/oh-my-opencode.schema.json` 的未暂存 `openclaw` schema 扩展来自已完成的 build 验证后生成结果，属于应保留的生成产物；最终应把该最新生成内容纳入提交，而不是回退到较早的 staged 版本。
 - `changes/sync-upstream-20260320/` 下的 `design.md`、`proposal.md`、`downstream-snapshot.md`、`learnings.md`、`tasks.md` 与 findings/progress 一起构成本次 upstream-sync 记录，应随本次 merge 提交。
 - 明确排除的本地杂物/非预期文件包括：`.opencode/.lock-*.tmp`、`.opencode/merge-analysis/**`、`.opencode/oh-my-opencode1.jsonc`、`debug-test-scratch.txt`、`githubanomalyco-opencode/`、`reproduce_bug.ts`，以及未进入暂存区的 `vendor/`、`src/downstream/runtime-hook-executor.test.ts`、`src/hooks/failure-counter/index.test.ts`；它们不是已验证的 merge 输出。
+
+### 2026-03-20 - Task 5.1 follow-up Atlas read-only fix
+
+- `src/agents/atlas/default.ts` 与 `src/agents/atlas/gemini.ts` 的 final-wave follow-up 最小修复是对齐已正确的 GPT 约定：`- Plan: \`changes/{name}/tasks.md\` (READ ONLY)`，并删除所有允许 Atlas 编辑或勾选 `changes/*/tasks.md` 的说明。
+- 这次 follow-up 不需要改 `src/agents/atlas/gpt.ts`；默认版/Gemini 版只要移除 plan-editing boundary 和整个 `POST-DELEGATION RULE` 区块，即可消除“Atlas 可以编辑计划文件”的残留回归。
+- prompt 测试的稳妥断言应锁定两个点：一是 downstream `changes/{name}/tasks.md` read-only 描述必须存在，二是 prompt 中不得再出现 `edit the plan checkbox` / `change \`- [ ]\` to \`- [x]\`` 等编辑指令；验证示例里的读取占位符仍可能是 `{name}` 或 `{plan-name}`，测试不应把它误判为回归。

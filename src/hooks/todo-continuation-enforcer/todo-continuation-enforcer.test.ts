@@ -361,7 +361,7 @@ describe("todo-continuation-enforcer", () => {
     expect(promptCalls[0].sessionID).toBe(otherSession)
   }, { timeout: 15000 })
 
-  test("should inject for background task session (subagent)", async () => {
+  test("should inject for background task session (subagent) when its own todos are incomplete", async () => {
     fakeTimers.restore()
     // given - main session set, background task session registered
     setMainSession("main-session")
@@ -375,7 +375,7 @@ describe("todo-continuation-enforcer", () => {
       event: { type: "session.idle", properties: { sessionID: bgTaskSession } },
     })
 
-    // then - continuation injected for background task session
+    // then - continuation still targets the background task session's own todos
     await wait(2500)
     expect(promptCalls.length).toBe(1)
     expect(promptCalls[0].sessionID).toBe(bgTaskSession)

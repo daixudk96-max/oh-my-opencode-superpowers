@@ -33,37 +33,38 @@ function resolveTaskContext(
   pendingTaskRef: PendingTaskRef | undefined,
   planPath: string,
 ): {
-  currentTask: TrackedTopLevelTaskRef | null
-  shouldSkipTaskSessionUpdate: boolean
+  persistenceTask: TrackedTopLevelTaskRef | null
+  reminderTask: TrackedTopLevelTaskRef | null
   shouldIgnoreCurrentSessionId: boolean
 } {
   if (!pendingTaskRef) {
+    const currentTask = readCurrentTopLevelTask(planPath)
     return {
-      currentTask: readCurrentTopLevelTask(planPath),
-      shouldSkipTaskSessionUpdate: false,
+      persistenceTask: null,
+      reminderTask: currentTask,
       shouldIgnoreCurrentSessionId: false,
     }
   }
 
   if (pendingTaskRef.kind === "track") {
     return {
-      currentTask: pendingTaskRef.task,
-      shouldSkipTaskSessionUpdate: false,
+      persistenceTask: pendingTaskRef.task,
+      reminderTask: pendingTaskRef.task,
       shouldIgnoreCurrentSessionId: false,
     }
   }
 
   if (pendingTaskRef.reason === "explicit_resume") {
     return {
-      currentTask: readCurrentTopLevelTask(planPath),
-      shouldSkipTaskSessionUpdate: true,
+      persistenceTask: null,
+      reminderTask: readCurrentTopLevelTask(planPath),
       shouldIgnoreCurrentSessionId: true,
     }
   }
 
   return {
-    currentTask: pendingTaskRef.task,
-    shouldSkipTaskSessionUpdate: true,
+    persistenceTask: null,
+    reminderTask: pendingTaskRef.task,
     shouldIgnoreCurrentSessionId: true,
   }
 }
@@ -128,12 +129,12 @@ export function createToolExecuteAfterHandler(input: {
       if (boulderState) {
         const progress = getPlanProgress(boulderState.active_plan)
         const {
-          currentTask,
-          shouldSkipTaskSessionUpdate,
+          persistenceTask,
+          reminderTask,
           shouldIgnoreCurrentSessionId,
         } = resolveTaskContext(pendingTaskRef, boulderState.active_plan)
-        const trackedTaskSession = currentTask
-          ? getTaskSessionState(ctx.directory, currentTask.key)
+        const trackedTaskSession = reminderTask
+          ? getTaskSessionState(ctx.directory, reminderTask.key)
           : null
         const sessionState = toolInput.sessionID ? getState(toolInput.sessionID) : undefined
 
@@ -154,11 +155,11 @@ export function createToolExecuteAfterHandler(input: {
           lineageSessionIDs,
         })
 
-        if (currentTask && subagentSessionId && !shouldSkipTaskSessionUpdate) {
+        if (persistenceTask && subagentSessionId) {
           upsertTaskSessionState(ctx.directory, {
-            taskKey: currentTask.key,
-            taskLabel: currentTask.label,
-            taskTitle: currentTask.title,
+            taskKey: persistenceTask.key,
+            taskLabel: persistenceTask.label,
+            taskTitle: persistenceTask.title,
             sessionId: subagentSessionId,
             agent: typeof toolOutput.metadata?.agent === "string" ? toolOutput.metadata.agent : undefined,
             category: typeof toolOutput.metadata?.category === "string" ? toolOutput.metadata.category : undefined,

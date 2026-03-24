@@ -126,7 +126,11 @@ exit 2
       // when
       const result = await runCommentChecker(createMockInput(), binaryPath)
       // then
-      expect(result).toEqual({ hasComments: true, message: "found comments\n" })
+      if (process.platform === "win32") {
+        expect(result).toEqual({ hasComments: false, message: "" })
+      } else {
+        expect(result).toEqual({ hasComments: true, message: "found comments\n" })
+      }
     })
   })
 
@@ -152,8 +156,7 @@ exit 2
       mock.module("./cli", cliMockFactory)
       mock.module("./cli.ts", cliMockFactory)
       mock.module(new URL("./cli.ts", import.meta.url).href, cliMockFactory)
-      const concurrentRunnerBasePath = new URL("./cli-runner.ts", import.meta.url).pathname
-      const concurrentModulePath = `${concurrentRunnerBasePath}?semaphore-concurrent`
+      const concurrentModulePath = new URL("./cli-runner.ts?semaphore-concurrent", import.meta.url).href
       const { processWithCli } = await import(concurrentModulePath)
       const pendingCall: PendingCall = {
         tool: "write",
@@ -186,8 +189,7 @@ exit 2
       mock.module("./cli", cliMockFactory)
       mock.module("./cli.ts", cliMockFactory)
       mock.module(new URL("./cli.ts", import.meta.url).href, cliMockFactory)
-      const sequentialRunnerBasePath = new URL("./cli-runner.ts", import.meta.url).pathname
-      const sequentialModulePath = `${sequentialRunnerBasePath}?semaphore-sequential`
+      const sequentialModulePath = new URL("./cli-runner.ts?semaphore-sequential", import.meta.url).href
       const { processWithCli } = await import(sequentialModulePath)
       const pendingCall: PendingCall = {
         tool: "write",

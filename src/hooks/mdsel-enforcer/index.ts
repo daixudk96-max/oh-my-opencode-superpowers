@@ -37,22 +37,18 @@ function isEnforcedExtension(filePath: string): boolean {
 function createBlockMessage(filePath: string, wordCount: number): string {
   return `[${HOOK_NAME}] This Markdown file exceeds ${MIN_WORDS} words (${wordCount} words detected).
 
-**You MUST use mdsel to read specific sections instead of the entire file.**
+**You MUST use the /mdsel skill to read specific sections instead of the entire file.**
 
-Quick start:
+Use the Skill tool to invoke mdsel:
 1. Index the document first:
-   \`\`\`bash
-   mdsel "${filePath}"
-   \`\`\`
+   Skill(skill="mdsel", args="${filePath}")
 
-2. Select the section you need:
-   \`\`\`bash
-   mdsel h2.0 "${filePath}"
-   \`\`\`
+2. Then select the section you need:
+   Skill(skill="mdsel", args="h2.0 \\"${filePath}\\"")
 
 **Benefits**: ~95% token savings for targeted section reading.
 
-**If you need the entire file**, use the Read tool with a specific reason.`
+**If you need the entire file**, use the Read tool with offset and limit parameters to read in chunks.`
 }
 
 export function createMdselEnforcerHook(ctx: PluginInput) {

@@ -26,7 +26,7 @@ describe("buildCompletionGate", () => {
 
       then("gate interpolates the plan name path", () => {
         expect(gate).toContain(planName)
-        expect(gate).toContain(`.sisyphus/plans/${planName}.md`)
+        expect(gate).toContain(`changes/${planName}/tasks.md`)
       })
 
       then("gate includes Edit instructions", () => {
@@ -37,12 +37,12 @@ describe("buildCompletionGate", () => {
         expect(gate.toLowerCase()).toContain("read")
       })
 
-      then("old STEP 7 MARK COMPLETION text is absent", () => {
-        expect(gate).not.toContain("STEP 7")
-        expect(gate).not.toContain("MARK COMPLETION IN PLAN FILE")
+      then("gate focuses on immediate checkbox update workflow", () => {
+        expect(gate).toContain("Your completion will NOT be recorded")
+        expect(gate).toContain("DO NOT call `task()` again")
       })
 
-      then("step numbering remains consecutive after removal", () => {
+      then("step numbering remains consecutive where step headers are present", () => {
         const stepMatches = gate.match(/STEP \d+:/g) ?? []
         if (stepMatches.length > 1) {
           const numbers = stepMatches.map((s: string) => parseInt(s.match(/\d+/)?.[0] ?? "0"))
@@ -64,8 +64,8 @@ describe("buildOrchestratorReminder", () => {
     when("buildOrchestratorReminder is called with autoCommit true", () => {
       const reminder = buildOrchestratorReminder(planName, progress, sessionId, true)
 
-      then("old STEP 7 MARK COMPLETION IN PLAN FILE text is absent", () => {
-        expect(reminder).not.toContain("STEP 7: MARK COMPLETION IN PLAN FILE")
+      then("reminder includes the immediate completion step wording", () => {
+        expect(reminder).toContain("STEP 7: MARK COMPLETION IN PLAN FILE (IMMEDIATELY)")
       })
 
       then("completion gate appears before verification reminder", () => {
@@ -79,8 +79,8 @@ describe("buildOrchestratorReminder", () => {
     when("buildOrchestratorReminder is called with autoCommit false", () => {
       const reminder = buildOrchestratorReminder(planName, progress, sessionId, false)
 
-      then("old STEP 7 MARK COMPLETION IN PLAN FILE text is absent", () => {
-        expect(reminder).not.toContain("STEP 7: MARK COMPLETION IN PLAN FILE")
+      then("reminder includes the immediate completion step wording", () => {
+        expect(reminder).toContain("STEP 7: MARK COMPLETION IN PLAN FILE (IMMEDIATELY)")
       })
 
       then("completion gate appears before verification reminder", () => {

@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { tmpdir } from "node:os"
 import { randomUUID } from "node:crypto"
 import { SYSTEM_DIRECTIVE_PREFIX } from "../../shared/system-directive"
-import { clearSessionAgent } from "../../features/claude-code-session-state"
+import { clearSessionAgent, updateSessionAgent } from "../../features/claude-code-session-state"
 // Force stable (JSON) mode for tests that rely on message file storage
 mock.module("../../shared/opencode-storage-detection", () => ({
   isSqliteBackend: () => false,
@@ -36,6 +36,9 @@ describe("prometheus-md-only", () => {
       join(testMessageDir, "msg_001.json"),
       JSON.stringify(messageContent)
     )
+    if (agent) {
+      updateSessionAgent(sessionID, agent)
+    }
   }
 
   afterEach(() => {
@@ -353,7 +356,7 @@ describe("prometheus-md-only", () => {
       await hook["tool.execute.before"](input, output)
 
       // then
-      expect(output.args.prompt).toContain(SYSTEM_DIRECTIVE_PREFIX)
+      expect(output.args.prompt).toContain("PROMETHEUS READ-ONLY")
       expect(output.args.prompt).toContain("DO NOT modify any files")
     })
 
@@ -373,7 +376,7 @@ describe("prometheus-md-only", () => {
       await hook["tool.execute.before"](input, output)
 
       // then
-      expect(output.args.prompt).toContain(SYSTEM_DIRECTIVE_PREFIX)
+      expect(output.args.prompt).toContain("PROMETHEUS READ-ONLY")
     })
 
     test("should inject read-only warning when Prometheus calls call_omo_agent", async () => {
@@ -392,7 +395,7 @@ describe("prometheus-md-only", () => {
       await hook["tool.execute.before"](input, output)
 
       // then
-      expect(output.args.prompt).toContain(SYSTEM_DIRECTIVE_PREFIX)
+      expect(output.args.prompt).toContain("PROMETHEUS READ-ONLY")
     })
 
     test("should not double-inject warning if already present", async () => {
@@ -480,6 +483,7 @@ describe("prometheus-md-only", () => {
     test("should prioritize boulder agent over message file agent", async () => {
       // given - prometheus in message files (from /plan)
       setupMessageStorage(TEST_SESSION_ID, "prometheus")
+      clearSessionAgent(TEST_SESSION_ID)
       
       // given - atlas in boulder state (from /start-work)
       writeFileSync(BOULDER_FILE, JSON.stringify({
@@ -511,14 +515,17 @@ describe("prometheus-md-only", () => {
     })
 
     test("should use prometheus from boulder state when set", async () => {
+      const sessionID = `ses_boulder_${randomUUID()}`
+
       // given - atlas in message files (from some other agent)
-      setupMessageStorage(TEST_SESSION_ID, "atlas")
+      setupMessageStorage(sessionID, "atlas")
+      clearSessionAgent(sessionID)
       
       // given - prometheus in boulder state (edge case, but should honor it)
       writeFileSync(BOULDER_FILE, JSON.stringify({
         active_plan: "/test/plan.md",
         started_at: new Date().toISOString(),
-        session_ids: [TEST_SESSION_ID],
+        session_ids: [sessionID],
         plan_name: "test-plan",
         agent: "prometheus"
       }))
@@ -530,7 +537,7 @@ describe("prometheus-md-only", () => {
 
       const input = {
         tool: "Write",
-        sessionID: TEST_SESSION_ID,
+        sessionID,
         callID: "call-1",
       }
       const output = {

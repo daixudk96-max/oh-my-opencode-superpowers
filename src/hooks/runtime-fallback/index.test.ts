@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeEach, afterEach, spyOn } from "bun:test"
 import { createRuntimeFallbackHook } from "./index"
 import type { RuntimeFallbackConfig, OhMyOpenCodeConfig } from "../../config"
-import * as sharedModule from "../../shared"
+import * as loggerModule from "../../shared/logger"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
 
 describe("runtime-fallback", () => {
@@ -13,7 +13,7 @@ describe("runtime-fallback", () => {
     logCalls = []
     toastCalls = []
     SessionCategoryRegistry.clear()
-    logSpy = spyOn(sharedModule, "log").mockImplementation((msg: string, data?: unknown) => {
+    logSpy = spyOn(loggerModule, "log").mockImplementation((msg: string, data?: unknown) => {
       logCalls.push({ msg, data })
     })
   })

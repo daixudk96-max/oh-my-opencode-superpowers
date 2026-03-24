@@ -104,43 +104,55 @@ function getSessionPartTextCandidates(part: OpenCodeSessionMessagePart): string[
 	return candidates
 }
 
+function readTranscriptContent(transcriptPath: string): string | null {
+	try {
+		return readFileSync(transcriptPath, "utf-8")
+	} catch (_readError) {
+		return null
+	}
+}
+
+function parseTranscriptEntry(line: string): TranscriptEntry | null {
+	try {
+		return JSON.parse(line) as TranscriptEntry
+	} catch (_parseError) {
+		return null
+	}
+}
+
 export function detectCompletionInTranscript(
 	transcriptPath: string | undefined,
 	promise: string,
 	startedAt?: string,
 ): boolean {
 	if (!transcriptPath) return false
+	if (!existsSync(transcriptPath)) return false
 
-	try {
-		if (!existsSync(transcriptPath)) return false
+	const content = readTranscriptContent(transcriptPath)
+	if (content === null) return false
 
-		const content = readFileSync(transcriptPath, "utf-8")
-		const pattern = buildPromisePattern(promise)
-		const lines = content.split("\n").filter((line) => line.trim())
+	const pattern = buildPromisePattern(promise)
+	const lines = content.split("\n").filter((line) => line.trim())
 
-		for (const line of lines) {
-			try {
-				const entry = JSON.parse(line) as TranscriptEntry
-				if (entry.type === "user" || entry.type === "tool_use") continue
-				if (isEntryBeforeStartedAt(entry, startedAt)) continue
+	for (const line of lines) {
+		const entry = parseTranscriptEntry(line)
+		if (!entry) continue
+		if (entry.type === "user" || entry.type === "tool_use") continue
+		if (isEntryBeforeStartedAt(entry, startedAt)) continue
 
-				if (entry.type === "assistant") {
-					if (typeof entry.content === "string" && isCompletionText(entry.content, pattern)) {
-						return true
-					}
-				} else if (entry.type === "tool_result") {
-					const candidates = getToolOutputTextCandidates(entry.tool_output)
-					if (candidates.some((candidate) => isCompletionText(candidate, pattern))) {
-						return true
-					}
-				}
-			} catch {
+		if (entry.type === "assistant") {
+			if (typeof entry.content === "string" && isCompletionText(entry.content, pattern)) {
+				return true
+			}
+		} else if (entry.type === "tool_result") {
+			const candidates = getToolOutputTextCandidates(entry.tool_output)
+			if (candidates.some((candidate) => isCompletionText(candidate, pattern))) {
+				return true
 			}
 		}
-		return false
-	} catch {
-		return false
 	}
+
+	return false
 }
 
 export async function detectCompletionInSessionMessages(

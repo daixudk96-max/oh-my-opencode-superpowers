@@ -1,155 +1,52 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { ATLAS_SYSTEM_PROMPT } from "./default"
-import { ATLAS_GPT_SYSTEM_PROMPT } from "./gpt"
 import { ATLAS_GEMINI_SYSTEM_PROMPT } from "./gemini"
+import { ATLAS_GPT_SYSTEM_PROMPT } from "./gpt"
+
+const atlasPrompts = [
+  { name: "default", prompt: ATLAS_SYSTEM_PROMPT },
+  { name: "gpt", prompt: ATLAS_GPT_SYSTEM_PROMPT },
+  { name: "gemini", prompt: ATLAS_GEMINI_SYSTEM_PROMPT },
+]
 
 describe("ATLAS prompt checkbox enforcement", () => {
-  describe("default prompt", () => {
-    test("plan should NOT be marked (READ ONLY)", () => {
-      // given
-      const prompt = ATLAS_SYSTEM_PROMPT
-
-      // when / then
-      expect(prompt).not.toMatch(/\(READ ONLY\)/)
-    })
-
-    test("plan description should include EDIT for checkboxes", () => {
-      // given
-      const prompt = ATLAS_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/edit.*checkbox|checkbox.*edit/)
-    })
-
-    test("boundaries should include exception for editing .sisyphus/plans/*.md checkboxes", () => {
-      // given
-      const prompt = ATLAS_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/\.sisyphus\/plans\/\*\.md/)
-      expect(lowerPrompt).toMatch(/checkbox/)
-    })
-
-    test("prompt should include POST-DELEGATION RULE", () => {
-      // given
-      const prompt = ATLAS_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/post-delegation/)
-    })
-
-    test("prompt should include MUST NOT call a new task() before", () => {
-      // given
-      const prompt = ATLAS_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/must not.*call.*new.*task/)
-    })
-
-    test("default prompt should NOT reference .sisyphus/tasks/", () => {
-      // given
-      const prompt = ATLAS_SYSTEM_PROMPT
-
-      // when / then
-      expect(prompt).not.toMatch(/\.sisyphus\/tasks\//)
-    })
+  test("all variants should mark the downstream plan file as read only", () => {
+    // given / when / then
+    for (const { prompt } of atlasPrompts) {
+      expect(prompt).toContain("- Plan: `changes/{name}/tasks.md` (READ ONLY)")
+    }
   })
 
-  describe("GPT prompt", () => {
-    test("plan should NOT be marked (READ ONLY)", () => {
-      // given
-      const prompt = ATLAS_GPT_SYSTEM_PROMPT
-
-      // when / then
-      expect(prompt).not.toMatch(/\(READ ONLY\)/)
-    })
-
-    test("plan description should include EDIT for checkboxes", () => {
-      // given
-      const prompt = ATLAS_GPT_SYSTEM_PROMPT
+  test("all variants should forbid editing or checkbox-marking the plan file", () => {
+    // given / when / then
+    for (const { prompt } of atlasPrompts) {
       const lowerPrompt = prompt.toLowerCase()
 
-      // when / then
-      expect(lowerPrompt).toMatch(/edit.*checkbox|checkbox.*edit/)
-    })
-
-    test("boundaries should include exception for editing .sisyphus/plans/*.md checkboxes", () => {
-      // given
-      const prompt = ATLAS_GPT_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/\.sisyphus\/plans\/\*\.md/)
-      expect(lowerPrompt).toMatch(/checkbox/)
-    })
-
-    test("prompt should include POST-DELEGATION RULE", () => {
-      // given
-      const prompt = ATLAS_GPT_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/post-delegation/)
-    })
-
-    test("prompt should include MUST NOT call a new task() before", () => {
-      // given
-      const prompt = ATLAS_GPT_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/must not.*call.*new.*task/)
-    })
+      expect(lowerPrompt).not.toContain("edit the plan checkbox")
+      expect(lowerPrompt).not.toContain("change `- [ ]` to `- [x]`")
+      expect(lowerPrompt).not.toContain("you may edit to mark checkboxes")
+    }
   })
 
-  describe("Gemini prompt", () => {
-    test("plan should NOT be marked (READ ONLY)", () => {
-      // given
-      const prompt = ATLAS_GEMINI_SYSTEM_PROMPT
+  test("all variants should keep plan reads but reject legacy plan paths", () => {
+    // given / when / then
+    for (const { prompt } of atlasPrompts) {
+      expect(prompt).toMatch(/Read\("changes\/\{(?:name|plan-name)\}\/tasks\.md"\)/)
+      expect(prompt).not.toContain(".sisyphus/plans/")
+      expect(prompt).not.toContain(".sisyphus/tasks/")
+    }
+  })
 
-      // when / then
-      expect(prompt).not.toMatch(/\(READ ONLY\)/)
-    })
+  test("all variants should avoid post-delegation checkbox editing instructions", () => {
+    // given / when / then
+    for (const { name, prompt } of atlasPrompts) {
+      if (name === "gpt") {
+        expect(prompt).not.toContain("POST-DELEGATION RULE")
 
-    test("plan description should include EDIT for checkboxes", () => {
-      // given
-      const prompt = ATLAS_GEMINI_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
+        continue
+      }
 
-      // when / then
-      expect(lowerPrompt).toMatch(/edit.*checkbox|checkbox.*edit/)
-    })
-
-    test("boundaries should include exception for editing .sisyphus/plans/*.md checkboxes", () => {
-      // given
-      const prompt = ATLAS_GEMINI_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/\.sisyphus\/plans\/\*\.md/)
-      expect(lowerPrompt).toMatch(/checkbox/)
-    })
-
-    test("prompt should include POST-DELEGATION RULE", () => {
-      // given
-      const prompt = ATLAS_GEMINI_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/post-delegation/)
-    })
-
-    test("prompt should include MUST NOT call a new task() before", () => {
-      // given
-      const prompt = ATLAS_GEMINI_SYSTEM_PROMPT
-      const lowerPrompt = prompt.toLowerCase()
-
-      // when / then
-      expect(lowerPrompt).toMatch(/must not.*call.*new.*task/)
-    })
+      expect(prompt).not.toContain("POST-DELEGATION RULE")
+    }
   })
 })

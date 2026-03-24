@@ -9,6 +9,13 @@ const TEST_USER_CONFIG_DIR = "/tmp/opencode-config"
 mock.module("./constants", () => ({
   CACHE_DIR: TEST_OPENCODE_CACHE_DIR,
   USER_CONFIG_DIR: TEST_USER_CONFIG_DIR,
+  USER_OPENCODE_CONFIG: `${TEST_USER_CONFIG_DIR}/opencode.json`,
+  USER_OPENCODE_CONFIG_JSONC: `${TEST_USER_CONFIG_DIR}/opencode.jsonc`,
+  NPM_REGISTRY_URL: "https://registry.npmjs.org/-/package/oh-my-opencode/dist-tags",
+  NPM_FETCH_TIMEOUT: 5000,
+  VERSION_FILE: join(TEST_OPENCODE_CACHE_DIR, "version"),
+  INSTALLED_PACKAGE_JSON: join(TEST_OPENCODE_CACHE_DIR, "node_modules", "oh-my-opencode", "package.json"),
+  getWindowsAppdataDir: () => null,
   PACKAGE_NAME: "oh-my-opencode",
 }))
 
@@ -56,6 +63,7 @@ describe("invalidatePackage", () => {
   })
 
   afterEach(() => {
+    mock.restore()
     if (existsSync(TEST_CACHE_DIR)) {
       rmSync(TEST_CACHE_DIR, { recursive: true, force: true })
     }

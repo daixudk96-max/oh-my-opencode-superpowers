@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test"
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { _resetForTesting, subagentSessions } from "../../features/claude-code-session-state"
 import { createBoulderGatingWrapper } from "./boulder-gating-wrapper"
 import { createContinuationMaxRetriesWrapper } from "./continuation-max-retries-wrapper"
 
@@ -20,6 +21,7 @@ function writeBoulderState(directory: string, state: Record<string, unknown>): v
 }
 
 afterEach(() => {
+  _resetForTesting()
   for (const dir of tempDirs.splice(0)) {
     try {
       rmSync(dir, { recursive: true, force: true })
@@ -78,6 +80,32 @@ describe("createBoulderGatingWrapper", () => {
 
     //#then
     expect(callCount).toBe(1)
+  })
+
+  test("blocks idle event for child session tracked as subagent", async () => {
+    //#given
+    const directory = createTempProjectDir()
+    writeBoulderState(directory, {
+      active_plan: "changes/demo/tasks.md",
+      started_at: new Date().toISOString(),
+      session_ids: ["ses-parent"],
+      plan_name: "demo",
+    })
+    subagentSessions.add("ses-child")
+
+    let callCount = 0
+    const wrapped = createBoulderGatingWrapper({
+      ctx: { directory } as never,
+      handler: async () => {
+        callCount += 1
+      },
+    })
+
+    //#when
+    await wrapped({ event: { type: "session.idle", properties: { sessionID: "ses-child" } } })
+
+    //#then
+    expect(callCount).toBe(0)
   })
 })
 

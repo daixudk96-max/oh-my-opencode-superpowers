@@ -30,6 +30,7 @@ export type TrackedTopLevelTaskRef = Pick<TopLevelTaskRef, "key" | "label" | "ti
 export type PendingTaskRef =
   | { kind: "track"; task: TrackedTopLevelTaskRef }
   | { kind: "skip"; reason: "explicit_resume" }
+  | { kind: "skip"; reason: "prompt_mismatch"; task: TrackedTopLevelTaskRef }
   | { kind: "skip"; reason: "ambiguous_task_key"; task: TrackedTopLevelTaskRef }
 
 export interface SessionState {

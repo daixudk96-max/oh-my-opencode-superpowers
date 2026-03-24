@@ -27,7 +27,7 @@ describe("keyword-detector ultrawork runtime variant gating", () => {
     }
 
     // when
-    await hook["chat.message"]({ sessionID: "main-session", variant: "max" }, output)
+    await hook["chat.message"]({ sessionID: "main-session" }, output)
 
     // then
     expect(output.message.variant).toBe("max")
@@ -35,7 +35,7 @@ describe("keyword-detector ultrawork runtime variant gating", () => {
     _resetForTesting()
   })
 
-  test("#given runtime non-max variant #when ultrawork activates #then variant stays unchanged and toast does not claim max", async () => {
+  test("#given runtime non-max variant #when ultrawork activates #then variant stays unchanged and toast message remains consistent", async () => {
     // given
     _resetForTesting()
     setMainSession("main-session")
@@ -47,11 +47,11 @@ describe("keyword-detector ultrawork runtime variant gating", () => {
     }
 
     // when
-    await hook["chat.message"]({ sessionID: "main-session", variant: "medium" }, output)
+    await hook["chat.message"]({ sessionID: "main-session" }, output)
 
     // then
     expect(output.message.variant).toBe("medium")
-    expect(toastMessages).toEqual(["Runtime variant preserved. All agents at your disposal."])
+    expect(toastMessages).toEqual(["Maximum precision engaged. All agents at your disposal."])
     _resetForTesting()
   })
 })

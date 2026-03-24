@@ -25,6 +25,8 @@ import {
 	buildExtractionPrompt,
 	parseAIResponse,
 } from "./trigger-extractor";
+import * as cacheStorage from "./cache-storage";
+import * as triggerGenerator from "./trigger-generator";
 import {
 	EMPTY_CACHE,
 	type SkillTrigger,
@@ -203,6 +205,19 @@ describe("createSkillAutoTriggerHook", () => {
 
 	test("injects top matching skill suggestion into output parts", async () => {
 		//#given
+		const loadCacheSpy = spyOn(cacheStorage, "loadCache").mockReturnValue(EMPTY_CACHE);
+		const generateTriggersSpy = spyOn(
+			triggerGenerator,
+			"generateDynamicTriggers",
+		).mockResolvedValue([
+			{
+				skillName: "builtin-audit",
+				description: "Use when audit security issues",
+				keywords: /audit/i,
+				priority: 10,
+				scope: "builtin",
+			},
+		]);
 		const hook = createSkillAutoTriggerHook({} as PluginInput);
 		const output = {
 			message: {} as Record<string, unknown>,
@@ -218,10 +233,26 @@ describe("createSkillAutoTriggerHook", () => {
 		expect(textPart.text).toContain("`builtin-audit`");
 		expect(textPart.text).toContain('skill("builtin-audit")');
 		expect(textPart.text).toContain("Please audit the system");
+
+		loadCacheSpy.mockRestore();
+		generateTriggersSpy.mockRestore();
 	});
 
 	test("matches explicit frontmatter triggers even when description keywords do not match", async () => {
 		//#given
+		const loadCacheSpy = spyOn(cacheStorage, "loadCache").mockReturnValue(EMPTY_CACHE);
+		const generateTriggersSpy = spyOn(
+			triggerGenerator,
+			"generateDynamicTriggers",
+		).mockResolvedValue([
+			{
+				skillName: "explicit-trigger-skill",
+				description: "Generic helper skill",
+				keywords: /multi\s+stage\s+verification/i,
+				priority: 10,
+				scope: "user",
+			},
+		]);
 		getAllSkillsSpy.mockResolvedValue([
 			Object.assign(createSkill("explicit-trigger-skill", {
 				description: "Generic helper skill",
@@ -242,6 +273,9 @@ describe("createSkillAutoTriggerHook", () => {
 
 		//#then
 		expect(output.parts[0].text).toContain("`explicit-trigger-skill`");
+
+		loadCacheSpy.mockRestore();
+		generateTriggersSpy.mockRestore();
 	});
 });
 

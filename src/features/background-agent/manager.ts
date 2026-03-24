@@ -68,12 +68,15 @@ type SessionPromptAsyncArgs = Parameters<OpencodeClient["session"]["promptAsync"
 
 interface MessagePartInfo {
   sessionID?: string
+  sessionId?: string
   type?: string
   tool?: string
 }
 
+
 interface EventProperties {
   sessionID?: string
+  sessionId?: string
   info?: { id?: string }
   [key: string]: unknown
 }
@@ -154,6 +157,36 @@ export class BackgroundManager {
     this.rootDescendantCounts = new Map()
     this.enableParentSessionNotifications = options?.enableParentSessionNotifications ?? true
     this.registerProcessCleanup()
+  }
+
+  private resolveSessionIDFromMessagePartEvent(properties: EventProperties | undefined): string | undefined {
+    if (!properties || typeof properties !== "object") {
+      return undefined
+    }
+
+    if (typeof properties.sessionID === "string" && properties.sessionID.length > 0) {
+      return properties.sessionID
+    }
+
+    if (typeof properties.sessionId === "string" && properties.sessionId.length > 0) {
+      return properties.sessionId
+    }
+
+    const part = properties.part
+    if (!part || typeof part !== "object") {
+      return undefined
+    }
+
+    const partInfo = part as MessagePartInfo
+    if (typeof partInfo.sessionID === "string" && partInfo.sessionID.length > 0) {
+      return partInfo.sessionID
+    }
+
+    if (typeof partInfo.sessionId === "string" && partInfo.sessionId.length > 0) {
+      return partInfo.sessionId
+    }
+
+    return undefined
   }
 
   async assertCanSpawn(parentSessionID: string): Promise<SubagentSpawnContext> {
@@ -430,12 +463,10 @@ export class BackgroundManager {
       ? { providerID: input.model.providerID, modelID: input.model.modelID }
       : undefined
     const launchVariant = input.model?.variant
-
-    const launchAgentPayload = { name: input.agent }
     promptWithModelSuggestionRetry(this.client, {
       path: { id: sessionID },
       body: {
-        agent: launchAgentPayload,
+        agent: input.agent,
         ...(launchModel ? { model: launchModel } : {}),
         ...(launchVariant ? { variant: launchVariant } : {}),
         system: input.skillContent,
@@ -701,16 +732,14 @@ export class BackgroundManager {
     // Fire-and-forget prompt via promptAsync (no response body needed)
     // Include model if task has one (preserved from original launch with category config)
     // variant must be top-level in body, not nested inside model (OpenCode PromptInput schema)
-    const resumeAgentPayload = { name: existingTask.agent }
     const resumeModel = existingTask.model
       ? { providerID: existingTask.model.providerID, modelID: existingTask.model.modelID }
       : undefined
     const resumeVariant = existingTask.model?.variant
-
     const resumePromptArgs = {
       path: { id: existingTask.sessionID },
       body: {
-        agent: resumeAgentPayload,
+        agent: existingTask.agent,
         ...(resumeModel ? { model: resumeModel } : {}),
         ...(resumeVariant ? { variant: resumeVariant } : {}),
         tools: (() => {
@@ -799,11 +828,14 @@ export class BackgroundManager {
     }
 
     if (event.type === "message.part.updated" || event.type === "message.part.delta") {
-      if (!props || typeof props !== "object" || !("sessionID" in props)) return
-      const partInfo = props as unknown as MessagePartInfo
-      const sessionID = partInfo?.sessionID
+      const sessionID = this.resolveSessionIDFromMessagePartEvent(props)
       if (!sessionID) return
 
+      const partInfo = (
+        props && typeof props.part === "object"
+          ? props.part
+          : props
+      ) as MessagePartInfo
       const task = this.findBySession(sessionID)
       if (!task) return
 
