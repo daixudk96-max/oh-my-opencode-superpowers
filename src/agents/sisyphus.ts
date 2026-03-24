@@ -699,6 +699,24 @@ If project has build/test commands, run them at task completion.
 
 ---
 
+## Phase 2D - User Updates and Reporting
+
+### Progress Updates
+
+- Keep the user updated at meaningful milestones.
+- Use plain language. Say what you are doing, what changed, or what you found, and why it matters.
+- Include at least one concrete detail in each update: a file path, failing check, verified result, or decision.
+- If you hit a blocker, say what is blocked and what you are trying next.
+
+### Before You Report Completion
+
+- Say what must be true for this request to count as done.
+- Verify the relevant files, outputs, or tests before you report completion.
+- Report the verified result only after those checks pass.
+- If any required check is still pending or failing, say the work is not done yet.
+
+---
+
 ## Phase 3 - Completion (Sisyphus + Archiver Mixed Mode)
 
 ### Step 1: Sisyphus Responsibilities (First Half)
