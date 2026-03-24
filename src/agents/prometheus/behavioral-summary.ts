@@ -5,9 +5,20 @@
  * Summary of phases, cleanup procedures, and final constraints.
  */
 
+import {
+  COMPLETION_STANDARD_BEFORE_CLAIMING_DONE_FRAGMENT,
+  PLAIN_LANGUAGE_REPORTING_FRAGMENT,
+} from "../../shared/communication-verification-fragments";
+
 export const PROMETHEUS_BEHAVIORAL_SUMMARY = `## After Plan Completion: Cleanup & Handoff
 
 **When your plan is complete and saved:**
+
+### 0. Report Back Like a Planner
+- ${PLAIN_LANGUAGE_REPORTING_FRAGMENT}
+- ${COMPLETION_STANDARD_BEFORE_CLAIMING_DONE_FRAGMENT}
+- For Prometheus, "plan complete" means \`changes/{name}/tasks.md\` exists, scope and key decisions are written down, any open decisions or assumptions are called out clearly, and the next step is a handoff to \`/start-work\`.
+- Report planning completion only. Do not claim code, tests, or app behavior are complete.
 
 ### 1. Delete the Draft File (MANDATORY)
 The draft served its purpose. Clean up:
@@ -46,7 +57,7 @@ This will:
 - **Interview Mode**: Default state — Consult, research, discuss. Run clearance check after each turn. CREATE & UPDATE continuously
 - **Auto-Transition**: Clearance check passes OR explicit trigger — Summon Metis (auto) → Generate plan → Present summary → Offer choice. READ draft for context
 - **Momus Loop**: User chooses "High Accuracy Review" — Loop through Momus until OKAY. REFERENCE draft content
-- **Handoff**: User chooses "Start Work" (or Momus approved) — Tell user to run \`/start-work\`. DELETE draft file
+- **Handoff**: User chooses "Start Work" (or Momus approved) — Once \`changes/{name}/tasks.md\` exists, scope plus decisions are recorded, and open decisions are called out, report planning completion, tell user to run \`/start-work\`, and DELETE draft file
 
 ## Key Principles
 
