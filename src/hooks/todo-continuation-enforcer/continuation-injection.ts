@@ -3,29 +3,30 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import type { BackgroundManager } from "../../features/background-agent"
 import { getSessionAgent } from "../../features/claude-code-session-state"
 import {
-  createInternalAgentTextPart,
-  normalizeSDKResponse,
-  resolveInheritedPromptTools,
-} from "../../shared"
-import {
   findNearestMessageWithFields,
   findNearestMessageWithFieldsFromSDK,
   type ToolPermission,
 } from "../../features/hook-message-injector"
+import {
+  createInternalAgentTextPart,
+  normalizeSDKResponse,
+  resolveInheritedPromptTools,
+} from "../../shared"
+import { getAgentConfigKey } from "../../shared/agent-display-names"
 import { log } from "../../shared/logger"
 import { isSqliteBackend } from "../../shared/opencode-storage-detection"
-import { getAgentConfigKey } from "../../shared/agent-display-names"
 
+import { isCompactionGuardActive } from "./compaction-guard"
+import { shouldSkipStaleContinuationForCompletedPlan } from "./completed-plan-guard"
 import {
   CONTINUATION_PROMPT,
   DEFAULT_SKIP_AGENTS,
   HOOK_NAME,
 } from "./constants"
-import { isCompactionGuardActive } from "./compaction-guard"
 import { getMessageDir } from "./message-directory"
+import type { SessionStateStore } from "./session-state"
 import { getIncompleteCount } from "./todo"
 import type { ResolvedMessageInfo, Todo } from "./types"
-import type { SessionStateStore } from "./session-state"
 
 function hasWritePermission(tools: Record<string, ToolPermission> | undefined): boolean {
   const editPermission = tools?.edit
@@ -81,6 +82,11 @@ export async function injectContinuation(args: {
     todos = normalizeSDKResponse(response, [] as Todo[], { preferResponseOnMissingData: true })
   } catch (error) {
     log(`[${HOOK_NAME}] Failed to fetch todos`, { sessionID, error: String(error) })
+    return
+  }
+
+  if (shouldSkipStaleContinuationForCompletedPlan(ctx.directory, sessionID, sessionStateStore)) {
+    log(`[${HOOK_NAME}] Skipped injection: completed active plan blocks stale prompt`, { sessionID })
     return
   }
 

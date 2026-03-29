@@ -102,4 +102,26 @@ describe("createSessionStateStore regressions", () => {
       })
     })
   })
+
+  describe("#given the completed-plan guard is not active", () => {
+    describe("#when valid todos stay unchanged after a successful continuation", () => {
+      test("#then stagnation tracking stays unchanged", () => {
+        const sessionID = "ses-no-completed-plan-guard"
+        const todos = [
+          { id: "1", content: "Task 1", status: "pending", priority: "high" },
+          { id: "2", content: "Task 2", status: "completed", priority: "medium" },
+        ]
+        const state = sessionStateStore.getState(sessionID)
+
+        sessionStateStore.trackContinuationProgress(sessionID, 1, todos)
+        state.awaitingPostInjectionProgressCheck = true
+
+        const progressUpdate = sessionStateStore.trackContinuationProgress(sessionID, 1, todos)
+
+        expect(progressUpdate.hasProgressed).toBe(false)
+        expect(progressUpdate.progressSource).toBe("none")
+        expect(progressUpdate.stagnationCount).toBe(1)
+      })
+    })
+  })
 })

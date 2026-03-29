@@ -2,9 +2,12 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import type { BackgroundManager } from "../../features/background-agent"
 import { getSessionAgent } from "../../features/claude-code-session-state"
 import { normalizeSDKResponse } from "../../shared"
-import { log } from "../../shared/logger"
 import { getAgentConfigKey } from "../../shared/agent-display-names"
+import { log } from "../../shared/logger"
 
+import { isLastAssistantMessageAborted } from "./abort-detection"
+import { isCompactionGuardActive } from "./compaction-guard"
+import { shouldSkipStaleContinuationForCompletedPlan } from "./completed-plan-guard"
 import {
   ABORT_WINDOW_MS,
   CONTINUATION_COOLDOWN_MS,
@@ -13,15 +16,13 @@ import {
   HOOK_NAME,
   MAX_CONSECUTIVE_FAILURES,
 } from "./constants"
-import { isLastAssistantMessageAborted } from "./abort-detection"
+import { startCountdown } from "./countdown"
 import { hasUnansweredQuestion } from "./pending-question-detection"
+import { resolveLatestMessageInfo } from "./resolve-message-info"
+import type { SessionStateStore } from "./session-state"
 import { shouldStopForStagnation } from "./stagnation-detection"
 import { getIncompleteCount } from "./todo"
 import type { MessageInfo, ResolvedMessageInfo, Todo } from "./types"
-import { resolveLatestMessageInfo } from "./resolve-message-info"
-import { isCompactionGuardActive } from "./compaction-guard"
-import type { SessionStateStore } from "./session-state"
-import { startCountdown } from "./countdown"
 
 export async function handleSessionIdle(args: {
   ctx: PluginInput
@@ -94,8 +95,12 @@ export async function handleSessionIdle(args: {
     return
   }
 
+  if (shouldSkipStaleContinuationForCompletedPlan(ctx.directory, sessionID, sessionStateStore)) {
+    log(`[${HOOK_NAME}] Skipped: completed active plan blocks stale countdown`, { sessionID })
+    return
+  }
+
   if (!todos || todos.length === 0) {
-    sessionStateStore.resetContinuationProgress(sessionID)
     sessionStateStore.resetContinuationProgress(sessionID)
     log(`[${HOOK_NAME}] No todos`, { sessionID })
     return
@@ -103,7 +108,6 @@ export async function handleSessionIdle(args: {
 
   const incompleteCount = getIncompleteCount(todos)
   if (incompleteCount === 0) {
-    sessionStateStore.resetContinuationProgress(sessionID)
     sessionStateStore.resetContinuationProgress(sessionID)
     log(`[${HOOK_NAME}] All todos complete`, { sessionID, total: todos.length })
     return
@@ -129,7 +133,7 @@ export async function handleSessionIdle(args: {
   }
 
   const effectiveCooldown =
-    CONTINUATION_COOLDOWN_MS * Math.pow(2, Math.min(state.consecutiveFailures, 5))
+    CONTINUATION_COOLDOWN_MS * 2 ** Math.min(state.consecutiveFailures, 5)
   if (state.lastInjectedAt && Date.now() - state.lastInjectedAt < effectiveCooldown) {
     log(`[${HOOK_NAME}] Skipped: cooldown active`, { sessionID, effectiveCooldown, consecutiveFailures: state.consecutiveFailures })
     return

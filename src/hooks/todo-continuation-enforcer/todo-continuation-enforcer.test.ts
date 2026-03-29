@@ -1,7 +1,12 @@
 /// <reference types="bun-types" />
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 
 import type { BackgroundManager } from "../../features/background-agent"
+import type { BoulderState } from "../../features/boulder-state/types"
+import { writeBoulderState } from "../../features/boulder-state/storage"
 import { setMainSession, subagentSessions, _resetForTesting } from "../../features/claude-code-session-state"
 import { createTodoContinuationEnforcer } from "."
 import {
@@ -163,6 +168,7 @@ function createFakeTimers(): FakeTimers {
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 describe("todo-continuation-enforcer", () => {
+  const testDir = join(tmpdir(), `todo-continuation-enforcer-${Date.now()}`)
   let promptCalls: Array<{ sessionID: string; agent?: string; model?: { providerID?: string; modelID?: string }; text: string }>
   let toastCalls: Array<{ title: string; message: string }>
   let fakeTimers: FakeTimers
@@ -186,7 +192,19 @@ describe("todo-continuation-enforcer", () => {
 
   let mockMessages: MockMessage[] = []
 
-  function createMockPluginInput() {
+  function writePlan(name: string, content: string): string {
+    const planDir = join(testDir, "changes", name)
+    mkdirSync(planDir, { recursive: true })
+    const planPath = join(planDir, "tasks.md")
+    writeFileSync(planPath, content)
+    return planPath
+  }
+
+  function writeState(state: BoulderState): void {
+    writeBoulderState(testDir, state)
+  }
+
+  function createMockPluginInput(directory: string = "/tmp/test") {
     return {
       client: {
         session: {
@@ -224,7 +242,7 @@ describe("todo-continuation-enforcer", () => {
           },
         },
       },
-      directory: "/tmp/test",
+      directory,
     } as any
   }
 
@@ -242,11 +260,17 @@ describe("todo-continuation-enforcer", () => {
     promptCalls = []
     toastCalls = []
     mockMessages = []
+    if (!existsSync(testDir)) {
+      mkdirSync(testDir, { recursive: true })
+    }
   })
 
   afterEach(() => {
     fakeTimers.restore()
     _resetForTesting()
+    if (existsSync(testDir)) {
+      rmSync(testDir, { recursive: true, force: true })
+    }
   })
 
   test("should inject continuation when idle with incomplete todos", async () => {
@@ -1706,6 +1730,120 @@ describe("todo-continuation-enforcer", () => {
     expect(promptCalls).toHaveLength(0)
   })
 
+  test("should not start countdown when stale todos belong to a completed active plan", async () => {
+    const sessionID = "main-completed-plan-idle"
+    setMainSession(sessionID)
+    const planPath = writePlan(
+      "completed-plan-idle",
+      `# Plan
+- [x] 1. Done
+`,
+    )
+
+    writeState({
+      active_plan: planPath,
+      started_at: "2026-03-29T00:00:00.000Z",
+      session_ids: [sessionID],
+      plan_name: "completed-plan-idle",
+    })
+
+    const hook = createTodoContinuationEnforcer(createMockPluginInput(testDir), {})
+
+    await hook.handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
+
+    await fakeTimers.advanceBy(3000)
+
+    expect(toastCalls).toHaveLength(0)
+    expect(promptCalls).toHaveLength(0)
+  })
+
+  test("should keep blocking stale continuation when only compaction history remains for a completed active plan", async () => {
+    const sessionID = "main-completed-plan-compaction-history"
+    setMainSession(sessionID)
+    const planPath = writePlan(
+      "completed-plan-compaction-history",
+      `# Plan
+- [x] 1. Done
+`,
+    )
+
+    writeState({
+      active_plan: planPath,
+      started_at: "2026-03-29T00:00:00.000Z",
+      session_ids: [sessionID],
+      plan_name: "completed-plan-compaction-history",
+    })
+
+    mockMessages = [
+      { info: { id: "msg-1", role: "assistant", agent: "compaction" } },
+    ] as any
+
+    const hook = createTodoContinuationEnforcer(createMockPluginInput(testDir), {
+      skipAgents: [],
+    })
+
+    await hook.handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
+
+    await fakeTimers.advanceBy(3000)
+
+    expect(toastCalls).toHaveLength(0)
+    expect(promptCalls).toHaveLength(0)
+  })
+
+  test("should keep injecting for an incomplete active Boulder plan with valid todos", async () => {
+    const sessionID = "main-incomplete-plan-valid-todos"
+    setMainSession(sessionID)
+    const planPath = writePlan(
+      "incomplete-plan-valid-todos",
+      `# Plan
+- [ ] 1. Remaining task
+`,
+    )
+
+    writeState({
+      active_plan: planPath,
+      started_at: "2026-03-29T00:00:00.000Z",
+      session_ids: [sessionID],
+      plan_name: "incomplete-plan-valid-todos",
+    })
+
+    const hook = createTodoContinuationEnforcer(createMockPluginInput(testDir), {})
+
+    await hook.handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
+
+    await fakeTimers.advanceBy(2500, true)
+
+    expect(toastCalls.length).toBeGreaterThan(0)
+    expect(promptCalls).toHaveLength(1)
+  })
+
+  test("should keep manual todos unchanged for non-Boulder sessions", async () => {
+    const sessionID = "main-non-boulder-manual-todos"
+    setMainSession(sessionID)
+
+    const mockInput = createMockPluginInput(testDir)
+    mockInput.client.session.todo = async () => ({ data: [
+      { content: "Manual follow-up", status: "pending", priority: "high" },
+    ]})
+
+    const hook = createTodoContinuationEnforcer(mockInput, {})
+
+    await hook.handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
+
+    await fakeTimers.advanceBy(2500, true)
+
+    expect(promptCalls).toHaveLength(1)
+    expect(promptCalls[0]?.text).toContain("[Status: 0/1 completed, 1 remaining]")
+  })
+
   test("should not inject when isContinuationStopped becomes true during countdown", async () => {
     // given - session where continuation is not stopped at idle time but stops during countdown
     const sessionID = "main-race-condition"
@@ -1751,6 +1889,53 @@ describe("todo-continuation-enforcer", () => {
     // then - continuation injected (stopped flag is false)
     expect(promptCalls.length).toBe(1)
   }, { timeout: 15000 })
+
+  test("should keep blocking stale continuation after stop state clears on next user message for a completed active plan", async () => {
+    const sessionID = "main-completed-plan-stop-clear"
+    setMainSession(sessionID)
+    const planPath = writePlan(
+      "completed-plan-stop-clear",
+      `# Plan
+- [x] 1. Done
+`,
+    )
+
+    writeState({
+      active_plan: planPath,
+      started_at: "2026-03-29T00:00:00.000Z",
+      session_ids: [sessionID],
+      plan_name: "completed-plan-stop-clear",
+    })
+
+    let stopped = true
+    const hook = createTodoContinuationEnforcer(createMockPluginInput(testDir), {
+      isContinuationStopped: () => stopped,
+    })
+
+    await hook.handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
+
+    expect(toastCalls).toHaveLength(0)
+    expect(promptCalls).toHaveLength(0)
+
+    stopped = false
+
+    await hook.handler({
+      event: {
+        type: "message.updated",
+        properties: { info: { sessionID, role: "user" } },
+      },
+    })
+    await hook.handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
+
+    await fakeTimers.advanceBy(3000)
+
+    expect(toastCalls).toHaveLength(0)
+    expect(promptCalls).toHaveLength(0)
+  })
 
   test("should cancel all countdowns via cancelAllCountdowns", async () => {
     // given - multiple sessions with running countdowns

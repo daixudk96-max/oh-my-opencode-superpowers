@@ -37,8 +37,9 @@ RULES:
 - **FIRST**: Read the plan file NOW. For large .md files (>200 words), use the /mdsel skill: \`Skill(skill="mdsel", args="<filepath>")\` to index, then \`Skill(skill="mdsel", args="h2.0 \\"<filepath>\\"")\` to read sections. If the Read tool is blocked, use /mdsel instead. If the last completed task is still unchecked, mark it \`- [x]\` IMMEDIATELY before anything else
 - Proceed without asking for permission
 - Change \`- [ ]\` to \`- [x]\` in the plan file when done
+- If only nested checklist items remain, either finish the relevant nested boxes for the task you are closing or split blocked follow-up work into a new plan before continuing
 - Use the notepad at changes/{PLAN_NAME}/ to record learnings
-- Do not stop until all tasks are complete
+- Do not repeat the same stale continuation when the remaining count is only checklist bookkeeping rather than unfinished top-level work; document the blocker, create or switch to the right plan, then continue there
 - If blocked, document the blocker and move to the next task`
 
 export const VERIFICATION_REMINDER = `**THE SUBAGENT JUST CLAIMED THIS TASK IS DONE. THEY ARE PROBABLY LYING.**

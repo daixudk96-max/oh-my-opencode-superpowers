@@ -1,4 +1,5 @@
 import type { PluginInput } from "@opencode-ai/plugin"
+import { hasCompletedActivePlanForSession } from "../../features/boulder-state"
 import { log } from "../../shared/logger"
 
 interface TodoSnapshot {
@@ -70,6 +71,12 @@ export function createCompactionTodoPreserverHook(
   const restore = async (sessionID: string): Promise<void> => {
     const snapshot = snapshots.get(sessionID)
     if (!snapshot || snapshot.length === 0) return
+
+    if (hasCompletedActivePlanForSession(ctx.directory, sessionID)) {
+      snapshots.delete(sessionID)
+      log(`[${HOOK_NAME}] Skipped restore (completed active plan)`, { sessionID, count: snapshot.length })
+      return
+    }
 
     let hasCurrent = false
     let currentTodos: TodoSnapshot[] = []

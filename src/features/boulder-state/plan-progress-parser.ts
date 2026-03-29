@@ -4,22 +4,37 @@ import type { PlanProgress, TaskPhaseInfo, TaskPhaseStatus } from "./types"
 const PHASE_HEADER_REGEX = /^#{2,3}\s+Phase\s+\d+:/i
 const BACKTICK_REGEX = /`(complete|in_progress|pending)`/i
 const STATUS_REGEX = /\*\*Status:\*\*\s*(complete|in_progress|pending)/i
-const TODO_REGEX = /^[-*]\s*\[\s*\]\s*(\d+\.\s*)?(.+)$/
-const CHECKED_REGEX = /^\s*[-*]\s*\[[xX]\]/
-const UNCHECKED_REGEX = /^\s*[-*]\s*\[\s*\]/
+const ACTIONABLE_CHECKED_REGEX = /^[-*]\s*\[[xX]\]/
+const ACTIONABLE_UNCHECKED_REGEX = /^[-*]\s*\[\s*\]/
 
 function countCheckboxes(lines: string[]): { total: number; completed: number } {
   let total = 0
   let completed = 0
   for (const line of lines) {
-    if (CHECKED_REGEX.test(line)) {
+    if (ACTIONABLE_CHECKED_REGEX.test(line)) {
       total += 1
       completed += 1
-    } else if (UNCHECKED_REGEX.test(line)) {
+    } else if (ACTIONABLE_UNCHECKED_REGEX.test(line)) {
       total += 1
     }
   }
   return { total, completed }
+}
+
+function getUncheckedTaskName(line: string): string | null {
+  if (!ACTIONABLE_UNCHECKED_REGEX.test(line)) {
+    return null
+  }
+
+  const taskName = line
+    .replace(/^[-*]\s*\[\s*\]\s*/, "")
+    .replace(/^\d+\.\s*/, "")
+    .trim()
+    .replace(/\*\*/g, "")
+    .replace(/`/g, "")
+    .slice(0, 80)
+
+  return taskName || null
 }
 
 export function parsePhaseStatus(
@@ -125,13 +140,8 @@ export function getFirstIncompleteTask(planPath: string): string | null {
     const lines = content.split(/\r?\n/)
 
     for (const line of lines) {
-      const match = line.match(TODO_REGEX)
-      if (match) {
-        const taskName = match[2]
-          .trim()
-          .replace(/\*\*/g, "")
-          .replace(/`/g, "")
-          .slice(0, 80)
+      const taskName = getUncheckedTaskName(line)
+      if (taskName) {
         return taskName || null
       }
     }
