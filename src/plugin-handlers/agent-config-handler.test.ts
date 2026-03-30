@@ -9,12 +9,15 @@ import type { OhMyOpenCodeConfig } from "../config"
 import * as agentLoader from "../features/claude-code-agent-loader"
 import * as skillLoader from "../features/opencode-skill-loader"
 import { getAgentDisplayName } from "../shared/agent-display-names"
+import { PROMETHEUS_GPT_SYSTEM_PROMPT } from "../agents/prometheus/gpt"
+import type { ModelResolutionResult } from "../shared/model-resolution-types"
 import { applyAgentConfig } from "./agent-config-handler"
 import type { PluginComponents } from "./plugin-components-loader"
 
 const BUILTIN_SISYPHUS_DISPLAY_NAME = getAgentDisplayName("sisyphus")
 const BUILTIN_SISYPHUS_JUNIOR_DISPLAY_NAME = getAgentDisplayName("sisyphus-junior")
 const BUILTIN_MULTIMODAL_LOOKER_DISPLAY_NAME = getAgentDisplayName("multimodal-looker")
+const BUILTIN_PROMETHEUS_DISPLAY_NAME = getAgentDisplayName("prometheus")
 
 function createPluginComponents(): PluginComponents {
   return {
@@ -43,6 +46,14 @@ function createPluginConfig(): OhMyOpenCodeConfig {
   }
 }
 
+function createResolvedModel(model: string, variant?: string): ModelResolutionResult {
+  return {
+    model,
+    variant,
+    provenance: "provider-fallback",
+  }
+}
+
 describe("applyAgentConfig builtin override protection", () => {
   let createBuiltinAgentsSpy: ReturnType<typeof spyOn>
   let createSisyphusJuniorAgentSpy: ReturnType<typeof spyOn>
@@ -55,6 +66,9 @@ describe("applyAgentConfig builtin override protection", () => {
   let loadProjectAgentsSpy: ReturnType<typeof spyOn>
   let migrateAgentConfigSpy: ReturnType<typeof spyOn>
   let logSpy: ReturnType<typeof spyOn>
+  let fetchAvailableModelsSpy: ReturnType<typeof spyOn>
+  let readConnectedProvidersCacheSpy: ReturnType<typeof spyOn>
+  let resolveModelPipelineSpy: ReturnType<typeof spyOn>
 
   const builtinSisyphusConfig: AgentConfig = {
     name: "Builtin Sisyphus",
@@ -128,6 +142,11 @@ describe("applyAgentConfig builtin override protection", () => {
       (config: Record<string, unknown>) => config,
     )
     logSpy = spyOn(shared, "log").mockImplementation(() => {})
+    fetchAvailableModelsSpy = spyOn(shared, "fetchAvailableModels").mockResolvedValue(new Set<string>())
+    readConnectedProvidersCacheSpy = spyOn(shared, "readConnectedProvidersCache").mockReturnValue(null)
+    resolveModelPipelineSpy = spyOn(shared, "resolveModelPipeline").mockReturnValue(
+      createResolvedModel("anthropic/claude-opus-4-6", "max"),
+    )
   })
 
   afterEach(() => {
@@ -142,6 +161,9 @@ describe("applyAgentConfig builtin override protection", () => {
     loadProjectAgentsSpy.mockRestore()
     migrateAgentConfigSpy.mockRestore()
     logSpy.mockRestore()
+    fetchAvailableModelsSpy.mockRestore()
+    readConnectedProvidersCacheSpy.mockRestore()
+    resolveModelPipelineSpy.mockRestore()
   })
 
   test("filters user agents whose key matches the builtin display-name alias", async () => {
@@ -277,5 +299,36 @@ describe("applyAgentConfig builtin override protection", () => {
 
     // then
     expect(createSisyphusJuniorAgentSpy).toHaveBeenCalledWith(undefined, "openai/gpt-5.4", false)
+  })
+
+  test("builds the Prometheus prompt from the resolved model before appending override text", async () => {
+    // given
+    const promptAppend = "## Custom Project Rules\nUse max 2 commits."
+    resolveModelPipelineSpy.mockReturnValue(createResolvedModel("openai/gpt-5.4", "high"))
+
+    // when
+    const result = await applyAgentConfig({
+      config: createBaseConfig(),
+      pluginConfig: {
+        sisyphus_agent: {
+          planner_enabled: true,
+        },
+        agents: {
+          prometheus: {
+            prompt_append: promptAppend,
+          },
+        },
+      },
+      ctx: { directory: "/tmp" },
+      pluginComponents: createPluginComponents(),
+    })
+
+    // then
+    const prometheus = result[BUILTIN_PROMETHEUS_DISPLAY_NAME] as {
+      model?: string
+      prompt?: string
+    }
+    expect(prometheus.model).toBe("openai/gpt-5.4")
+    expect(prometheus.prompt).toBe(`${PROMETHEUS_GPT_SYSTEM_PROMPT}\n${promptAppend}`)
   })
 })
