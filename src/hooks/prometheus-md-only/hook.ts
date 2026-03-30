@@ -1,12 +1,12 @@
 // TDD-EXEMPT: reason="Path migration to changes/"
 import type { PluginInput } from "@opencode-ai/plugin"
-import { HOOK_NAME, BLOCKED_TOOLS, PLANNING_CONSULT_WARNING, PROMETHEUS_WORKFLOW_REMINDER } from "./constants"
+import { getAgentDisplayName } from "../../shared/agent-display-names"
 import { log } from "../../shared/logger"
 import { SYSTEM_DIRECTIVE_PREFIX } from "../../shared/system-directive"
-import { getAgentDisplayName } from "../../shared/agent-display-names"
 import { getAgentFromSession } from "./agent-resolution"
 import { isPrometheusAgent } from "./agent-matcher"
-import { isAllowedFile } from "./path-policy"
+import { BLOCKED_TOOLS, HOOK_NAME, PLANNING_CONSULT_WARNING, PROMETHEUS_WORKFLOW_REMINDER } from "./constants"
+import { classifyPlannerPath, isAllowedFile, isPlanFile } from "./path-policy"
 
 const TASK_TOOLS = ["task", "call_omo_agent"]
 
@@ -48,38 +48,38 @@ export function createPrometheusMdOnlyHook(ctx: PluginInput) {
       }
 
        if (!isAllowedFile(filePath, ctx.directory)) {
-         log(`[${HOOK_NAME}] Blocked: Prometheus can only write to changes/**/*.md`, {
+          log(`[${HOOK_NAME}] Blocked: Prometheus attempted disallowed planner write`, {
+            sessionID: input.sessionID,
+            tool: toolName,
+            filePath,
+            agent: agentName,
+          })
+          throw new Error(
+             `[${HOOK_NAME}] ${getAgentDisplayName("prometheus")} can only write/edit root changes/**/*.md, root docs/**/*.md, .sisyphus/boulder.json, or .sisyphus/run-continuation/**/*.json. ` +
+            `Attempted to modify: ${filePath}. ` +
+            `${getAgentDisplayName("prometheus")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
+            `APOLOGIZE TO THE USER, REMIND OF YOUR PLAN WRITING PROCESSES, TELL USER WHAT YOU WILL GOING TO DO AS THE PROCESS, WRITE THE PLAN`
+          )
+        }
+
+       const plannerPathKind = classifyPlannerPath(filePath, ctx.directory)
+       if (isPlanFile(filePath, ctx.directory)) {
+         log(`[${HOOK_NAME}] Injecting workflow reminder for plan write`, {
            sessionID: input.sessionID,
            tool: toolName,
-           filePath,
-           agent: agentName,
-         })
-         throw new Error(
-            `[${HOOK_NAME}] ${getAgentDisplayName("prometheus")} can only write/edit .md files inside changes/ or .sisyphus/ directory. ` + // TDD-EXEMPT: path migration fix
-           `Attempted to modify: ${filePath}. ` +
-           `${getAgentDisplayName("prometheus")} is a READ-ONLY planner. Use /start-work to execute the plan. ` +
-           `APOLOGIZE TO THE USER, REMIND OF YOUR PLAN WRITING PROCESSES, TELL USER WHAT YOU WILL GOING TO DO AS THE PROCESS, WRITE THE PLAN`
-         )
-       }
-
-      const normalizedPath = filePath.toLowerCase().replace(/\\/g, "/")
-      const isPlanPath = normalizedPath.endsWith("/tasks.md") || normalizedPath.includes("/.sisyphus/plans/")
-      if (isPlanPath) { // TDD-EXEMPT: path migration fix
-        log(`[${HOOK_NAME}] Injecting workflow reminder for plan write`, {
-          sessionID: input.sessionID,
-          tool: toolName,
-          filePath,
-          agent: agentName,
+            filePath,
+            agent: agentName,
         })
         output.message = (output.message || "") + PROMETHEUS_WORKFLOW_REMINDER
       }
 
-      log(`[${HOOK_NAME}] Allowed: changes/**/*.md write permitted`, {
-        sessionID: input.sessionID,
-        tool: toolName,
-        filePath,
-        agent: agentName,
-      })
+       log(`[${HOOK_NAME}] Allowed planner write`, {
+         sessionID: input.sessionID,
+         tool: toolName,
+         filePath,
+         plannerPathKind,
+         agent: agentName,
+       })
     },
   }
 }

@@ -69,7 +69,7 @@ describe("prometheus-md-only", () => {
       //#when //#then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
 
     test("should enforce md-only restriction for Prometheus display name Plan Builder", async () => {
@@ -88,7 +88,7 @@ describe("prometheus-md-only", () => {
       //#when //#then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
 
     test("should enforce md-only restriction for Prometheus display name Planner", async () => {
@@ -107,7 +107,7 @@ describe("prometheus-md-only", () => {
       //#when //#then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
 
     test("should enforce md-only restriction for uppercase PROMETHEUS", async () => {
@@ -126,7 +126,7 @@ describe("prometheus-md-only", () => {
       //#when //#then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
 
     test("should not enforce restriction for non-Prometheus agent", async () => {
@@ -188,10 +188,10 @@ describe("prometheus-md-only", () => {
       // when / #then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
 
-    test("should allow Prometheus to write .md files inside changes/", async () => {
+    test("should allow Prometheus to write .md files inside root changes/", async () => {
       // given
       const hook = createPrometheusMdOnlyHook(createMockPluginInput())
       const input = {
@@ -209,7 +209,7 @@ describe("prometheus-md-only", () => {
       ).resolves.toBeUndefined()
     })
 
-    test("should inject workflow reminder when Prometheus writes to changes/plans/", async () => {
+    test("should inject workflow reminder when Prometheus writes to root changes tasks.md", async () => {
       // given
       const hook = createPrometheusMdOnlyHook(createMockPluginInput())
       const input = {
@@ -231,7 +231,7 @@ describe("prometheus-md-only", () => {
       expect(output.message).toContain("MOMUS REVIEW")
     })
 
-    test("should NOT inject workflow reminder for changes/drafts/", async () => {
+    test("should NOT inject workflow reminder for changes drafts", async () => {
       // given
       const hook = createPrometheusMdOnlyHook(createMockPluginInput())
       const input = {
@@ -250,7 +250,43 @@ describe("prometheus-md-only", () => {
       expect(output.message).toBeUndefined()
     })
 
-    test("should block Prometheus from writing .md files outside changes/", async () => {
+    test("should allow Prometheus to write docs markdown files", async () => {
+      // given
+      const hook = createPrometheusMdOnlyHook(createMockPluginInput())
+      const input = {
+        tool: "Write",
+        sessionID: TEST_SESSION_ID,
+        callID: "call-1",
+      }
+      const output = {
+        args: { filePath: "/tmp/test/docs/guide/overview.md" },
+      }
+
+      // when / then
+      await expect(
+        hook["tool.execute.before"](input, output)
+      ).resolves.toBeUndefined()
+    })
+
+    test("should allow Prometheus to write boulder state json", async () => {
+      // given
+      const hook = createPrometheusMdOnlyHook(createMockPluginInput())
+      const input = {
+        tool: "Write",
+        sessionID: TEST_SESSION_ID,
+        callID: "call-1",
+      }
+      const output = {
+        args: { filePath: "/tmp/test/.sisyphus/boulder.json" },
+      }
+
+      // when / then
+      await expect(
+        hook["tool.execute.before"](input, output)
+      ).resolves.toBeUndefined()
+    })
+
+    test("should block Prometheus from writing .md files outside root allowlist", async () => {
       // given
       const hook = createPrometheusMdOnlyHook(createMockPluginInput())
       const input = {
@@ -265,7 +301,7 @@ describe("prometheus-md-only", () => {
       // when / #then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files inside changes/ or .sisyphus/")
+      ).rejects.toThrow("root changes/**/*.md, root docs/**/*.md, .sisyphus/boulder.json, or .sisyphus/run-continuation/**/*.json")
     })
 
     test("should block Edit tool for non-.md files", async () => {
@@ -283,7 +319,7 @@ describe("prometheus-md-only", () => {
       // when / #then
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
 
     test("should allow bash commands from Prometheus", async () => {
@@ -547,7 +583,7 @@ describe("prometheus-md-only", () => {
       // when / then - should block because boulder says prometheus
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
 
     test("should fall back to message files when session not in boulder", async () => {
@@ -580,7 +616,7 @@ describe("prometheus-md-only", () => {
       // when / then - should block because falls back to message files (prometheus)
       await expect(
         hook["tool.execute.before"](input, output)
-      ).rejects.toThrow("can only write/edit .md files")
+      ).rejects.toThrow("root changes/**/*.md")
     })
   })
 
@@ -680,13 +716,13 @@ describe("prometheus-md-only", () => {
         }
 
         // when / #then
-        await expect(
-          hook["tool.execute.before"](input, output)
-        ).rejects.toThrow("can only write/edit .md files inside changes/ or .sisyphus/")
+      await expect(
+        hook["tool.execute.before"](input, output)
+      ).rejects.toThrow("root changes/**/*.md")
       })
 
-      test("should allow nested changes directories (ctx.directory may be parent)", async () => {
-        // given - when ctx.directory is parent of actual project, path includes project name
+      test("should block nested changes directories outside the repo root", async () => {
+        // given - root-anchored matching should reject nested lookalikes
         setupMessageStorage(TEST_SESSION_ID, "prometheus")
         const hook = createPrometheusMdOnlyHook(createMockPluginInput())
         const input = {
@@ -698,10 +734,10 @@ describe("prometheus-md-only", () => {
           args: { filePath: "src/changes/plans/x.md" },
         }
 
-        // when / #then - should allow because changes is in path
+        // when / #then - should block because only root changes/ is allowed
         await expect(
           hook["tool.execute.before"](input, output)
-        ).resolves.toBeUndefined()
+        ).rejects.toThrow("root changes/**/*.md")
       })
 
       test("should block path traversal attempts", async () => {
@@ -718,9 +754,9 @@ describe("prometheus-md-only", () => {
         }
 
         // when / #then
-        await expect(
-          hook["tool.execute.before"](input, output)
-        ).rejects.toThrow("can only write/edit .md files inside changes/ or .sisyphus/")
+      await expect(
+        hook["tool.execute.before"](input, output)
+      ).rejects.toThrow("root changes/**/*.md")
       })
 
       test("should allow case-insensitive CHANGES directory", async () => {
@@ -742,9 +778,8 @@ describe("prometheus-md-only", () => {
         ).resolves.toBeUndefined()
       })
 
-      test("should allow nested project path with changes (Windows real-world case)", async () => {
-        // given - simulates when ctx.directory is parent of actual project
-        // User reported: xauusd-dxy-plan\changes\drafts\supabase-email-templates.md
+      test("should block nested project path with changes when not rooted at workspace", async () => {
+        // given - root anchoring should reject project-prefixed lookalikes
         setupMessageStorage(TEST_SESSION_ID, "prometheus")
         const hook = createPrometheusMdOnlyHook(createMockPluginInput())
         const input = {
@@ -759,10 +794,10 @@ describe("prometheus-md-only", () => {
         // when / #then
         await expect(
           hook["tool.execute.before"](input, output)
-        ).resolves.toBeUndefined()
+        ).rejects.toThrow("root changes/**/*.md")
       })
 
-      test("should allow nested project path with mixed separators", async () => {
+      test("should block nested project path with mixed separators", async () => {
         // given
         setupMessageStorage(TEST_SESSION_ID, "prometheus")
         const hook = createPrometheusMdOnlyHook(createMockPluginInput())
@@ -778,7 +813,7 @@ describe("prometheus-md-only", () => {
         // when / #then
         await expect(
           hook["tool.execute.before"](input, output)
-        ).resolves.toBeUndefined()
+        ).rejects.toThrow("root changes/**/*.md")
       })
 
       test("should block nested project path without changes", async () => {
@@ -797,7 +832,7 @@ describe("prometheus-md-only", () => {
        // when / #then
        await expect(
          hook["tool.execute.before"](input, output)
-       ).rejects.toThrow("can only write/edit .md files")
-     })
+       ).rejects.toThrow("root changes/**/*.md")
+      })
   })
 })
