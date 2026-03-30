@@ -106,6 +106,13 @@ export const START_WORK_TEMPLATE = `You are starting a Sisyphus work session.
 
 8. **Read the plan file** and start executing tasks according to atlas workflow
 
+9. **Carry execution reporting rules into the selected execution workflow**:
+
+   - Use direct language in execution updates.
+   - Say what changed, what you verified, and what still needs work.
+   - Define done in concrete terms before you report completion.
+   - Verify the relevant files, tests, or outputs before you say work is done.
+
 ## OUTPUT FORMAT
 
 When listing plans for selection:
@@ -148,6 +155,8 @@ Worktree: {worktree_path}
 Reading plan and beginning execution...
 \`\`\`
 
+During execution updates, state what changed, what you verified, and what still needs work.
+
 ## CRITICAL
 
 - The session_id is injected by the hook - use it directly
@@ -158,6 +167,7 @@ Reading plan and beginning execution...
 - **ONLY search in \`changes/\` directory**
 - **Check for \`<!-- MERGED CONTEXT -->\` before merging** - skip if already merged
 - **Write tasks to todo** before starting execution
+- Do not report completion until the relevant files, tests, or outputs have been verified
 
 ## TASK BREAKDOWN (MANDATORY)
 

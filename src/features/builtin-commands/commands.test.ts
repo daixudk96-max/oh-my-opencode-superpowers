@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from "bun:test"
 import { loadBuiltinCommands } from "./commands"
 import { HANDOFF_TEMPLATE } from "./templates/handoff"
+import { START_WORK_TEMPLATE } from "./templates/start-work"
 import type { BuiltinCommandName } from "./types"
 
 describe("loadBuiltinCommands", () => {
@@ -82,6 +83,31 @@ describe("loadBuiltinCommands", () => {
 
     //#then
     expect(commands.handoff.description).toContain("context summary")
+  })
+
+  it("should include start-work execution reporting guidance in command template", () => {
+    const commands = loadBuiltinCommands()
+
+    expect(commands["start-work"].template).toContain(START_WORK_TEMPLATE)
+    expect(commands["start-work"].template).toContain(
+      "Use direct language in execution updates.",
+    )
+    expect(commands["start-work"].template).toContain(
+      "Verify the relevant files, tests, or outputs before you say work is done.",
+    )
+  })
+
+  it("should keep unrelated command templates free of start-work reporting guidance", () => {
+    const commands = loadBuiltinCommands()
+
+    for (const name of ["handoff", "revert", "status"] as const) {
+      expect(commands[name].template).not.toContain(
+        "Use direct language in execution updates.",
+      )
+      expect(commands[name].template).not.toContain(
+        "Define done in concrete terms before you report completion.",
+      )
+    }
   })
 })
 
