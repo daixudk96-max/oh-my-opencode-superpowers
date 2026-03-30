@@ -72,6 +72,12 @@ Is task about documentation files (.md, .rst, docs/)?
           NO  → category: "ultrabrain" (default)
 ```
 
+**Pre-dispatch checklist (MANDATORY):**
+
+- Use direct language in execution updates.
+- Confirm what done means for the task in concrete terms before dispatch.
+- Decide which files, tests, or outputs must be verified before the task can be reported as complete.
+
 For each task, dispatch to the appropriate agent:
 
 ```typescript
@@ -116,6 +122,9 @@ ${tddNotes}
 - Run lsp_diagnostics before completion
 - Request Codex prototype before coding (Phase 2)
 - Request Codex review after coding (Phase 3)
+- Use direct language in execution updates.
+- Define done in concrete terms before you report completion.
+- Verify the relevant files, tests, or outputs before you say work is done.
 
 ### 8. MUST NOT DO
 - Do not modify files outside the listed paths
@@ -135,6 +144,8 @@ Work from: ${worktreePath}
 | `COMPLETED` | Record SHA, mark complete, continue to next task |
 | `QUESTIONS` | Answer questions, resume Implementer with `resume=session_id` |
 | `BLOCKED` | Stop, report to user, wait for feedback |
+
+Accept `COMPLETED` only when the response says what changed, what was verified, and why the task now counts as done. If any of that is missing, continue the Implementer instead of marking the task complete.
 
 ### Step 2c: Auto Git Checkpoint
 
@@ -164,6 +175,7 @@ After each COMPLETED response:
 **正常情况（无错误）：**
 - 自动继续下一任务
 - 无需等待人工反馈
+- 用直接语言说明已完成内容、已验证内容、以及剩余工作
 
 **遇到 BLOCKED 或错误时：**
 - 显示已完成任务和 checkpoint SHAs

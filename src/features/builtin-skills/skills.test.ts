@@ -129,6 +129,41 @@ describe("createBuiltinSkills", () => {
 		}
 	})
 
+	test("executing-plans skill includes execution-oriented reporting guidance", () => {
+		const skills = createBuiltinSkills()
+		const skill = skills.find((s) => s.name === "executing-plans")
+
+		expect(skill).toBeDefined()
+		expect(skill?.template).toContain(
+			"Use direct language in execution updates.",
+		)
+		expect(skill?.template).toContain(
+			"Define done in concrete terms before you report completion.",
+		)
+		expect(skill?.template).toContain(
+			"Verify the relevant files, tests, or outputs before you say work is done.",
+		)
+	})
+
+	test("keeps unrelated builtin skills free of executing-plans reporting guidance", () => {
+		const skills = createBuiltinSkills()
+
+		for (const name of [
+			"wave-parallel-execution",
+			"verification-before-completion",
+		] as const) {
+			const skill = skills.find((entry) => entry.name === name)
+
+			expect(skill).toBeDefined()
+			expect(skill?.template).not.toContain(
+				"Use direct language in execution updates.",
+			)
+			expect(skill?.template).not.toContain(
+				"Define done in concrete terms before you report completion.",
+			)
+		}
+	})
+
 	test("should exclude playwright when it is in disabledSkills", () => {
 		// #given
 		const baselineCount = createBuiltinSkills().length
