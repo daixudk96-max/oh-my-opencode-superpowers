@@ -1,7 +1,25 @@
-// TDD-EXEMPT: reason="Path migration to changes/"
-import { relative, resolve, isAbsolute } from "node:path"
+// TDD-EXEMPT: reason="Path migration to root-anchored planner paths"
+import { isAbsolute, relative, resolve } from "node:path"
 
-import { ALLOWED_EXTENSIONS } from "./constants"
+export type PlannerPathKind =
+  | "plan"
+  | "draft"
+  | "changes-md"
+  | "docs-md"
+  | "boulder-state"
+  | "run-continuation"
+  | "forbidden"
+
+function getWorkspaceRelativePath(filePath: string, workspaceRoot: string): string | undefined {
+  const resolved = resolve(workspaceRoot, filePath)
+  const rel = relative(workspaceRoot, resolved)
+
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    return undefined
+  }
+
+  return rel.replace(/\\/g, "/")
+}
 
 /**
  * Cross-platform path validator for Prometheus file writes.
@@ -10,33 +28,62 @@ import { ALLOWED_EXTENSIONS } from "./constants"
  * - Mixed separators (e.g., changes/x.md)
  * - Case-insensitive directory/extension matching
  * - Workspace confinement (blocks paths outside root or via traversal)
- * - Nested project paths (e.g., parent/changes/... when ctx.directory is parent)
+ * - Root-anchored matching for planner artifacts
  */
+export function classifyPlannerPath(filePath: string, workspaceRoot: string): PlannerPathKind {
+  const relativePath = getWorkspaceRelativePath(filePath, workspaceRoot)
+  if (!relativePath) {
+    return "forbidden"
+  }
+
+  const segments = relativePath.split("/").filter(Boolean)
+  if (segments.length === 0) {
+    return "forbidden"
+  }
+
+  const lowerSegments = segments.map(segment => segment.toLowerCase())
+  const [rootSegment, secondSegment, thirdSegment] = lowerSegments
+  const fileName = lowerSegments.at(-1)
+  const isMarkdown = fileName?.endsWith(".md") ?? false
+  const isJson = fileName?.endsWith(".json") ?? false
+
+  if (rootSegment === "changes" && isMarkdown && lowerSegments.length >= 3) {
+    if (fileName === "tasks.md") {
+      return "plan"
+    }
+
+    if (fileName === "proposal.md") {
+      return "draft"
+    }
+
+    return "changes-md"
+  }
+
+  if (rootSegment === "docs" && isMarkdown && lowerSegments.length >= 2) {
+    return "docs-md"
+  }
+
+  if (rootSegment === ".sisyphus" && secondSegment === "boulder.json" && lowerSegments.length === 2) {
+    return "boulder-state"
+  }
+
+  if (
+    rootSegment === ".sisyphus"
+    && secondSegment === "run-continuation"
+    && isJson
+    && lowerSegments.length >= 3
+    && thirdSegment !== undefined
+  ) {
+    return "run-continuation"
+  }
+
+  return "forbidden"
+}
+
 export function isAllowedFile(filePath: string, workspaceRoot: string): boolean {
-  // 1. Resolve to absolute path
-  const resolved = resolve(workspaceRoot, filePath)
+  return classifyPlannerPath(filePath, workspaceRoot) !== "forbidden"
+}
 
-  // 2. Get relative path from workspace root
-  const rel = relative(workspaceRoot, resolved)
-
-  // 3. Reject if escapes root (starts with ".." or is absolute)
-  if (rel.startsWith("..") || isAbsolute(rel)) {
-    return false
-  }
-
-  // 4. Check if changes/ or changes\ exists anywhere in the path (case-insensitive)
-  // This handles both direct paths (changes/x.md) and nested paths (project/changes/x.md)
-  if (!/changes[/\\]/i.test(rel)) {
-    return false
-  }
-
-  // 5. Check extension matches one of ALLOWED_EXTENSIONS (case-insensitive)
-  const hasAllowedExtension = ALLOWED_EXTENSIONS.some(
-    ext => resolved.toLowerCase().endsWith(ext.toLowerCase())
-  )
-  if (!hasAllowedExtension) {
-    return false
-  }
-
-  return true
+export function isPlanFile(filePath: string, workspaceRoot: string): boolean {
+  return classifyPlannerPath(filePath, workspaceRoot) === "plan"
 }

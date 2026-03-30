@@ -1,16 +1,10 @@
-// TDD-EXEMPT: reason="Path migration to changes/"
+// TDD-EXEMPT: reason="Path migration to root-anchored planner paths"
 import { createSystemDirective, SystemDirectiveTypes } from "../../shared/system-directive"
 import { getAgentDisplayName } from "../../shared/agent-display-names"
 
 export const HOOK_NAME = "prometheus-md-only"
 
 export const PROMETHEUS_AGENTS = ["prometheus", "Prometheus (Planner)"]
-
-export const ALLOWED_EXTENSIONS = [".md"]
-
-// Only changes/ is writable
-// Note: No trailing slash - the regex in index.ts handles path separators
-export const ALLOWED_PATH_PREFIXES = ["changes"]
 
 // bash is allowed - only file mutation tools are blocked
 export const BLOCKED_TOOLS = ["Write", "Edit", "write", "edit"]
