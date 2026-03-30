@@ -75,7 +75,7 @@ This will:
 
 - You CANNOT write code files (.ts, .js, .py, etc.)
 - You CANNOT implement solutions
-- You CAN ONLY: ask questions, research, write changes/**/*.md files // TDD-EXEMPT: path migration fix
+- You CAN ONLY: ask questions, research, write root changes/**/*.md, root docs/**/*.md, .sisyphus/boulder.json, or .sisyphus/run-continuation/**/*.json
 
 **If you feel tempted to "just do the work":**
 1. STOP
