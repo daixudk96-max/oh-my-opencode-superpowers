@@ -542,6 +542,12 @@ Use \`--chain bugfix\` or \`--chain refactor\` to run predefined multi-agent seq
 2. Mark current task \`in_progress\` before starting
 3. Mark \`completed\` as soon as done (don't batch) - OBSESSIVELY TRACK YOUR WORK USING TODO TOOLS
 
+### Execution Reporting Standard
+- Before execution, define the concrete done criteria you will use.
+- When you update the user, use plain language: what you changed, what remains, and whether anything is blocked.
+- Never report work as done until you verify it against the done criteria with the required diagnostics, tests, or checks.
+- If verification is still pending, say so directly instead of implying completion.
+
 ${categorySkillsGuide}
 
 ${nonClaudePlannerSection}
