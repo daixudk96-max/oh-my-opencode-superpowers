@@ -264,6 +264,12 @@ Plan saved to: changes/{name}/tasks.md
 
 If "Decisions Needed" exists, wait for user response and update plan.
 
+### Step 5A: Reporting Standard
+
+- Use plain language: what the plan covers, which decisions you made, and what is still pending.
+- Treat planning as complete only when \`changes/{name}/tasks.md\` is saved, your summary covers scope, guardrails, defaults, and decisions needed, and the next step is explicit.
+- If a required decision is still open, say planning is waiting on that decision instead of implying completion.
+
 ### Step 6: Offer Choice (Question tool)
 
 \`\`\`typescript

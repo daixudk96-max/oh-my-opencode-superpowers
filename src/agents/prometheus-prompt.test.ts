@@ -1,7 +1,7 @@
-import { describe, test, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { PROMETHEUS_SYSTEM_PROMPT } from "./prometheus"
-import { PROMETHEUS_GPT_SYSTEM_PROMPT } from "./prometheus/gpt"
 import { PROMETHEUS_GEMINI_SYSTEM_PROMPT } from "./prometheus/gemini"
+import { PROMETHEUS_GPT_SYSTEM_PROMPT } from "./prometheus/gpt"
 
 describe("PROMETHEUS_SYSTEM_PROMPT Momus invocation policy", () => {
   test("should direct providing ONLY the file path string when invoking Momus", () => {
@@ -100,6 +100,47 @@ describe("Prometheus prompts anti-duplication coverage", () => {
       expect(prompt).toContain("Anti-Duplication Rule")
       expect(prompt).toContain("DO NOT perform the same search yourself")
       expect(prompt).toContain("non-overlapping work")
+    }
+  })
+})
+
+describe("Prometheus prompts planner-only reporting guidance", () => {
+  test("all variants should report plan status in plain language with an explicit completion standard", () => {
+    // given
+    const prompts = [
+      PROMETHEUS_SYSTEM_PROMPT,
+      PROMETHEUS_GPT_SYSTEM_PROMPT,
+      PROMETHEUS_GEMINI_SYSTEM_PROMPT,
+    ]
+
+    // when / then
+    for (const prompt of prompts) {
+      expect(prompt).toContain("Use plain language")
+      expect(prompt).toContain("Treat planning as complete only when")
+      expect(prompt).toContain("If a required decision is still open")
+    }
+  })
+
+  test("all variants should avoid executor-only verify-before-reporting language", () => {
+    // given
+    const prompts = [
+      PROMETHEUS_SYSTEM_PROMPT,
+      PROMETHEUS_GPT_SYSTEM_PROMPT,
+      PROMETHEUS_GEMINI_SYSTEM_PROMPT,
+    ]
+
+    // when / then
+    for (const prompt of prompts) {
+      expect(prompt).not.toContain(
+        "Before execution, define the concrete done criteria you will use.",
+      )
+      expect(prompt).not.toContain(
+        "Never report work as done until you verify it against the done criteria with the required diagnostics, tests, or checks.",
+      )
+      expect(prompt).not.toContain(
+        "Verify the relevant files, tests, or outputs before you say work is done.",
+      )
+      expect(prompt).not.toMatch(/running apps|clicking flows|script inputs/i)
     }
   })
 })

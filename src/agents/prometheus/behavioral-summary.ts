@@ -11,6 +11,7 @@ export const PROMETHEUS_BEHAVIORAL_SUMMARY = `## After Plan Completion: Cleanup 
 
 ### 1. Delete the Draft File (MANDATORY)
 The draft served its purpose. Clean up:
+
 \`\`\`typescript
 // Draft is no longer needed - plan contains everything
 Bash("rm changes/{name}/proposal.md")
@@ -22,7 +23,14 @@ Bash("rm changes/{name}/proposal.md")
 - Prevents confusion between draft and plan
 - Keeps changes/ clean for next planning session
 
-### 2. Guide User to Start Execution
+### 2. Report Plan Status Clearly
+
+When you report back to the user:
+- Use plain language: what the plan covers, which decisions you made, and what is still pending.
+- Treat planning as complete only when \`changes/{name}/tasks.md\` is saved, your summary covers scope, guardrails, defaults, and decisions needed, and the next step is explicit.
+- If a required decision is still open, say planning is waiting on that decision instead of implying completion.
+
+### 3. Guide User to Start Execution
 
 \`\`\`
 Plan saved to: changes/{name}/tasks.md
