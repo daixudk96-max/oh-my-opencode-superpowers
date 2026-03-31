@@ -224,6 +224,14 @@ describe("TDD Guard Hook", () => {
       expect(isTestFile("src/__tests__/helper.ts")).toBe(true)
     })
 
+    test("should detect .contract.ts files as test files", () => {
+      expect(isTestFile("src/auth.contract.ts")).toBe(true)
+    })
+
+    test("should detect .contract.ts files in contracts/ directory", () => {
+      expect(isTestFile("changes/add-auth/contracts/auth-middleware.contract.ts")).toBe(true)
+    })
+
     test("should not detect regular .ts files as test files", () => {
       expect(isTestFile("src/utils/helper.ts")).toBe(false)
     })

@@ -69,7 +69,7 @@ export const TIER_3_PATTERNS: RegExp[] = [
 export const LANGUAGE_PATTERNS: Record<SupportedLanguage, TestFilePattern> = {
   typescript: {
     extension: [".ts", ".tsx"],
-    testPatterns: [/\.test\.tsx?$/, /\.spec\.tsx?$/, /__tests__\/.+\.tsx?$/],
+    testPatterns: [/\.test\.tsx?$/, /\.spec\.tsx?$/, /__tests__\/.+\.tsx?$/, /\.contract\.tsx?$/],
     assertionPatterns: [/expect\s*\(/, /assert\s*\(/, /\.toBe\(/, /\.toEqual\(/],
   },
   javascript: {

@@ -13,6 +13,7 @@ import { manifest as hooks_behavior_anchor } from "./hooks/behavior-anchor/manif
 import { manifest as hooks_codebase_assessment } from "./hooks/codebase-assessment/manifest"
 import { manifest as hooks_comment_checker } from "./hooks/comment-checker/manifest"
 import { manifest as hooks_commit_size_checker } from "./hooks/commit-size-checker/manifest"
+import { manifest as hooks_contract_lock_preparer } from "./hooks/contract-lock-preparer/manifest"
 import { manifest as hooks_debugging_injector } from "./hooks/debugging-injector/manifest"
 import { manifest as hooks_directory_agents_injector } from "./hooks/directory-agents-injector/manifest"
 import { manifest as hooks_failure_counter } from "./hooks/failure-counter/manifest"
@@ -78,6 +79,7 @@ export const HOOK_MANIFESTS: HookManifest[] = [
   hooks_codebase_assessment,
   hooks_comment_checker,
   hooks_commit_size_checker,
+  hooks_contract_lock_preparer,
   hooks_debugging_injector,
   hooks_directory_agents_injector,
   hooks_failure_counter,
